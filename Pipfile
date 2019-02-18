@@ -18,6 +18,7 @@ pyjwt = "*"
 rq = "*"
 redis = "*"
 elasticsearch = "*"
+flask-socketio = "*"
 
 [dev-packages]
 
