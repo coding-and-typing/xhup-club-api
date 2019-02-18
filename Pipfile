@@ -4,7 +4,20 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-
+requests = "*"
+"bs4" = "*"
+lxml = "*"
+flask = "*"
+python-dotenv = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+flask-restplus = "*"
+flask-mail="*"
+flask-login = "*"
+pyjwt = "*"
+rq = "*"
+redis = "*"
+elasticsearch = "*"
 
 [dev-packages]
 
