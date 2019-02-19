@@ -1,0 +1,87 @@
+# -*- coding: utf-8 -*-
+import logging
+import typing
+
+from flask.views import MethodView
+from flask_login import current_user, login_user, logout_user, login_required
+import marshmallow as ma
+from flask_rest_api import abort
+
+from app import api_rest, db
+from app.models import User
+from . import api_bp
+
+logger = logging.getLogger(__name__)
+
+
+@api_rest.definition('User')
+class UserSchema(ma.Schema):
+    """应该暴露给 API 的 User 属性
+    """
+    class Meta:
+        strict = True
+        ordered = True
+
+    id = ma.fields.Int(dump_only=True)
+    username = ma.fields.String()
+    email = ma.fields.Email()
+
+
+class UserCreateArgsSchema(ma.Schema):
+    """创建用户需要的参数
+
+    """
+    class Meta:
+        strict = True
+        ordered = True
+
+    username = ma.fields.String()
+    email = ma.fields.Email()
+    password_hash = ma.fields.String()
+
+
+@api_bp.route('/user/')
+class UserView(MethodView):
+    """登录与登出
+    将登录与登出看作是对 session 的创建与删除
+    """
+
+    @api_bp.arguments(UserCreateArgsSchema)
+    @api_bp.response(code=201)
+    def post(self, data: typing.Dict):
+        """用户注册
+        ---
+        :param data:
+        :return:
+        """
+        if current_user.is_authenticated:
+            abort(400, "please logout first")
+        else:
+            user = User(username=data['username'], email=data['email'])
+            user.set_password(data['password'])
+            db.session.add(user)
+            db.session.commit()
+
+    @api_bp.response(UserSchema, code=200)
+    @login_required
+    def get(self):
+        """获取当前用户信息
+
+        ---
+        :return:
+        """
+        return current_user
+
+    @api_bp.response(code=204)
+    @login_required
+    def delete(self):
+        """删除用户
+        需要提供密码验证
+        ---
+        :return:
+        """
+        db.session.remove(current_user)
+        db.session.commit()
+
+
+# TODO 邮箱验证、QQ群验证、与密码重设

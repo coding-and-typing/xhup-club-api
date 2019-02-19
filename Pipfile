@@ -11,14 +11,15 @@ flask = "*"
 python-dotenv = "*"
 flask-sqlalchemy = "*"
 flask-migrate = "*"
-flask-restplus = "*"
-flask-mail="*"
 flask-login = "*"
+flask-mail="*"
+flask-rest-api = "*"
+flask-socketio = "*"
+
 pyjwt = "*"
 rq = "*"
 redis = "*"
 elasticsearch = "*"
-flask-socketio = "*"
 
 [dev-packages]
 

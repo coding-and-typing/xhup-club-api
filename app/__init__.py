@@ -1,13 +1,14 @@
 import os
-
-import logging
+from logging.handlers import SMTPHandler, RotatingFileHandler
 
 from flask import Flask
+from flask_rest_api import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+
 from flask_mail import Mail
-from flask_socketio import SocketIO
+# from flask_socketio import SocketIO
 
 from elasticsearch import Elasticsearch
 from redis import Redis
@@ -15,14 +16,14 @@ import rq
 
 from config import config_by_name
 
-logger = logging.getLogger(__name__)
-
-
 db = SQLAlchemy()
 migrate = Migrate()
+
 login = LoginManager()
 mail = Mail()
-socketio = SocketIO()
+# socketio = SocketIO()
+
+api_rest = Api()
 
 # 获取环境
 env = os.getenv("XHUP_ENV")
@@ -37,6 +38,7 @@ def create_app():
     migrate.init_app(app, db)
     login.init_app(app)
     mail.init_app(app)
+    api_rest.init_app(app)
 
     # TODO elasticsearch 模糊搜索
     # app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
@@ -50,11 +52,12 @@ def create_app():
     from .api import v1 as api_v1
     from . import events
 
-    api_v1.init_app(app)
+    api_v1.init_api(api_rest)  # 注意这个是用 api_rest 注册
     events.init_app(app)
 
+    # 日志
     app.logger.setLevel(current_config.LOG_LEVEL)
-
+    app.logger.info('拆小鹤后台系统开始启动～ hhh')
     return app
 
 

@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 import logging
 from pathlib import Path
 
@@ -34,5 +36,17 @@ class BaseConfig(object):
     LOG_LEVEL = logging.DEBUG
 
     ADMINS = ['xiaoyin_c@qq.com']
+
+    # 为 flask-rest-api 指定遵守的 openapi 版本
+    OPENAPI_VERSION = '3.0.2'
+
+    # base path for json file and ui
+    OPENAPI_URL_PREFIX = '/api/v1'
+    OPENAPI_REDOC_PATH = '/redoc'
+
+    OPENAPI_JSON_PATH = "/openapi.json"
+    OPENAPI_SWAGGER_UI_PATH = '/swagger-ui'
+    OPENAPI_SWAGGER_UI_VERSION = '3.20.8'  # 用于生成静态文件的 cdn 链接
+    OPENAPI_SWAGGER_UI_SUPPORTED_SUBMIT_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch']
 
 
