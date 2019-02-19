@@ -48,12 +48,13 @@ def create_app():
     # app.redis = Redis.from_url(app.config['REDIS_URL'])
     # app.task_queue = rq.Queue('xhup-tasks', connection=app.redis)
 
-    # 注册各项 blueprint
-    from .api import v1 as api_v1
+    # Import Socket.IO events so that they are registered with Flask-SocketIO
     from . import events
-
-    api_v1.init_api(api_rest)  # 注意这个是用 api_rest 注册
     events.init_app(app)
+
+    # 注册 rest api 模块，
+    from .api import v1 as api_v1
+    api_v1.init_api(api_rest)  # 注意是使用已经在 app 上注册了的 app_rest
 
     # 日志
     app.logger.setLevel(current_config.LOG_LEVEL)
@@ -61,8 +62,4 @@ def create_app():
     return app
 
 
-# Import Socket.IO events so that they are registered with Flask-SocketIO
-from . import events
-
-# Import SQLAlchemy models so that they are registered with Flask-SQLAlchemy
-from . import models
+from . import models  # Import SQLAlchemy models

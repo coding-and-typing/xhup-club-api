@@ -42,11 +42,37 @@ class BaseConfig(object):
 
     # base path for json file and ui
     OPENAPI_URL_PREFIX = '/api/v1'
+    OPENAPI_JSON_PATH = "/openapi.json"  # openapi spec json path
+
+    API_SPEC_OPTIONS = {
+        "info": {
+            "title": "拆小鹤",
+            "description": "小鹤音形拆字、赛文、成绩记录系统 RESTFul API - Version 1",
+            "contact": {
+                "email": "xiaoyin_c@qq.com",
+                "url": "https://github.com/ryan4yin/xhup-club-api",
+            },
+            "license": {
+                "name": "MIT Licence",
+                "url": "https://github.com/ryan4yin/xhup-club-api/blob/master/LICENSE"
+            }
+        },
+        "components": {
+            "securitySchemes": {
+                "api_key": {
+                    "description": "更好的方案是再添加一个 secret-key，用于对数据做签名校验",
+                    "type": "apiKey",
+                    "name": "api_key",
+                    "in": "header"
+                }
+            },
+        }
+    }
+
+    # redoc api doc
     OPENAPI_REDOC_PATH = '/redoc'
 
-    OPENAPI_JSON_PATH = "/openapi.json"
+    # swagger-ui api doc
     OPENAPI_SWAGGER_UI_PATH = '/swagger-ui'
     OPENAPI_SWAGGER_UI_VERSION = '3.20.8'  # 用于生成静态文件的 cdn 链接
     OPENAPI_SWAGGER_UI_SUPPORTED_SUBMIT_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch']
-
-

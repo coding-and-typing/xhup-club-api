@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-
-from flask_rest_api import Blueprint, Api
-
-api_bp = Blueprint(
-    'api_v1', __name__, url_prefix='/api/v1',
-    description="拆小鹤 RESTFul API - Version 1"
-)
+from flask_rest_api import Api
 
 from .session import *
 from .user import *
 from .xhup import *
 
 
-def init_api(api: Api):
-    api_rest.register_blueprint(api_bp)
+""""
+拆小鹤 RESTFul API - Version 1
+"""
+
+
+def init_api(api_: Api):
+    # 要将 flask-rest-api 定义的 blueprint 注册到 api_rest
+    api_.register_blueprint(session_bp)
+    api_.register_blueprint(user_bp)
+    api_.register_blueprint(xhup_bp)

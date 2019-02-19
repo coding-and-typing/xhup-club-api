@@ -5,13 +5,17 @@ import typing
 from flask.views import MethodView
 from flask_login import current_user, login_user, logout_user, login_required
 import marshmallow as ma
-from flask_rest_api import abort
+from flask_rest_api import abort, Blueprint
 
 from app import api_rest, db
 from app.models import User
-from . import api_bp
 
 logger = logging.getLogger(__name__)
+
+user_bp = Blueprint(
+    'user', __name__, url_prefix='/api/v1',
+    description="用户的注册、用户信息的获取与修改"
+)
 
 
 @api_rest.definition('User')
@@ -40,14 +44,14 @@ class UserCreateArgsSchema(ma.Schema):
     password_hash = ma.fields.String()
 
 
-@api_bp.route('/user/')
+@user_bp.route('/user/')
 class UserView(MethodView):
     """登录与登出
     将登录与登出看作是对 session 的创建与删除
     """
 
-    @api_bp.arguments(UserCreateArgsSchema)
-    @api_bp.response(code=201)
+    @user_bp.arguments(UserCreateArgsSchema)
+    @user_bp.response(code=201)
     def post(self, data: typing.Dict):
         """用户注册
         ---
@@ -62,7 +66,7 @@ class UserView(MethodView):
             db.session.add(user)
             db.session.commit()
 
-    @api_bp.response(UserSchema, code=200)
+    @user_bp.response(UserSchema, code=200)
     @login_required
     def get(self):
         """获取当前用户信息
@@ -72,7 +76,7 @@ class UserView(MethodView):
         """
         return current_user
 
-    @api_bp.response(code=204)
+    @user_bp.response(code=204)
     @login_required
     def delete(self):
         """删除用户

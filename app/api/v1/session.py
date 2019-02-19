@@ -5,13 +5,17 @@ import typing
 from flask.views import MethodView
 from flask_login import current_user, login_user, logout_user, login_required
 import marshmallow as ma
-from flask_rest_api import abort
+from flask_rest_api import abort, Blueprint
 
 from app import api_rest
 from app.models import User
-from . import api_bp
 
 logger = logging.getLogger(__name__)
+
+session_bp = Blueprint(
+    'session', __name__, url_prefix='/api/v1',
+    description="用户的登入登出"
+)
 
 
 @api_rest.definition('Session')
@@ -39,14 +43,14 @@ class SessionCreateArgsSchema(ma.Schema):
     password_hash = ma.fields.String()
 
 
-@api_bp.route('/session/')
+@session_bp.route('/session/')
 class SessionView(MethodView):
     """登录与登出
     将登录与登出看作是对 session 的创建与删除
     """
 
-    @api_bp.arguments(SessionCreateArgsSchema)
-    @api_bp.response(code=201)
+    @session_bp.arguments(SessionCreateArgsSchema)
+    @session_bp.response(code=201)
     def post(self, data: typing.Dict):
         """用户登录
         暂时使用 cookie 保存登录状态
@@ -62,7 +66,7 @@ class SessionView(MethodView):
         else:
             abort(401, message='error username or password')
 
-    @api_bp.response(SessionSchema, code=200)
+    @session_bp.response(SessionSchema, code=200)
     @login_required
     def get(self):
         """获取当前用户信息
@@ -72,7 +76,7 @@ class SessionView(MethodView):
         """
         return current_user
 
-    @api_bp.response(code=204)
+    @session_bp.response(code=204)
     @login_required
     def delete(self):
         """用户登出
@@ -80,5 +84,4 @@ class SessionView(MethodView):
         :return:
         """
         logout_user()  # 不需要参数，它自己就能查到 current_user
-
 
