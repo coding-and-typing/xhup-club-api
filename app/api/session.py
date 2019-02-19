@@ -10,11 +10,12 @@ from flask_rest_api import abort, Blueprint
 from app import api_rest
 from app.models import User
 from app.utils.common import login_required
+from app.api import api_prefix
 
 logger = logging.getLogger(__name__)
 
 session_bp = Blueprint(
-    'session', __name__, url_prefix='/api/v1',
+    'session', __name__, url_prefix=f'{api_prefix}/session',
     description="用户的登入登出，看作 session 的创建与删除"
 )
 
@@ -44,7 +45,7 @@ class SessionCreateArgsSchema(ma.Schema):
     password_hash = ma.fields.String()
 
 
-@session_bp.route('/session/')
+@session_bp.route('/')
 class SessionView(MethodView):
     """登录与登出
     将登录与登出看作是对 session 的创建与删除

@@ -1,5 +1,4 @@
 import os
-from logging.handlers import SMTPHandler, RotatingFileHandler
 
 from flask import Flask
 from flask_rest_api import Api
@@ -9,10 +8,6 @@ from flask_login import LoginManager
 
 from flask_mail import Mail
 # from flask_socketio import SocketIO
-
-from elasticsearch import Elasticsearch
-from redis import Redis
-import rq
 
 from config import config_by_name
 
@@ -53,7 +48,7 @@ def create_app():
     events.init_app(app)
 
     # 注册 rest api 模块，
-    from .api import v1 as api_v1
+    from app.api import v1 as api_v1
     api_v1.init_api(api_rest)  # 注意是使用已经在 app 上注册了的 app_rest
 
     # 日志

@@ -37,6 +37,9 @@ class BaseConfig(object):
 
     ADMINS = ['xiaoyin_c@qq.com']
 
+    # api 版本，1
+    API_VERSION = '1'
+
     # 为 flask-rest-api 指定遵守的 openapi 版本
     OPENAPI_VERSION = '3.0.2'
 

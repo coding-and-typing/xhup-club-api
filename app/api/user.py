@@ -10,11 +10,12 @@ from flask_rest_api import abort, Blueprint
 from app import api_rest, db
 from app.models import User
 from app.utils.common import login_required
+from app.api import api_prefix
 
 logger = logging.getLogger(__name__)
 
 user_bp = Blueprint(
-    'user', __name__, url_prefix='/api/v1',
+    'user', __name__, url_prefix=f'{api_prefix}/users',
     description="用户的注册、用户信息的获取与修改"
 )
 
@@ -45,8 +46,8 @@ class UserCreateArgsSchema(ma.Schema):
     password_hash = ma.fields.String()
 
 
-@user_bp.route('/user/')
-class UserView(MethodView):
+@user_bp.route('/')
+class UsersView(MethodView):
     """登录与登出
 
     将登录与登出看作是对 session 的创建与删除
@@ -71,8 +72,9 @@ class UserView(MethodView):
     @user_bp.response(UserSchema, code=200, description="成功获取到用户信息")
     @login_required
     def get(self):
-        """获取当前用户信息
+        """获取所有用户信息（仅网站管理员可操作）
 
+        TODO：加分页，加权限认证
         ---
         :return:
         """
@@ -83,12 +85,10 @@ class UserView(MethodView):
     def delete(self):
         """删除用户
 
-        需要提供密码验证
+        TODO 需要提供密码验证
         ---
         :return:
         """
         db.session.remove(current_user)
         db.session.commit()
 
-
-# TODO 邮箱验证、QQ群验证、与密码重设
