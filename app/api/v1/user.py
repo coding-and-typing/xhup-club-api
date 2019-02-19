@@ -3,12 +3,13 @@ import logging
 import typing
 
 from flask.views import MethodView
-from flask_login import current_user, login_user, logout_user, login_required
+from flask_login import current_user
 import marshmallow as ma
 from flask_rest_api import abort, Blueprint
 
 from app import api_rest, db
 from app.models import User
+from app.utils.common import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +48,12 @@ class UserCreateArgsSchema(ma.Schema):
 @user_bp.route('/user/')
 class UserView(MethodView):
     """登录与登出
+
     将登录与登出看作是对 session 的创建与删除
     """
 
     @user_bp.arguments(UserCreateArgsSchema)
-    @user_bp.response(code=201)
+    @user_bp.response(code=201, description="新用户注册成功")
     def post(self, data: typing.Dict):
         """用户注册
         ---
@@ -66,7 +68,7 @@ class UserView(MethodView):
             db.session.add(user)
             db.session.commit()
 
-    @user_bp.response(UserSchema, code=200)
+    @user_bp.response(UserSchema, code=200, description="成功获取到用户信息")
     @login_required
     def get(self):
         """获取当前用户信息
@@ -76,10 +78,11 @@ class UserView(MethodView):
         """
         return current_user
 
-    @user_bp.response(code=204)
+    @user_bp.response(code=204, description="账号删除成功")
     @login_required
     def delete(self):
         """删除用户
+
         需要提供密码验证
         ---
         :return:

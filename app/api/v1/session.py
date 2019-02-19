@@ -3,18 +3,19 @@ import logging
 import typing
 
 from flask.views import MethodView
-from flask_login import current_user, login_user, logout_user, login_required
+from flask_login import current_user, login_user, logout_user
 import marshmallow as ma
 from flask_rest_api import abort, Blueprint
 
 from app import api_rest
 from app.models import User
+from app.utils.common import login_required
 
 logger = logging.getLogger(__name__)
 
 session_bp = Blueprint(
     'session', __name__, url_prefix='/api/v1',
-    description="用户的登入登出"
+    description="用户的登入登出，看作 session 的创建与删除"
 )
 
 
@@ -53,7 +54,8 @@ class SessionView(MethodView):
     @session_bp.response(code=201)
     def post(self, data: typing.Dict):
         """用户登录
-        暂时使用 cookie 保存登录状态
+
+        登录成功的响应首部中会带有 Set-Cookie 字段，设置 cookie
         ---
         :param data:
         :return:
@@ -69,17 +71,22 @@ class SessionView(MethodView):
     @session_bp.response(SessionSchema, code=200)
     @login_required
     def get(self):
-        """获取当前用户信息
+        """获取当前会话（session）信息。
 
+        暂时和 user 的 get 结果一样。（计划返回更多 session 相关的信息）
+
+        需要先登录
         ---
         :return:
         """
         return current_user
 
-    @session_bp.response(code=204)
+    @session_bp.response(code=204, description="Session 删除成功")
     @login_required
     def delete(self):
         """用户登出
+
+        登出后 cookie 失效，需要先登录
         ---
         :return:
         """
