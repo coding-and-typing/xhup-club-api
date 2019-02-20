@@ -92,3 +92,11 @@ class UsersView(MethodView):
         db.session.remove(current_user)
         db.session.commit()
 
+    @login_required
+    def patch(self):
+        """修改用户信息
+
+        ---
+        :return:
+        """
+
