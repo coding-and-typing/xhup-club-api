@@ -52,7 +52,7 @@ class CharView(MethodView):
     def post(self, data: dict):
         """提交新的拆字表
 
-        只允许【散步的鹤】，或者网站管理员访问此 api
+        只允许 QQ群`小鹤双拼输入法`的管理员访问此 api
         必须要带版号，而且版号必须比之前的高。
         ---
         :return None
