@@ -26,7 +26,7 @@ def save_split_table(table: str, version: str):
 
     table_io = StringIO(table)
     for line in table_io:
-        char = Character(char=line[0], info=line, version=version)
+        char = Character(char=line[0], info=line, version=str(version))
         db.session.add(char)
 
     db.session.commit()
@@ -35,8 +35,8 @@ def save_split_table(table: str, version: str):
 def get_latest_version():
     """获取最新的拆字表版本号"""
     versions = map(itemgetter(0), db.session.query(Character.version))
-    versions = map(parse_version, versions)
-    latest_version = max(versions)
+    versions = list(map(parse_version, versions))
+    latest_version = max(versions) if versions else parse_version("0.0.0")
 
     return latest_version
 

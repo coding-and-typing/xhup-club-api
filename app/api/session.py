@@ -69,7 +69,7 @@ class SessionView(MethodView):
         else:
             abort(401, message='error username or password')
 
-    @session_bp.response(SessionSchema, code=200, "成功获取到消息")
+    @session_bp.response(SessionSchema, code=200, description="成功获取到消息")
     @login_required
     def get(self):
         """获取当前会话（session）信息。

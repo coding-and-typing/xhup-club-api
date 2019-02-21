@@ -66,9 +66,10 @@ class CharView(MethodView):
 
         默认使用最新的拆字表
         """
-        info = get_info(data['char'])
+        char = data['char']
+        info = get_info(char)
         if not info:
-            abort(404, "no info for that character")
+            abort(404, f"no info for character {char}")
 
         return {
             "info": info
