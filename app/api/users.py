@@ -83,7 +83,7 @@ class UsersView(MethodView):
     @user_bp.response(code=204, description="账号删除成功")
     @login_required
     def delete(self):
-        """删除用户
+        """删除当前用户（永久注销）
 
         TODO 需要提供密码验证
         ---
@@ -94,7 +94,7 @@ class UsersView(MethodView):
 
     @login_required
     def patch(self):
-        """修改用户信息
+        """修改当前用户信息
 
         ---
         :return:

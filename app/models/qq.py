@@ -21,4 +21,5 @@ class QQUser(db.Model):
     is_owner = db.Column(db.Boolean, nullable=False)
 
 
+# QQ 用户 - QQ 群 对应表
 group_user = db.Table()

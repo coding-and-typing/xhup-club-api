@@ -15,13 +15,14 @@ flask-login = "*"
 flask-mail="*"
 flask-rest-api = "*"
 flask-socketio = "*"
-
 pyjwt = "*"
 rq = "*"
 redis = "*"
 elasticsearch = "*"
 
 [dev-packages]
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.7"

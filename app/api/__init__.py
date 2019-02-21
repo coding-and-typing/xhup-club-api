@@ -8,7 +8,7 @@ from flask_rest_api import Api
 api_prefix = "/api/v1"
 
 from app.api.session import *
-from app.api.user import *
+from app.api.users import *
 from app.api.xhup import *
 
 

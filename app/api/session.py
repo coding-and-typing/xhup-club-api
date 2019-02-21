@@ -52,7 +52,7 @@ class SessionView(MethodView):
     """
 
     @session_bp.arguments(SessionCreateArgsSchema)
-    @session_bp.response(code=201)
+    @session_bp.response(code=201, description="登录成功")
     def post(self, data: typing.Dict):
         """用户登录
 
@@ -69,7 +69,7 @@ class SessionView(MethodView):
         else:
             abort(401, message='error username or password')
 
-    @session_bp.response(SessionSchema, code=200)
+    @session_bp.response(SessionSchema, code=200, "成功获取到消息")
     @login_required
     def get(self):
         """获取当前会话（session）信息。

@@ -48,7 +48,7 @@ def create_app():
     events.init_app(app)
 
     # 注册 rest api 模块，
-    from app.api import v1 as api_v1
+    from app import api as api_v1
     api_v1.init_api(api_rest)  # 注意是使用已经在 app 上注册了的 app_rest
 
     # 日志
