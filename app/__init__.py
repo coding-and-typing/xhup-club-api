@@ -7,7 +7,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 
 from flask_mail import Mail
-# from flask_socketio import SocketIO
+from flask_socketio import SocketIO
 
 from config import config_by_name
 
@@ -16,7 +16,7 @@ migrate = Migrate()
 
 login = LoginManager()
 mail = Mail()
-# socketio = SocketIO()
+socketio = SocketIO()
 
 api_rest = Api()
 
