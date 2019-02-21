@@ -81,16 +81,20 @@ class UsersView(MethodView):
         return current_user
 
     @user_bp.response(code=204, description="账号删除成功")
+    @user_bp.arguments(UserCreateArgsSchema)
     @login_required
-    def delete(self):
+    def delete(self, data: dict):
         """删除当前用户（永久注销）
 
-        TODO 需要提供密码验证
         ---
         :return:
         """
-        db.session.remove(current_user)
-        db.session.commit()
+        # 验证密码
+        if current_user.check_password(data['password_hash']):
+            db.session.remove(current_user)  # 删除用户，考虑是否有其他资料需要删除
+            db.session.commit()
+        else:
+            abort(400, "delete account need to confirm you password!")
 
     @login_required
     def patch(self):

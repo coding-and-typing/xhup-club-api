@@ -5,8 +5,9 @@ from flask.views import MethodView
 import marshmallow as ma
 from flask_rest_api import abort, Blueprint
 
-from app import api_rest
+from app import api_rest, current_config
 from app.api import api_prefix
+from app.service.auth import qq_group
 from app.service.xhup.characters import save_split_table, get_info
 from app.utils.common import login_required
 
@@ -53,7 +54,12 @@ class CharView(MethodView):
 
         只允许【散步的鹤】，或者网站管理员访问此 api
         必须要带版号，而且版号必须比之前的高。
+        ---
+        :return None
         """
+        if not qq_group.is_admin(current_config.XHUP_GROUP_ID):
+            abort(401, "you are not the admin of qq group '小鹤双拼输入法'")
+
         try:
             save_split_table(data['table'], data['version'])
         except RuntimeError as e:
