@@ -16,3 +16,7 @@ class Character(db.Model):
     # 或者使用支持 Version 字符串的数据库？
     version = db.Column(db.String, index=True, nullable=False)
 
+    def __repr__(self):
+        return "<Char '{}'>".format(self.char)
+
+
