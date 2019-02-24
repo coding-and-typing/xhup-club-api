@@ -33,6 +33,7 @@ def create_app():
     migrate.init_app(app, db)
     login.init_app(app)
     mail.init_app(app)
+    socketio.init_app(app)
     api_rest.init_app(app)
 
     # TODO elasticsearch 模糊搜索
