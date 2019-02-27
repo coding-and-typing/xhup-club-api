@@ -1,0 +1,28 @@
+language: python
+
+# requires for python 3.7 currently
+sudo: required
+dist: xenial
+
+python:
+- '3.7'
+
+before_install:
+- openssl aes-256-cbc -K $encrypted_7ca182d1b659_key -iv $encrypted_7ca182d1b659_iv
+  -in secrets.tar.enc -out secrets.tar -d
+- tar -xv -f secrets.tar -C ~ # 解打包
+
+install:
+- pip install --upgrade pip
+- pip install pipenv
+- pipenv sync
+
+script:
+- pipenv run python -m unittest discover tests
+
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: bash scripts/deploy.sh
+  on:
+    tags: true
