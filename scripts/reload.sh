@@ -8,7 +8,8 @@ source .env
 pip install -r requirements.txt
 
 # 数据库更新
-flask db upgrade
+flask db migrate  # 更新 migrations
+flask db upgrade  # 将更新写入数据库
 
 # 重启 gunicorn， -S 选项表示从 stdin 读取密码
 # 此 service 的配置文件在 docs/config.md 中

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+from urllib import parse
 
 from config import BaseConfig
 
@@ -20,7 +21,7 @@ class ProductionConfig(BaseConfig):
     DB_PORT = os.getenv("DB_PORT")
     SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{user}:{password}@{host}:{port}/{name}'.format(
         user=DB_USER,
-        password=DB_PASSWORD,
+        password=parse.quote(DB_PASSWORD),
         host=DB_HOST,
         port=DB_PORT,
         name=DB_NAME,

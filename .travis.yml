@@ -18,6 +18,7 @@ install:
 - pipenv sync
 
 script:
+- export XHUP_ENV=test
 - pipenv run python -m unittest discover tests
 
 deploy:
