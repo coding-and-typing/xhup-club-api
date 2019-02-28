@@ -35,15 +35,20 @@ After=network.target
 
 [Service]
 PermissionsStartOnly=True
-RuntimeDirectory=gunicorn  # 临时文件夹
+
+# 临时文件夹
+RuntimeDirectory=gunicorn
 RuntimeDirectoryMode=0775
 PIDFile=/run/gunicorn/xhup-club-api.pid
 
 User=ryan
 Group=ryan
 
-EnvironmentFile=/home/ryan/xhup-club-api/.env  # 环境变量
-WorkingDirectory=/home/ryan/xhup-club-api  # web app 目录
+# 环境变量
+EnvironmentFile=/home/ryan/xhup-club-api/.env
+
+# web app 目录
+WorkingDirectory=/home/ryan/xhup-club-api
 
 # unix socket 配置有点麻烦。。先直接用 tcp 吧，nginx 也稍后再配，先跑起来再说
 ExecStart=/home/ryan/miniconda3/bin/gunicorn --pid /run/gunicorn/xhup-club-api.pid   \
