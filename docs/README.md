@@ -43,11 +43,3 @@
 之后是赛文系统
 再之后是成绩系统
 
-
-### 自动部署
-
-如果修改了 `.env`，记得运行如下命令更新加密文件：
-```bash
-tar -cv -f secrets.tar .env id_rsa_for_ssh.key
-travis encrypt-file secrets.tar
-```

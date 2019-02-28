@@ -22,7 +22,6 @@ elasticsearch = "*"
 eventlet = "*"
 gunicorn = "*"
 pymysql = "*"
-pyinvoke = "*"
 
 [dev-packages]
 pytest = "*"
