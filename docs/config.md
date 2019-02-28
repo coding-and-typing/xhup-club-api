@@ -84,3 +84,18 @@ travis encrypt-file secrets.tar
 这样如果 log 信息中出现了这些变量（比如报错），travis-ci 就会用 [secure] 替换它们！
 
 对 `DB_PASSWORD` 这种使用了 `urllib.parse.quote_plus` 的字符串，quote 后的字符串也应该加进去。
+
+### DB 密码
+
+带特殊字符的 DB_PASSWORD 在 SQLAlchemy 中必须用 `urllib.parse.quote_plus` 编码，
+可在 `Alembic` 中如此编码后，会导致错误，必须在 `migrations/env.py` 中做如下修改
+
+```python
+# 找到这一句
+config.set_main_option('sqlalchemy.url',
+                       current_app.config.get('SQLALCHEMY_DATABASE_URI'))
+
+# 用这个替换找到的行
+db_url_escaped = current_app.config.get('SQLALCHEMY_DATABASE_URI').replace('%', '%%')
+config.set_main_option('sqlalchemy.url', db_url_escaped)
+```
