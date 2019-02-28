@@ -81,7 +81,7 @@ tar -cv -f secrets.tar .env id_rsa_for_ssh.key
 travis encrypt-file secrets.tar
 ```
 
-**NOTE：所有密码一定要同时设为 travis-ci 的环境变量！**
+**NOTE：所有密码一定要同时设为 travis-ci 的环境变量！(变量中的特殊字符 x 要用 \x 转义，否则也会发生不好的事。。)**
 这样如果 log 信息中出现了这些变量（比如报错），travis-ci 就会用 [secure] 替换它们！
 
 对 `DB_PASSWORD` 这种使用了 `urllib.parse.quote_plus` 的字符串，quote 后的字符串也应该加进去。
