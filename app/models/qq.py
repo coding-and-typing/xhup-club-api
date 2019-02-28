@@ -28,8 +28,8 @@ class QQUser(db.Model):
 class GroupMembers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    group_id = db.Column(db.String(20), db.ForeignKey('qq_group.id'))
-    user_id = db.Column(db.String(20), db.ForeignKey('qq_user.id'))
+    group_id = db.Column(db.Integer, db.ForeignKey('qq_group.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('qq_user.id'))
 
     nick_name = db.Column(db.String(50))
 
