@@ -13,4 +13,4 @@ flask db upgrade  # 将更新写入数据库
 
 # 重启 gunicorn， -S 选项表示从 stdin 读取密码
 # 此 service 的配置文件在 docs/config.md 中
-echo $SERVER_PASSWORD | sudo -S systemctl reload xhup-club-api.service
+echo $SERVER_PASSWORD | sudo -S systemctl restart xhup-club-api.service
