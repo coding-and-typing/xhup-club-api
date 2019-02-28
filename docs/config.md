@@ -42,6 +42,7 @@ PIDFile=/run/gunicorn/xhup-club-api.pid
 User=ryan
 Group=ryan
 
+EnvironmentFile=/home/ryan/xhup-club-api/.env  # 环境变量
 WorkingDirectory=/home/ryan/xhup-club-api  # web app 目录
 
 # unix socket 配置有点麻烦。。先直接用 tcp 吧，nginx 也稍后再配，先跑起来再说
@@ -70,7 +71,7 @@ sudo systemctl status xhup-club-api.service  # 状态
 sudo journalctl -u xhup-club-api.service  # 查看该服务的日志
 ```
 
-如果修改了 service 文件，需要用 `systemctl daemon-reload` 重载该配置文件。
+如果修改了 service 文件，需要用 `sudo systemctl daemon-reload` 重载该配置文件。
 
 ### 自动部署
 
