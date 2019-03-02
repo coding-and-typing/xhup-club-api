@@ -1,5 +1,5 @@
 from app import create_app, db, socketio
-from app.models import User
+from app.models import MainUser
 
 """
 提供给 flask 的启动脚本
@@ -13,7 +13,7 @@ app = create_app()
 @app.shell_context_processor
 def make_shell_context():
     """在运行 flask shell 时，flask 会自动加载此函数返回的数据"""
-    return {'app': app, 'db': db, 'User': User}
+    return {'app': app, 'db': db, 'User': MainUser}
 
 
 if __name__ == '__main__':

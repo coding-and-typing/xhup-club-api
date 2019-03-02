@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ### 三、 将 xhup-club-api 设为 systemd 服务：
 
-此处参考了 gunicorn 的官方文档
+此处参考了 gunicorn 的官方文档（不支持行内注释！！！注释必须单独一行）
 `/etc/systemd/system/xhup-club-api.service`:
 ```
 [Unit]

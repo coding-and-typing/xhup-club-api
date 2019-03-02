@@ -9,7 +9,7 @@ api_prefix = "/api/v1"
 
 from app.api.session import *
 from app.api.users import *
-from app.api.xhup import *
+from app.api.character import *
 
 
 """"
@@ -21,4 +21,4 @@ def init_api(api_: Api):
     # 要将 flask-rest-api 定义的 blueprint 注册到 api_rest
     api_.register_blueprint(session_bp)
     api_.register_blueprint(user_bp)
-    api_.register_blueprint(xhup_bp)
+    api_.register_blueprint(char_bp)

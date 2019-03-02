@@ -8,7 +8,7 @@ import marshmallow as ma
 from flask_rest_api import abort, Blueprint
 
 from app import api_rest, db
-from app.models import User
+from app.models import MainUser
 from app.utils.common import login_required
 from app.api import api_prefix
 
@@ -64,7 +64,7 @@ class UsersView(MethodView):
         if current_user.is_authenticated:
             abort(400, "please logout first")
         else:
-            user = User(username=data['username'], email=data['email'])
+            user = MainUser(username=data['username'], email=data['email'])
             user.set_password(data['password'])
             db.session.add(user)
             db.session.commit()
@@ -91,7 +91,7 @@ class UsersView(MethodView):
         """
         # 验证密码
         if current_user.check_password(data['password_hash']):
-            db.session.remove(current_user)  # 删除用户，考虑是否有其他资料需要删除
+            db.session.remove(current_user)  # 删除用户，相关资料自动级联删除
             db.session.commit()
         else:
             abort(400, "delete account need to confirm you password!")

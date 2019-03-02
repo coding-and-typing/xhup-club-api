@@ -53,11 +53,11 @@ class BaseConfig(object):
             "description": "小鹤音形拆字、赛文、成绩记录系统 RESTFul API - Version 1",
             "contact": {
                 "email": "xiaoyin_c@qq.com",
-                "url": "https://github.com/ryan4yin/xhup-club-api",
+                "url": "https://github.com/ryan4yin/words-club-api",
             },
             "license": {
                 "name": "MIT Licence",
-                "url": "https://github.com/ryan4yin/xhup-club-api/blob/master/LICENSE"
+                "url": "https://github.com/ryan4yin/words-club-api/blob/master/LICENSE"
             }
         },
         "components": {
@@ -79,7 +79,4 @@ class BaseConfig(object):
     OPENAPI_SWAGGER_UI_PATH = '/swagger-ui'
     OPENAPI_SWAGGER_UI_VERSION = '3.20.8'  # 用于生成静态文件的 cdn 链接
     OPENAPI_SWAGGER_UI_SUPPORTED_SUBMIT_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch']
-
-    # 小鹤双拼官方群
-    XHUP_GROUP_ID = "182883808"
 

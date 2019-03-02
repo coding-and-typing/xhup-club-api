@@ -8,7 +8,7 @@ import marshmallow as ma
 from flask_rest_api import abort, Blueprint
 
 from app import api_rest
-from app.models import User
+from app.models import MainUser
 from app.utils.common import login_required
 from app.api import api_prefix
 
@@ -62,7 +62,7 @@ class SessionView(MethodView):
         :return:
         """
         # 验证登录
-        user = User.query.filter_by(username=data['username']).first()
+        user = MainUser.query.filter_by(username=data['username']).first()
         if user is not None \
                 and user.check_password(data['password_hash']):
             login_user(user)

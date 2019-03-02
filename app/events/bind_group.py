@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """
-绑定 QQ 用户与 QQ 群，
+绑定 QQ 用户与 QQ 群
+
 1. 当用户请求绑定 QQ群 时，前端请求此 api
 2. 然后后端收到请求将生成一个随机验证码
     1. 将该 验证码、要求验证的用户 id、时间戳放入 redis，该 redis 需要设置一个失效时间
@@ -12,7 +13,7 @@
         2. 不对应，那估计是以前的绑定消息。
             1. 丢弃或返回给客户端
             2. 回到第三步
-3. 当 xhup-bot 收到验证码时（验证消息格式：`拆小鹤验证：xxxxxx`）
+3. 当 words-bot 收到验证码时（验证消息格式：`拆小鹤验证：xxxxxx`）
     1. 会通过 websocket 将QQ用户信息与验证码发送到后端
 4. 后端从 redis 中查询对应的验证数据，若存在并且时间不超过三分钟
     1. 将 QQ 信息写入数据库，绑定成功。
@@ -23,7 +24,7 @@ from flask_socketio import send, emit, disconnect
 from app import socketio
 from flask_login import current_user
 
-from . import authenticated_only
+from app.events import authenticated_only
 
 
 @socketio.on('json', namespace="/qq_groups")
@@ -33,4 +34,3 @@ def handle_json(json):
     而 namespace 允许服务端通过同一个 websocket 发起多个 namespace 不同的连接，实现多路复用
     """
     pass
-
