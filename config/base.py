@@ -53,11 +53,11 @@ class BaseConfig(object):
             "description": "小鹤音形拆字、赛文、成绩记录系统 RESTFul API - Version 1",
             "contact": {
                 "email": "xiaoyin_c@qq.com",
-                "url": "https://github.com/ryan4yin/words-club-api",
+                "url": "https://github.com/ryan4yin/xhup-club-api",
             },
             "license": {
                 "name": "MIT Licence",
-                "url": "https://github.com/ryan4yin/words-club-api/blob/master/LICENSE"
+                "url": "https://github.com/ryan4yin/xhup-club-api/blob/master/LICENSE"
             }
         },
         "components": {

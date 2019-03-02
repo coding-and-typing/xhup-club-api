@@ -42,7 +42,7 @@ def create_app():
 
     # TODO 使用消息队列实现异步任务
     # app.redis = Redis.from_url(app.config['REDIS_URL'])
-    # app.task_queue = rq.Queue('words-tasks', connection=app.redis)
+    # app.task_queue = rq.Queue('xhup-tasks', connection=app.redis)
 
     # Import Socket.IO events so that they are registered with Flask-SocketIO
     from . import events
