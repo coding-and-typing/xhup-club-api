@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from flask_rest_api import Api
+from flask_rq2 import RQ
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -13,6 +14,7 @@ from config import config_by_name
 
 db = SQLAlchemy()
 migrate = Migrate()
+rq = RQ()
 
 login = LoginManager()
 mail = Mail()
@@ -40,9 +42,8 @@ def create_app():
     # app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
     #     if app.config['ELASTICSEARCH_URL'] else None
 
-    # TODO 使用消息队列实现异步任务
-    # app.redis = Redis.from_url(app.config['REDIS_URL'])
-    # app.task_queue = rq.Queue('xhup-tasks', connection=app.redis)
+    # TODO 使用 rq 实现异步任务
+    # rq.init_app(app)
 
     # Import Socket.IO events so that they are registered with Flask-SocketIO
     from . import events

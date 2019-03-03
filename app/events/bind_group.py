@@ -20,7 +20,11 @@
     1. 将返回信息和对应的验证码写入 redis，由验证用的 websocket 接收（这个信息是否需要考虑没有被消费的情况？）
 """
 
-from flask_socketio import send, emit, disconnect
+from flask_socketio import (
+    send,  # 发送未命名消息
+    emit,  # 发送一个命名事件，它的第一个参数是事件名称！
+    disconnect  # 关闭连接
+)
 from app import socketio
 from flask_login import current_user
 
