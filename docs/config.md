@@ -105,3 +105,9 @@ config.set_main_option('sqlalchemy.url',
 db_url_escaped = current_app.config.get('SQLALCHEMY_DATABASE_URI').replace('%', '%%')
 config.set_main_option('sqlalchemy.url', db_url_escaped)
 ```
+
+
+### 域名与协议
+
+域名的话，我想可以找老范讨要个 `typing.xhup.club` 这个子域名
+协议必须用 https 和 wss，尤其是 wss，因为 token 不加密完全是明文的。

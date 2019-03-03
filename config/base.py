@@ -91,10 +91,29 @@ class BaseConfig(object):
     CHAIWUBI_URL = "http://www.chaiwubi.com/match/"  # 仅在登录后，用于获取赛文列表
     CHAIWUBI_API = "http://47.93.35.203/saiwen/json.php"  # 登录、赛文添加/修改/删除
 
-    # 特殊字符对照表（针对中文！）
-    SPECIAL_CHARS = {
-        '': [r'　', r" ", r' ', r' '],  # \u2001 \u200a \u2009 \u0020
-        '—': ['-', '─'],  # 这个应该统一替换成“——”
+    # 中英标点对照表
+    PUNCTUATIONS_TABLE = {
+        ',': '',
+        '.': '',
+        '\\': '、',
+        ';': '；',
+        '!': '！',
+        '?': '？',
+        '[': '【',
+        ']': '】',
+        '(': '（',
+        ')': '）',
+        ':': '：',
+        '~': '～',
     }
+
+    # 6. 群聊相关配置
+    # 图灵聊天 api
+    TURING_API = "http://openapi.tuling123.com/openapi/api/v2"
+    TURING_KEY = os.getenv("TURING_KEY")
+
+    # xhup.club 短链 api
+    SHORT_URL_API = 'http://xhup.club/index.php/Home/Service/getShortUrl'
+    SHORT_URL_TOKEN = os.getenv("SHORT_URL_TOKEN")
 
 
