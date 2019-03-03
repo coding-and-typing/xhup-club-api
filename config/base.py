@@ -10,6 +10,7 @@ from pathlib import Path
 
 
 class BaseConfig(object):
+    # 1. flask 相关配置
     SECRET_KEY = '*this-really_needs-to-be-changed*'
 
     DEBUG = False
@@ -18,29 +19,28 @@ class BaseConfig(object):
     # 项目根目录
     PROJECT_ROOT = Path(__file__).parent.parent.absolute()
 
+    # 2. 数据库相关配置
     REDIS_URL = ""
-
     ELASTICSEARCH_URL = ""
-
-    # SQLITE
+    # SQLite
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(PROJECT_ROOT / "app-dev.db")
     # 是否在每次更新数据库时给出提示（追踪修改）
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
+    # 3. 权限与日志配置
     # 是否开启权限鉴定
     IS_AUTH_ENABLED = False
 
     # 发生 error 时邮件通知 ADMINS
     IS_ERROR_MAIL_ENABLED = False
-
     LOG_LEVEL = logging.DEBUG
-
     ADMINS = ['xiaoyin_c@qq.com']
 
+    # 4. flask-rest-api 相关配置
     # api 版本，1
     API_VERSION = '1'
 
-    # 为 flask-rest-api 指定遵守的 openapi 版本
+    # 指定遵守的 openapi 版本
     OPENAPI_VERSION = '3.0.2'
 
     # base path for json file and ui
@@ -79,4 +79,22 @@ class BaseConfig(object):
     OPENAPI_SWAGGER_UI_PATH = '/swagger-ui'
     OPENAPI_SWAGGER_UI_VERSION = '3.20.8'  # 用于生成静态文件的 cdn 链接
     OPENAPI_SWAGGER_UI_SUPPORTED_SUBMIT_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch']
+
+    # 5. 赛文系统相关配置
+    # 随机赛文，使用每日一文的 api（注意抓取频率，毕竟人家也是公益网站。）
+    # 另外这个网站的标点处理得也不彻底，需要自己筛选。
+    DAILY_ARTICLE_API = "https://meiriyiwen.com/"
+    RANDOM_ARTICLE_API = f"{DAILY_ARTICLE_API}/random"
+    USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36"
+
+    # 小拆五笔
+    CHAIWUBI_URL = "http://www.chaiwubi.com/match/"  # 仅在登录后，用于获取赛文列表
+    CHAIWUBI_API = "http://47.93.35.203/saiwen/json.php"  # 登录、赛文添加/修改/删除
+
+    # 特殊字符对照表（针对中文！）
+    SPECIAL_CHARS = {
+        '': [r'　', r" ", r' ', r' '],  # \u2001 \u200a \u2009 \u0020
+        '—': ['-', '─'],  # 这个应该统一替换成“——”
+    }
+
 
