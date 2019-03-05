@@ -1,14 +1,18 @@
-from dotenv import load_dotenv
-from pathlib import Path
+import os
 
 from app import create_app, db, socketio
 from app.models import MainUser
 
 """
-提供给 flask 的启动脚本
-
-需要 `export FLASK_APP=run.py`，然后运行 `flask run` 或 `flask shell` 时，就会从这里进入
+flask 的启动脚本（入口）
 """
+
+# 如果尚未设置环境变量，就先加载环境变量
+# 仅开发环境，测试环境不会走这个入口，而生产环境 systemd 会提前使用 .env 设置环境变量
+if os.getenv('XHUP_ENV') is None:
+    os.environ['XHUP_ENV'] = 'dev'
+    os.environ['FLASK_ENV'] = 'development'
+
 
 app = create_app()
 
