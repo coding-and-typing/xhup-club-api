@@ -2,7 +2,7 @@
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from app import db, login
+from app import db, login_manager
 
 """
 这个用户，是指系统的主用户，需要绑定邮箱，设置密码
@@ -27,7 +27,7 @@ class MainUser(UserMixin, db.Model):
         return check_password_hash(self.password_hash, password)
 
 
-@login.user_loader
+@login_manager.user_loader
 def load_user(user_id):
     return MainUser.query.get(int(user_id))
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Defines fixtures available to all tests."""
+import flask_login
 import os
 
 import pytest
@@ -9,6 +10,7 @@ os.environ['XHUP_ENV'] = 'test'
 
 from app import create_app
 from app import db as _db
+from app.models import MainUser
 
 
 @pytest.fixture
@@ -24,7 +26,7 @@ def app():
 
 
 @pytest.fixture
-def test_client(app):
+def client(app):
     """A flask test_client"""
     return app.test_client()
 
@@ -46,6 +48,8 @@ def db(app):
 @pytest.fixture
 def user(db):
     """A user for the tests."""
-
+    user = MainUser(username='ryan', email="ryan@example.com")
+    user.set_password("i_have_a_dream")
+    db.session.add(user)
     db.session.commit()
     return user
