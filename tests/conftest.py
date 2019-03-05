@@ -45,11 +45,16 @@ def db(app):
     _db.drop_all()
 
 
+username = 'ryan'
+email = "ryan@example.com"
+password = "i_have_a_dream"
+
+
 @pytest.fixture
 def user(db):
     """A user for the tests."""
-    user = MainUser(username='ryan', email="ryan@example.com")
-    user.set_password("i_have_a_dream")
+    user = MainUser(username=username, email=email)
+    user.set_password(password)
     db.session.add(user)
     db.session.commit()
     return user
