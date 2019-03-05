@@ -27,6 +27,7 @@ elasticsearch = "*"
 pytest = "*"
 pytest-cov = "*"
 "psycopg2" = "*"
+codecov = "*"
 
 [requires]
 python_version = "3.7"

@@ -15,11 +15,11 @@ before_install:
 install:
 - pip install --upgrade pip
 - pip install pipenv
-- pipenv sync
+- pipenv sync --dev
 
 script:
-- export XHUP_ENV=test
-- pipenv run python -m unittest discover tests
+- pytest --cov=./
+- codecov --token=$CODECOV_TOKEN
 
 deploy:
   provider: script
