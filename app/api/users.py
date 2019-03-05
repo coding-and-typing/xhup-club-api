@@ -41,9 +41,9 @@ class UserCreateArgsSchema(ma.Schema):
         strict = True
         ordered = True
 
-    username = ma.fields.String()
-    email = ma.fields.Email()
-    password = ma.fields.String()
+    username = ma.fields.String(required=True)
+    email = ma.fields.Email(required=True)
+    password = ma.fields.String(required=True)
 
 
 @user_bp.route('/')

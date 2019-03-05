@@ -30,13 +30,13 @@ class TableCreateArgsSchema(ma.Schema):
         strict = True
         ordered = True
 
-    version = ma.fields.String()
-    table = ma.fields.String()
+    version = ma.fields.String(required=True)
+    table = ma.fields.String(required=True)
 
-    table_name = ma.fields.String()  # 编码表名称（如小鹤音形拆字表）
+    table_name = ma.fields.String(required=True)  # 编码表名称（如小鹤音形拆字表）
 
-    group_id = ma.fields.String()  # 一个编码表，需要绑定一个群号。
-    group_platform = ma.fields.String()  # 该群所属平台
+    group_id = ma.fields.String(required=True)  # 一个编码表，需要绑定一个群号。
+    group_platform = ma.fields.String(required=True)  # 该群所属平台
 
 
 @api_rest.definition('Char')

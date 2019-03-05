@@ -41,8 +41,8 @@ class SessionCreateArgsSchema(ma.Schema):
         strict = True
         ordered = True
 
-    username = ma.fields.String()
-    password = ma.fields.String()
+    username = ma.fields.String(required=True)
+    password = ma.fields.String(required=True)
 
 
 @session_bp.route('/')
@@ -53,6 +53,7 @@ class SessionView(MethodView):
 
     @session_bp.arguments(SessionCreateArgsSchema)
     @session_bp.response(code=201, description="登录成功")
+    @session_bp.doc(responses={"401": {'description': "用户名或密码错误"}})
     def post(self, data: typing.Dict):
         """用户登录
 
