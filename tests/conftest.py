@@ -4,12 +4,11 @@ import os
 
 import pytest
 
-from app import create_app
-from app import db as _db
-
-
 # 测试环境
 os.environ['XHUP_ENV'] = 'test'
+
+from app import create_app
+from app import db as _db
 
 
 @pytest.fixture
