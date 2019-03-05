@@ -63,7 +63,7 @@ class UsersView(MethodView):
         :return:
         """
         if current_user.is_authenticated:
-            abort(400, "please logout first")
+            abort(400, message="you've login, or this account has been used.")
         else:
             user = MainUser(username=data['username'], email=data['email'])
             user.set_password(data['password'])
@@ -96,7 +96,7 @@ class UsersView(MethodView):
             db.session.remove(current_user)  # 删除用户，相关资料自动级联删除
             db.session.commit()
         else:
-            abort(400, "delete account need to confirm you password!")
+            abort(400, message="delete account need to confirm you password!")
 
     @login_required
     def patch(self):

@@ -42,7 +42,7 @@ class SessionCreateArgsSchema(ma.Schema):
         ordered = True
 
     username = ma.fields.String()
-    password_hash = ma.fields.String()
+    password = ma.fields.String()
 
 
 @session_bp.route('/')
@@ -64,7 +64,7 @@ class SessionView(MethodView):
         # 验证登录
         user = MainUser.query.filter_by(username=data['username']).first()
         if user is not None \
-                and user.check_password(data['password_hash']):
+                and user.check_password(data['password']):
             login_user(user)
         else:
             abort(401, message='error username or password')

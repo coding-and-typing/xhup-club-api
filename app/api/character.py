@@ -67,12 +67,12 @@ class CharView(MethodView):
         :return None
         """
         # TODO 验证当前用户是指定群的管理员
-        abort(401, "you are not the admin of this group")
+        abort(401, message="you are not the admin of this group")
 
         try:
             character.save_split_table(**data)
         except RuntimeError as e:
-            abort(400, e.args)
+            abort(400, message=e.args)
 
     @char_bp.arguments(CharSchema)
     @char_bp.response(CharSchema, code=200, description="成功获取到 char 的 info")
@@ -83,6 +83,6 @@ class CharView(MethodView):
         """
         info = character.get_info(**data)
         if not info:
-            abort(404, f"no info for character {data['char']}")
+            abort(404, message=f"no info for character {data['char']}")
 
         return info
