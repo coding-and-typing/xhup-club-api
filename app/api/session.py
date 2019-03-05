@@ -53,7 +53,7 @@ class SessionView(MethodView):
     """
 
     @session_bp.arguments(SessionCreateArgsSchema)
-    @session_bp.response(code=201, description="登录成功")
+    @session_bp.response(SessionSchema, code=201, description="登录成功")
     @session_bp.doc(responses={"401": {'description': "用户名或密码错误"}})
     @session_bp.doc(responses={"400": {'description': "请先登出当前账号"}})
     def post(self, data: typing.Dict):

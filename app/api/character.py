@@ -45,7 +45,7 @@ class CharSchema(ma.Schema):
         strict = True
         ordered = True
 
-    char = ma.fields.String()
+    char = ma.fields.String(required=True)
     info = ma.fields.String()
     version = ma.fields.String()
 
@@ -55,7 +55,7 @@ class CharView(MethodView):
     """拆字表查询 api"""
 
     @char_bp.arguments(TableCreateArgsSchema)
-    @char_bp.response(code=201)
+    @char_bp.response(code=201, description="拆字表创建成功")
     @login_required
     def post(self, data: dict):
         """提交新的拆字表

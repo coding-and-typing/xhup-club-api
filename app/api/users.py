@@ -6,6 +6,7 @@ from flask.views import MethodView
 from flask_login import current_user
 import marshmallow as ma
 from flask_rest_api import abort, Blueprint
+from sqlalchemy.exc import IntegrityError
 
 from app import api_rest, db
 from app.models import MainUser
@@ -54,7 +55,7 @@ class UsersView(MethodView):
     """
 
     @user_bp.arguments(UserCreateArgsSchema)
-    @user_bp.response(code=201, description="新用户注册成功")
+    @user_bp.response(UserSchema, code=201, description="新用户注册成功")
     @user_bp.doc(responses={"400": {'description': "当前已有用户登录，需要先退出登录"}})
     @user_bp.doc(responses={"409": {'description': "用户名或 email 已被使用"}})
     def post(self, data: typing.Dict):
@@ -72,7 +73,7 @@ class UsersView(MethodView):
         try:
             db.session.add(user)
             db.session.commit()
-        except:
+        except IntegrityError as e:
             db.session.rollback()
             abort(409, message="the username or email has been used.")
 
