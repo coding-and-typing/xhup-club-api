@@ -14,6 +14,7 @@ from app.models.character import Character, CharsTable
 
 class XHUP(object):
     """小鹤音形词条的解析类"""
+
     @staticmethod
     def parse_table(table: str, table_id: int):
         """解析小鹤音形拆字表"""
@@ -34,17 +35,21 @@ parsers = {
 
 def save_split_table(table: str,
                      version: str,
-                     table_type: str, # 编码表类型，用于确定应该调用的解析器
-                     table_name: str,  # 编码表名称（如小鹤音形拆字表）
-                     group_id: str,  # 群组 id（非数据库 id）
-                     group_platform: str):  # 该群所属平台
+                     table_type: str,
+                     table_name: str,
+                     group_id: str,
+                     group_platform: str):
     """
 
     :param table: 待解析的拆字表字符串
     :param version: 拆字表版本号
+    :param table_type: 编码表类型，用于确定应该调用的解析器
+    :param table_name: 编码表名称（如小鹤音形拆字表）
+    :param group_id: 群组 id（非数据库 id）
+    :param group_platform: 该群所属平台
     :return:
     """
-    version_ = parse_version(version)  # version 错误会抛异常！
+    version_ = parse_version(version)
 
     if version_ <= get_latest_version(table_name):
         raise RuntimeError("the version has existed!")
@@ -68,6 +73,8 @@ def save_split_table(table: str,
 
     # 最后提交修改
     db.session.commit()
+
+    return chars_table
 
 
 def get_latest_version(table_name: str):
@@ -94,5 +101,3 @@ def get_info(char: str, table_name, version=None):
         .first()
 
     return info
-
-

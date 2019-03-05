@@ -39,11 +39,14 @@ class GroupUser(db.Model):
         return "<{} Group '{}', Id '{}'>".format(self.platform, self.username, self.user_id)
 
 
-class GroupMembers(db.Model):
+class GroupUserRelation(db.Model):
+    """
+    GroupUser 与 Group 的关联表
+    """
     id = db.Column(db.Integer, primary_key=True)
     platform = db.Column(db.String(10), index=True, nullable=False)  # qq、wechat 或 telegram
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('group_user.id'), index=True, nullable=False)
+    group_db_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
+    user_db_id = db.Column(db.Integer, db.ForeignKey('group_user.id'), index=True, nullable=False)
 
     is_admin = db.Column(db.Boolean, nullable=False)
     is_owner = db.Column(db.Boolean, nullable=False)
