@@ -26,7 +26,7 @@ pip install -r requirements.txt
 
 ### 三、 将 xhup-club-api 设为 systemd 服务：
 
-此处参考了 gunicorn 的官方文档
+此处参考了 gunicorn 的官方文档（不支持行内注释！！！注释必须单独一行）
 `/etc/systemd/system/xhup-club-api.service`:
 ```
 [Unit]
@@ -105,3 +105,9 @@ config.set_main_option('sqlalchemy.url',
 db_url_escaped = current_app.config.get('SQLALCHEMY_DATABASE_URI').replace('%', '%%')
 config.set_main_option('sqlalchemy.url', db_url_escaped)
 ```
+
+
+### 域名与协议
+
+域名的话，我想可以找老范讨要个 `typing.xhup.club` 这个子域名
+协议必须用 https 和 wss，尤其是 wss，因为 token 不加密完全是明文的。

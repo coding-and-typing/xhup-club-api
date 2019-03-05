@@ -4,13 +4,9 @@
 实用函数
 """
 import time
+
 from flask_login import login_required as login_required_
 from flask_rest_api.utils import deepupdate
-
-
-def timestamp():
-    """Return the current timestamp as an integer."""
-    return int(time.time())
 
 
 def login_required(func):
@@ -24,14 +20,9 @@ def login_required(func):
     return login_required_(func)
 
 
-def send_email(destination, content):
-    """
-    使用配置好的邮件服务器发送邮件，用于发送账号验证邮件、重置账号密码等
-    :param destination:
-    :param content:
-    :return:
-    """
+def timestamp():
+    """Return the current timestamp as an integer."""
+    return int(time.time())
 
-    # TODO 待实现
-    pass
+
 

@@ -4,5 +4,5 @@
 数据模型
 """
 
-from .user import *
-from .qq import *
+from .main_user import *
+from .group_user import *

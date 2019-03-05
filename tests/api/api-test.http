@@ -1,0 +1,48 @@
+# api 接口的功能测试
+
+# 变量
+# @hostname = xhup.club
+# @port = 8000
+
+@hostname = localhost
+@port = 5000
+
+@host = {{hostname}}:{{port}}
+
+### 注册测试
+POST http://{{host}}/api/v1/users/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "ryan",
+    "email": "ryan@tt.com",
+    "password": "ihaveadream"
+}
+
+
+### 永久注销用户
+POST http://{{host}}/api/v1/users/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "password": "ihaveadream"
+}
+
+
+### 登录测试
+
+POST http://{{host}}/api/v1/session/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "ryan",
+    "password": "ihaveadream",
+    "remember_me": false
+}
+
+### 登出测试
+
+DELETE http://{{host}}/api/v1/session/ HTTP/1.1
+
+
+
