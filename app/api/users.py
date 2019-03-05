@@ -70,6 +70,8 @@ class UsersView(MethodView):
             db.session.add(user)
             db.session.commit()
 
+            return user
+
     @user_bp.response(UserSchema, code=200, description="成功获取到用户信息")
     @login_required
     def get(self):

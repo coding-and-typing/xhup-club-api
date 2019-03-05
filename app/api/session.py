@@ -67,6 +67,8 @@ class SessionView(MethodView):
         if user is not None \
                 and user.check_password(data['password']):
             login_user(user)
+
+            return user
         else:
             abort(401, message='error username or password')
 
