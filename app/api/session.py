@@ -43,6 +43,7 @@ class SessionCreateArgsSchema(ma.Schema):
 
     username = ma.fields.String(required=True)
     password = ma.fields.String(required=True)
+    remember_me = ma.fields.Boolean(required=True)  # 记住我
 
 
 @session_bp.route('/')
@@ -54,6 +55,7 @@ class SessionView(MethodView):
     @session_bp.arguments(SessionCreateArgsSchema)
     @session_bp.response(code=201, description="登录成功")
     @session_bp.doc(responses={"401": {'description': "用户名或密码错误"}})
+    @session_bp.doc(responses={"400": {'description': "请先登出当前账号"}})
     def post(self, data: typing.Dict):
         """用户登录
 
@@ -62,11 +64,15 @@ class SessionView(MethodView):
         :param data:
         :return:
         """
+        if current_user.is_authenticated:
+            abort(400, message="please logout first.")
+
         # 验证登录
         user = MainUser.query.filter_by(username=data['username']).first()
         if user is not None \
                 and user.check_password(data['password']):
-            login_user(user)
+
+            login_user(user, remember=data['remember_me'])
 
             return user
         else:

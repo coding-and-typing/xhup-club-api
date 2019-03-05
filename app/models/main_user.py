@@ -28,6 +28,6 @@ class MainUser(UserMixin, db.Model):
 
 
 @login.user_loader
-def load_user(id):
-    return MainUser.query.get(int(id))
+def load_user(user_id):
+    return MainUser.query.get(int(user_id))
 

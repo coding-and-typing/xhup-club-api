@@ -56,32 +56,27 @@ class UsersView(MethodView):
     @user_bp.arguments(UserCreateArgsSchema)
     @user_bp.response(code=201, description="新用户注册成功")
     @user_bp.doc(responses={"400": {'description': "当前已有用户登录，需要先退出登录"}})
+    @user_bp.doc(responses={"409": {'description': "用户名或 email 已被使用"}})
     def post(self, data: typing.Dict):
         """用户注册
+
         ---
         :param data:
         :return:
         """
         if current_user.is_authenticated:
-            abort(400, message="you've login, or this account has been used.")
-        else:
-            user = MainUser(username=data['username'], email=data['email'])
-            user.set_password(data['password'])
+            abort(400, message="please logout first.")
+
+        user = MainUser(username=data['username'], email=data['email'])
+        user.set_password(data['password'])
+        try:
             db.session.add(user)
             db.session.commit()
+        except:
+            db.session.rollback()
+            abort(409, message="the username or email has been used.")
 
-            return user
-
-    @user_bp.response(UserSchema, code=200, description="成功获取到用户信息")
-    @login_required
-    def get(self):
-        """获取所有用户信息（仅网站管理员可操作）
-
-        TODO：加分页，加权限认证
-        ---
-        :return:
-        """
-        return current_user
+        return user
 
     @user_bp.response(code=204, description="账号删除成功")
     @user_bp.arguments(UserCreateArgsSchema)
