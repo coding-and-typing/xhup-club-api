@@ -43,7 +43,7 @@ class UserCreateArgsSchema(ma.Schema):
 
     username = ma.fields.String()
     email = ma.fields.Email()
-    password_hash = ma.fields.String()
+    password = ma.fields.String()
 
 
 @user_bp.route('/')
@@ -55,6 +55,7 @@ class UsersView(MethodView):
 
     @user_bp.arguments(UserCreateArgsSchema)
     @user_bp.response(code=201, description="新用户注册成功")
+    @user_bp.doc(responses={"400": {'description': "当前已有用户登录，需要先退出登录"}})
     def post(self, data: typing.Dict):
         """用户注册
         ---
@@ -82,6 +83,7 @@ class UsersView(MethodView):
 
     @user_bp.response(code=204, description="账号删除成功")
     @user_bp.arguments(UserCreateArgsSchema)
+    @user_bp.doc(responses={"400": {'description': "删除用户需要再次确认密码"}})
     @login_required
     def delete(self, data: dict):
         """删除当前用户（永久注销）
