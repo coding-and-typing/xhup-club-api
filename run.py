@@ -7,13 +7,6 @@ from app.models import MainUser
 flask 的启动脚本（入口）
 """
 
-# 如果尚未设置环境变量，就先加载环境变量
-# 仅开发环境，测试环境不会走这个入口，而生产环境 systemd 会提前使用 .env 设置环境变量
-if os.getenv('XHUP_ENV') is None:
-    os.environ['XHUP_ENV'] = 'dev'
-    os.environ['FLASK_ENV'] = 'development'
-
-
 app = create_app()
 
 

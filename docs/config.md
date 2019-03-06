@@ -45,7 +45,7 @@ User=ryan
 Group=ryan
 
 # 环境变量
-EnvironmentFile=/home/ryan/xhup-club-api/.env
+EnvironmentFile=/home/ryan/xhup-club-api/prod.env
 
 # web app 目录
 WorkingDirectory=/home/ryan/xhup-club-api
@@ -82,7 +82,7 @@ sudo journalctl -u xhup-club-api.service  # 查看该服务的日志
 
 如果修改了 `.env`，记得运行如下命令更新加密文件：
 ```bash
-tar -cv -f secrets.tar .env id_rsa_for_ssh.key
+tar -cv -f secrets.tar prod.env id_rsa_for_ssh.key
 travis encrypt-file secrets.tar
 ```
 
