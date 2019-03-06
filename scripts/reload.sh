@@ -3,6 +3,8 @@
 # 这个脚本用于重启服务器，在服务器上使用
 # 需要在项目根目录下运行
 
+git checkout master
+
 # 将 .env 中的 key=value 导入到当前环境变量中，忽略注释行和换行
 set -a
 . ./prod.env
