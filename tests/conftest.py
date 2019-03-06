@@ -57,4 +57,5 @@ def user(db):
     user.set_password(password)
     db.session.add(user)
     db.session.commit()
-    return user
+    return db.session.query(MainUser) \
+        .filter_by(username=username, email=email).first()
