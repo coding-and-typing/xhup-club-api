@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import os
 
 from flask import Flask
@@ -21,6 +23,7 @@ login_manager = LoginManager()
 mail = Mail()
 socketio = SocketIO()
 
+cors = CORS()  # REST API 允许跨域
 api_rest = Api()
 
 # 获取环境
@@ -33,7 +36,11 @@ def create_app():
     app.config.from_object(current_config)
 
     # 允许 /api/ 下的 api 跨域访问
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    cors.init_app(app, resources={r"/api/*": {
+        "origins": "*",
+        "max_age": timedelta(days=1),
+        "supports_credentials": True,  # 允许跨域使用 cookie
+    }})
 
     db.init_app(app)
     migrate.init_app(app, db)
