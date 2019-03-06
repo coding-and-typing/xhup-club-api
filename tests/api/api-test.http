@@ -1,16 +1,16 @@
 # api 接口的功能测试
 
 # 变量
-# @hostname = xhup.club
-# @port = 8000
+@hostname = xhup.club
+@port = 8000
 
-@hostname = localhost
-@port = 5000
+# @hostname = localhost
+# @port = 5000
 
 @host = {{hostname}}:{{port}}
 
 ### 注册测试
-POST http://{{host}}/api/v1/users/ HTTP/1.1
+POST http://{{host}}/api/v1/user/ HTTP/1.1
 Content-Type: application/json
 
 {
@@ -21,7 +21,7 @@ Content-Type: application/json
 
 
 ### 永久注销用户
-POST http://{{host}}/api/v1/users/ HTTP/1.1
+DELETE http://{{host}}/api/v1/user/ HTTP/1.1
 Content-Type: application/json
 
 {
