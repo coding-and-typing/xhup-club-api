@@ -37,6 +37,7 @@ class TableSchema(ma.Schema):
 
     version = ma.fields.String(required=True)
     table = ma.fields.String(required=True, validate=lambda s: len(s) < 400000)
+    table_type = ma.fields.String(required=True)
 
     table_name = ma.fields.String(required=True)  # 编码表名称（如小鹤音形拆字表）
 

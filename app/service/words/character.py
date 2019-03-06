@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import json
+import re
 from io import StringIO
 from operator import itemgetter
 from pkg_resources import parse_version
@@ -11,6 +13,10 @@ from app.models.character import Character, CharsTable
 小鹤音形 - 拆字表查询
 """
 
+# Unicode 中日韩统一汉字区（不包括补充字符集）
+# 参考 https://zh.wikipedia.org/wiki/Unicode#%E6%BC%A2%E5%AD%97%E5%95%8F%E9%A1%8C
+cjk_re = "[\u4e00-\u9fbb]"
+
 
 class XHUP(object):
     """小鹤音形词条的解析类"""
@@ -20,11 +26,22 @@ class XHUP(object):
         """解析小鹤音形拆字表"""
         table_io = StringIO(table)
         for line in table_io:
-            yield XHUP.parse_line(line, table_id)
+            yield XHUP.parse_line(line.strip(), table_id)
 
     @staticmethod
     def parse_line(line: str, table_id: int):
-        pass
+        line = re.sub(r"[ 　]+", " ", line)  # 中文空格与英文空格，连带出现
+        char = line[0]
+        parts = line.split("=")
+        codes = parts[0].replace(f"{char}： ", "")
+        split = parts[1].replace(f"拆分： ", "")
+        otehr_info = json.dumps(
+            dict(pair.split("： ") for pair in parts[2:]))
+        return Character(char=char,
+                         codes=codes,
+                         split=split,
+                         other_info=otehr_info,
+                         table_id=table_id)
 
 
 # 针对不同的编码表，调用不同的 parser

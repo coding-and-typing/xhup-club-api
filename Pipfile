@@ -22,6 +22,7 @@ pymysql = "*"
 redis = "*"
 "flask-rq2" = "*"
 elasticsearch = "*"
+flask-cors = "*"
 
 [dev-packages]
 pytest = "*"
