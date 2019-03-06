@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from flask_cors import CORS
 from flask_rest_api import Api
 from flask_rq2 import RQ
 from flask_sqlalchemy import SQLAlchemy
@@ -30,6 +31,9 @@ current_config = config_by_name[env]
 def create_app():
     app = Flask(__name__)
     app.config.from_object(current_config)
+
+    # 允许 /api/ 下的 api 跨域访问
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     db.init_app(app)
     migrate.init_app(app, db)

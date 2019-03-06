@@ -5,7 +5,7 @@
 # 修改 ssh key 权限，否则 ssh 会报错。
 chmod 600 ~/id_rsa_for_ssh.key
 
-mv ~/.env .
+mv ~/prod.env .
 
 # git 路径
 GIT_PATH=/usr/local/git/bin/git

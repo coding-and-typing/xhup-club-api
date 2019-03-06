@@ -39,14 +39,17 @@ class GroupUser(db.Model):
         return "<{} Group '{}', Id '{}'>".format(self.platform, self.username, self.user_id)
 
 
-class GroupMembers(db.Model):
+class GroupUserRelation(db.Model):
+    """
+    GroupUser 与 Group 的关联表
+    """
     id = db.Column(db.Integer, primary_key=True)
     platform = db.Column(db.String(10), index=True, nullable=False)  # qq、wechat 或 telegram
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('group_user.id'), index=True, nullable=False)
+    group_db_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
+    user_db_id = db.Column(db.Integer, db.ForeignKey('group_user.id'), index=True, nullable=False)
 
     is_admin = db.Column(db.Boolean, nullable=False)
     is_owner = db.Column(db.Boolean, nullable=False)
 
     # 特定平台下，用户 - 群组的映射不应该重复！
-    __table_args__ = (UniqueConstraint('platform', 'user_id', 'group_id'),)
+    __table_args__ = (UniqueConstraint('platform', 'user_db_id', 'group_db_id'),)

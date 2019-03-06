@@ -5,7 +5,7 @@
 
 # 将 .env 中的 key=value 导入到当前环境变量中，忽略注释行和换行
 set -a
-. ./.env
+. ./prod.env
 set +a
 
 pip install -r requirements.txt
