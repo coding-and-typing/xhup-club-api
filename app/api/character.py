@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 
 from flask.views import MethodView
@@ -36,13 +37,13 @@ class TableSchema(ma.Schema):
         ordered = True
 
     version = ma.fields.String(required=True)
-    table = ma.fields.String(required=True, validate=lambda s: len(s) < 400000)
+    table = ma.fields.String(required=True, load_only=True)
     table_type = ma.fields.String(required=True)
 
     table_name = ma.fields.String(required=True)  # 编码表名称（如小鹤音形拆字表）
 
     group_id = ma.fields.String(required=True)  # 一个编码表，需要绑定一个群号。
-    group_platform = ma.fields.String(required=True)  # 该群所属平台
+    platform = ma.fields.String(required=True)  # 该群所属平台
 
     @validates("version")
     def validate_version(self, version: str):
@@ -76,10 +77,17 @@ class TableView(MethodView):
         """
         # 验证当前用户是指定群的管理员
         if not is_(["owner", "admin"], current_user,
-                   group_id=data['group_id'], platform=data['group_platform']):
+                   group_id=data['group_id'], platform=data['platform']):
             abort(401, message="you are not the admin of this group")
 
         return character.save_split_table(**data)
+
+
+class CharInfoSchema(ma.Schema):
+    char = ma.fields.String()
+    codes = ma.fields.String()
+    split = ma.fields.String()
+    other_info = ma.fields.Dict()
 
 
 @api_rest.definition('Char')
@@ -88,9 +96,15 @@ class CharSchema(ma.Schema):
         strict = True
         ordered = True
 
-    char = ma.fields.String(required=True, )
-    info = ma.fields.String()
+    char = ma.fields.String(required=True)
+    info = ma.fields.Nested(CharInfoSchema, dump_only=True)
     version = ma.fields.String()
+    table_name = ma.fields.String(required=True)
+
+    @validates("char")
+    def validate_table(self, table: str):
+        if len(table) != 1:
+            raise ValidationError("`char` must be just one character!")
 
 
 @table_bp.route("/info/")
@@ -109,4 +123,5 @@ class CharView(MethodView):
         if not info:
             abort(404, message=f"no info for character {data['char']}")
 
-        return info
+        data['info'] = info
+        return data

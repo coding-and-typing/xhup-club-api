@@ -55,7 +55,7 @@ def save_split_table(table: str,
                      table_type: str,
                      table_name: str,
                      group_id: str,
-                     group_platform: str):
+                     platform: str):
     """
 
     :param table: 待解析的拆字表字符串
@@ -63,7 +63,7 @@ def save_split_table(table: str,
     :param table_type: 编码表类型，用于确定应该调用的解析器
     :param table_name: 编码表名称（如小鹤音形拆字表）
     :param group_id: 群组 id（非数据库 id）
-    :param group_platform: 该群所属平台
+    :param platform: 该群所属平台
     :return:
     """
     version_ = parse_version(version)
@@ -73,11 +73,11 @@ def save_split_table(table: str,
 
     # 新建 version 行
     group_db_id = db.session.query(Group) \
-        .filter_by(group_id=group_id, platform=group_platform) \
+        .filter_by(group_id=group_id, platform=platform) \
         .first().id
     chars_table = CharsTable(name=table_name,
                              version=version,
-                             group_id=group_db_id)
+                             group_db_id=group_db_id)
     db.session.add(chars_table)  # 将 chars_table 插入表中
     table_id = db.session.query(CharsTable) \
         .filter_by(name=table_name, version=version) \
@@ -91,13 +91,18 @@ def save_split_table(table: str,
     # 最后提交修改
     db.session.commit()
 
-    return chars_table
+    return {
+        "version": version,
+        "table_name": table_name,
+        "group_id": group_id,
+        "platform": platform,
+    }
 
 
 def get_latest_version(table_name: str):
     """获取最新的拆字表版本号"""
     versions = map(itemgetter(0), db.session.query(CharsTable.version) \
-                   .filer_by(name=table_name))
+                   .filter_by(name=table_name))
     versions = list(map(parse_version, versions))
     latest_version = max(versions) if versions else parse_version("0.0.0")
 
@@ -113,8 +118,9 @@ def get_info(char: str, table_name, version=None):
         .filter_by(version=version).first()[0]
 
     # 在该拆字表内查找 char 的信息
-    info = db.session.query(Character) \
+    info: Character = db.session.query(Character) \
         .filter_by(char=char, table_id=table_id) \
         .first()
 
+    info.other_info = json.loads(info.other_info)
     return info

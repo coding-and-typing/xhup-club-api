@@ -18,7 +18,7 @@ class CharsTable(db.Model):
     version = db.Column(db.String(20), index=True, nullable=False)
 
     # 拆字表所属群组，只有该群管理员可编辑该表
-    group_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
+    group_db_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
 
     # 同一张拆字表的同一个版本号只能使用一次
     __table_args__ = (UniqueConstraint('name', 'version'),)
