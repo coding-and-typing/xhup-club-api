@@ -12,7 +12,7 @@ from app import db
 class CharsTable(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
-    name = db.Column(db.String(64), nullable=False, unique=True)
+    name = db.Column(db.String(64), unique=True, nullable=False)
 
     # 所属的拆字表版本号，应使用 pkg_resources.parse_version 做比较
     version = db.Column(db.String(20), index=True, nullable=False)
@@ -30,7 +30,7 @@ class CharsTable(db.Model):
 class Character(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     char = db.Column(db.String(6), index=True, nullable=False)  # utf-8 最长 6 字节
-    codes = db.Column(db.String(64))  # 可用编码，用空格分隔
+    codes = db.Column(db.String(64), nullable=False)  # 可用编码，用空格分隔
     split = db.Column(db.String(200))  # 单字的拆分
     other_info = db.Column(db.String(200))  # 其他拆分信息，对小鹤音形来说，这是"首末编码"信息
 

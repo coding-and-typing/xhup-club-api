@@ -14,7 +14,7 @@
 
 ### 已知 bug
 
-- anonymous 用户被 flask-login 直接使用了 id 1 查询
+- 绑定平台账号后，用户账号无法删除（需要级联删除所有相关行，添加 relationship：on_delete - cascade）
 
 
 

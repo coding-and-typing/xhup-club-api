@@ -47,7 +47,7 @@ def db(app):
 
 username = 'ryan'
 email = "ryan@example.com"
-password = "i_have_a_dream"
+password = "ihaveadream"
 
 
 @pytest.fixture
