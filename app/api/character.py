@@ -8,7 +8,7 @@ from flask_rest_api import abort, Blueprint
 from marshmallow import validates, ValidationError
 from pkg_resources import parse_version
 
-from app import api_rest, current_config
+from app import api_rest
 from app.api import api_prefix
 from app.service.auth.group_user import is_
 from app.service.words import character

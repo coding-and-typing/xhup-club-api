@@ -52,4 +52,4 @@ class GroupUserRelation(db.Model):
     is_owner = db.Column(db.Boolean, nullable=False)
 
     # 特定平台下，用户 - 群组的映射不应该重复！
-    __table_args__ = (UniqueConstraint('platform', 'user_id', 'group_id'),)
+    __table_args__ = (UniqueConstraint('platform', 'user_db_id', 'group_db_id'),)
