@@ -1,11 +1,12 @@
 # api 接口的功能测试
 
-# 变量
-# @hostname = xhup.club
-# @port = 8000
-
-@hostname = localhost
+## 线上服务器
+@hostname = xhup.club
 @port = 8000
+
+## 本地测试服务器
+# @hostname = localhost
+# @port = 8000
 
 @host = {{hostname}}:{{port}}
 
@@ -22,8 +23,6 @@ Content-Type: application/json
 
 ### 永久删除用户
 # 已知 bug：绑定平台账号后（比如绑定 qq群），删除账号会报 500 错误
-# 而 ryan 账号用于测试拆字表上传，已经绑定了 QQ群，并设为了管理员。
-# 因此 ryan 暂时不能用于测试此 api
 
 DELETE http://{{host}}/api/v1/user/ HTTP/1.1
 Content-Type: application/json
@@ -50,6 +49,7 @@ DELETE http://{{host}}/api/v1/session/ HTTP/1.1
 
 
 ### 拆字表上传测试
+#  仅绑定 QQ 群管理员账号的用户，可使用此 api，暂时无法线上测试
 POST http://{{host}}/api/v1/characters/table/ HTTP/1.1
 Content-Type: application/json
 
