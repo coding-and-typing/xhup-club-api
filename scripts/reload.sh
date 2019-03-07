@@ -13,7 +13,6 @@ set +a
 pip install -r requirements.txt
 
 # 数据库更新
-flask db migrate  # 更新 migrations
 flask db upgrade  # 将更新写入数据库
 
 # 重启 gunicorn， -S 选项表示从 stdin 读取密码
