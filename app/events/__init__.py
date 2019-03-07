@@ -1,42 +1,26 @@
 # -*- coding: utf-8 -*-
-import functools
 from flask import Blueprint, Flask
-from flask_login import current_user
-from flask_socketio import disconnect
+from flask_sockets import Sockets
+
+# websocket 路径前缀
+ws_prefix = "/ws"
+
+from .bot import *
+from .web import *
 
 """
 WebSocket 事件处理
+
+---
+使用了 flask-sockets，这个插件是对 gevent-websocket 的一个超简单的封装，总代码仅 113 行。
+
+Note: WebSocket 的 url 并没有被直接注册到 app，因此 app.url_map 中是看不到 ws api 的
+    url 是在 sockets 实例的 url_map 属性中。
 """
 
-ws_bp = Blueprint('ws', __name__, url_prefix='/api/v1/ws')
 
-
-def init_app(app: Flask):
-    app.register_blueprint(ws_bp)
-
-
-def authenticated_only(f):
-    """socketio 版本的 login_required
-
-    这个装饰器用于 Web 页面相关的 api（即适用于单用户）
-    """
-    @functools.wraps(f)
-    def wrapped(*args, **kwargs):
-        if not current_user.is_authenticated:
-            disconnect()
-        else:
-            return f(*args, **kwargs)
-    return wrapped
-
-
-def token_required(f):
-    """需要 token
-
-    这个装饰器用于聊天机器人相关的 api
-    chatbot 是系统内部的工具，因此开放的权限比较多，token 必须要藏好别让人知道了。。
-
-    Note：token 是直接放在 url 参数内的，因此必须使用 ssl 才安全！！！
-    """
-    # TODO 待实现
-
+def init_websockets(sockets: Sockets):
+    # 将 flask_sockets 的 blueprint 注册到 sockets 实例
+    sockets.register_blueprint(bot_bp)
+    sockets.register_blueprint(web_bp)
 

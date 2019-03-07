@@ -11,7 +11,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 
 from flask_mail import Mail
-from flask_socketio import SocketIO
+from flask_sockets import Sockets
 
 from config import config_by_name
 
@@ -21,7 +21,7 @@ rq = RQ()
 
 login_manager = LoginManager()
 mail = Mail()
-socketio = SocketIO()
+sockets = Sockets()
 
 cors = CORS()  # REST API 允许跨域
 api_rest = Api()
@@ -46,7 +46,7 @@ def create_app():
     migrate.init_app(app, db)
     login_manager.init_app(app)
     mail.init_app(app)
-    socketio.init_app(app)
+    sockets.init_app(app)
     api_rest.init_app(app)
 
     # TODO elasticsearch 模糊搜索
@@ -56,13 +56,13 @@ def create_app():
     # TODO 使用 rq 实现异步任务
     # rq.init_app(app)
 
-    # Import Socket.IO events so that they are registered with Flask-SocketIO
-    from . import events
-    events.init_app(app)
-
     # 注册 rest api 模块，
     from app import api as api_v1
     api_v1.init_api(api_rest)  # 注意是使用已经在 app 上注册了的 app_rest
+
+    # Import Sockets events so that they are registered with Flask-Sockets
+    from . import events
+    events.init_websockets(sockets)
 
     # 日志
     app.logger.setLevel(current_config.LOG_LEVEL)

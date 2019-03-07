@@ -8,11 +8,14 @@ if os.getenv('XHUP_ENV') is None:
     os.environ['FLASK_ENV'] = 'development'
 
 
-from app import create_app, db, socketio
+from app import create_app, db
 from app.models import MainUser
 
 """
 flask 的启动脚本（入口）
+
+Note: 因为使用了 flask 的开发服务器无法提供 websocket 服务，
+    因此不能直接通过 `flask run` 命令启动服务器！那样的话 ws api 会不可用！
 """
 
 app = create_app()
@@ -25,4 +28,11 @@ def make_shell_context():
 
 
 if __name__ == '__main__':
-    socketio.run(app)  # 使用了 socketio 后，需要通过 socketio.run 函数启动 app
+    # 需要使用 geventwebsocket 提供 websocket 服务，因此不能用常规方式（app.run）启动服务器
+    from gevent import pywsgi
+    from geventwebsocket.handler import WebSocketHandler
+
+    server = pywsgi.WSGIServer(('', 5000),
+                               app,
+                               handler_class=WebSocketHandler)
+    server.serve_forever()
