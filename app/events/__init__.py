@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, Flask
 from flask_sockets import Sockets
 
 # websocket 路径前缀

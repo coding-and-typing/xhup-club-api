@@ -27,16 +27,18 @@ def authenticated_only(func: Callable):
     验证 WS 的 upgrade 请求是否带有有效的 token
     """
     def deco(socket):
+        # websocket 是发生在 http 握手后的，而且是同一个 tcp 连接
+        # 因此可以直接使用 request 获取握手阶段的请求信息
         auth = request.headers.get('Authorization', '')
         if not auth.startswith('Token ') and not auth.startswith('token '):
-            abort(401)
+            abort(401)  # Unauthorized
 
         token_given = auth[len('Token '):].strip()
         if not token_given:
             abort(401)
 
         if not validate_access_token(token_given):  # 验证 token
-            abort(403)
+            abort(403)  # Forbidden
 
         return func(socket)
 
@@ -52,5 +54,6 @@ def echo_socket(socket):
     while not socket.closed:
         message = socket.receive()
         socket.send(message)
+
 
 

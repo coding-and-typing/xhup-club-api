@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+from itertools import chain
+
 import os
 
 import logging
+import string
 from pathlib import Path
 
 """
@@ -106,6 +109,12 @@ class BaseConfig(object):
         ':': '：',
         '~': '～',
     }
+
+    # 字符相关
+    SYMBOLS_US = frozenset(chain(string.printable, "  "))  # 也包含了数字和特殊标点
+    SYMBOLS_CN = frozenset(r"！“,”#￥%&‘’（）*+，-。、：；《〈=〉》？@「、」…… ——`『|』~【】〖〗〔〕．〃＂……¨ˉ·─　")
+    SYMBOLS_OTHER = frozenset(r"ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９")
+    SYMBOLS_ALL = frozenset(chain(SYMBOLS_US, SYMBOLS_CN, SYMBOLS_OTHER))
 
     # 6. 群聊相关配置
     # 图灵聊天 api
