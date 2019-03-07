@@ -17,7 +17,7 @@ class Group(db.Model):
     group_name = db.Column(db.String(50), nullable=False)  # 群名称
 
     # 特定平台下，群的 id 应该是唯一的
-    __table_args__ = (UniqueConstraint('platform', 'group_id'),)
+    __table_args__ = (UniqueConstraint('platform', 'group_id', name="c_group"),)
 
     def __repr__(self):
         return "<{} Group '{}', Id '{}'>".format(self.platform, self.group_name, self.group_id)
@@ -33,7 +33,7 @@ class GroupUser(db.Model):
     main_user_id = db.Column(db.Integer, db.ForeignKey('main_user.id'), index=True, nullable=False)
 
     # 特定平台下，用户的 id 应该是唯一的
-    __table_args__ = (UniqueConstraint('platform', 'user_id'),)
+    __table_args__ = (UniqueConstraint('platform', 'user_id', name='c_group_user'),)
 
     def __repr__(self):
         return "<{} Group '{}', Id '{}'>".format(self.platform, self.username, self.user_id)
@@ -52,4 +52,4 @@ class GroupUserRelation(db.Model):
     is_owner = db.Column(db.Boolean, nullable=False)
 
     # 特定平台下，用户 - 群组的映射不应该重复！
-    __table_args__ = (UniqueConstraint('platform', 'user_db_id', 'group_db_id'),)
+    __table_args__ = (UniqueConstraint('platform', 'user_db_id', 'group_db_id', name='c_relation'),)

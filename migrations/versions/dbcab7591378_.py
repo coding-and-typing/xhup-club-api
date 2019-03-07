@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 75c03fa5228c
+Revision ID: dbcab7591378
 Revises: 
-Create Date: 2019-03-06 16:39:59.861894
+Create Date: 2019-03-07 12:08:06.649734
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '75c03fa5228c'
+revision = 'dbcab7591378'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -24,14 +24,14 @@ def upgrade():
     sa.Column('group_id', sa.String(length=20), nullable=False),
     sa.Column('group_name', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('platform', 'group_id')
+    sa.UniqueConstraint('platform', 'group_id', name='c_group')
     )
     op.create_index(op.f('ix_group_group_id'), 'group', ['group_id'], unique=False)
     op.create_index(op.f('ix_group_platform'), 'group', ['platform'], unique=False)
     op.create_table('main_user',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('username', sa.String(length=64), nullable=True),
-    sa.Column('email', sa.String(length=120), nullable=True),
+    sa.Column('username', sa.String(length=64), nullable=False),
+    sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password_hash', sa.String(length=128), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -41,13 +41,13 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('version', sa.String(length=20), nullable=False),
-    sa.Column('group_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['group_id'], ['group.id'], ),
+    sa.Column('group_db_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['group_db_id'], ['group.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name'),
-    sa.UniqueConstraint('name', 'version')
+    sa.UniqueConstraint('name', 'version', name='c_chars_table')
     )
-    op.create_index(op.f('ix_chars_table_group_id'), 'chars_table', ['group_id'], unique=False)
+    op.create_index(op.f('ix_chars_table_group_db_id'), 'chars_table', ['group_db_id'], unique=False)
     op.create_index(op.f('ix_chars_table_version'), 'chars_table', ['version'], unique=False)
     op.create_table('group_user',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -57,7 +57,7 @@ def upgrade():
     sa.Column('main_user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('platform', 'user_id')
+    sa.UniqueConstraint('platform', 'user_id', name='c_group_user')
     )
     op.create_index(op.f('ix_group_user_main_user_id'), 'group_user', ['main_user_id'], unique=False)
     op.create_index(op.f('ix_group_user_platform'), 'group_user', ['platform'], unique=False)
@@ -65,16 +65,16 @@ def upgrade():
     op.create_table('character',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('char', sa.String(length=6), nullable=False),
-    sa.Column('codes', sa.String(length=64), nullable=True),
+    sa.Column('codes', sa.String(length=64), nullable=False),
     sa.Column('split', sa.String(length=200), nullable=True),
     sa.Column('other_info', sa.String(length=200), nullable=True),
-    sa.Column('table_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['table_id'], ['chars_table.id'], ),
+    sa.Column('table_db_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['table_db_id'], ['chars_table.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('table_id', 'char')
+    sa.UniqueConstraint('table_db_id', 'char', name='c_char')
     )
     op.create_index(op.f('ix_character_char'), 'character', ['char'], unique=False)
-    op.create_index(op.f('ix_character_table_id'), 'character', ['table_id'], unique=False)
+    op.create_index(op.f('ix_character_table_db_id'), 'character', ['table_db_id'], unique=False)
     op.create_table('group_user_relation',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('platform', sa.String(length=10), nullable=False),
@@ -85,7 +85,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['group_db_id'], ['group.id'], ),
     sa.ForeignKeyConstraint(['user_db_id'], ['group_user.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('platform', 'user_db_id', 'group_db_id')
+    sa.UniqueConstraint('platform', 'user_db_id', 'group_db_id', name='c_relation')
     )
     op.create_index(op.f('ix_group_user_relation_group_db_id'), 'group_user_relation', ['group_db_id'], unique=False)
     op.create_index(op.f('ix_group_user_relation_platform'), 'group_user_relation', ['platform'], unique=False)
@@ -99,7 +99,7 @@ def downgrade():
     op.drop_index(op.f('ix_group_user_relation_platform'), table_name='group_user_relation')
     op.drop_index(op.f('ix_group_user_relation_group_db_id'), table_name='group_user_relation')
     op.drop_table('group_user_relation')
-    op.drop_index(op.f('ix_character_table_id'), table_name='character')
+    op.drop_index(op.f('ix_character_table_db_id'), table_name='character')
     op.drop_index(op.f('ix_character_char'), table_name='character')
     op.drop_table('character')
     op.drop_index(op.f('ix_group_user_user_id'), table_name='group_user')
@@ -107,7 +107,7 @@ def downgrade():
     op.drop_index(op.f('ix_group_user_main_user_id'), table_name='group_user')
     op.drop_table('group_user')
     op.drop_index(op.f('ix_chars_table_version'), table_name='chars_table')
-    op.drop_index(op.f('ix_chars_table_group_id'), table_name='chars_table')
+    op.drop_index(op.f('ix_chars_table_group_db_id'), table_name='chars_table')
     op.drop_table('chars_table')
     op.drop_index(op.f('ix_main_user_username'), table_name='main_user')
     op.drop_index(op.f('ix_main_user_email'), table_name='main_user')

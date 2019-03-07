@@ -21,7 +21,7 @@ class CharsTable(db.Model):
     group_db_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
 
     # 同一张拆字表的同一个版本号只能使用一次
-    __table_args__ = (UniqueConstraint('name', 'version'),)
+    __table_args__ = (UniqueConstraint('name', 'version', name="c_chars_table"),)
 
     def __repr__(self):
         return "<Chars Table '{}'>".format(self.name)
@@ -35,10 +35,10 @@ class Character(db.Model):
     other_info = db.Column(db.String(200))  # 其他拆分信息，对小鹤音形来说，这是"首末编码"信息
 
     # 所属的拆字表 id
-    table_id = db.Column(db.Integer, db.ForeignKey('chars_table.id'), index=True, nullable=False)
+    table_db_id = db.Column(db.Integer, db.ForeignKey('chars_table.id'), index=True, nullable=False)
 
     # 同一张拆字表中，同一个单字只应该有一个词条
-    __table_args__ = (UniqueConstraint('table_id', 'char'),)
+    __table_args__ = (UniqueConstraint('table_db_id', 'char', name='c_char'),)
 
     def __repr__(self):
         return "<Char '{}'>".format(self.char)

@@ -22,26 +22,26 @@ class XHUP(object):
     """小鹤音形词条的解析类"""
 
     @staticmethod
-    def parse_table(table: str, table_id: int):
+    def parse_table(table: str, table_db_id: int):
         """解析小鹤音形拆字表"""
         table_io = StringIO(table)
         for line in table_io:
-            yield XHUP.parse_line(line.strip(), table_id)
+            yield XHUP.parse_line(line.strip(), table_db_id)
 
     @staticmethod
-    def parse_line(line: str, table_id: int):
+    def parse_line(line: str, table_db_id: int):
         line = re.sub(r"[ 　]+", " ", line)  # 中文空格与英文空格，连带出现
         char = line[0]
         parts = line.split("=")
         codes = parts[0].replace(f"{char}： ", "")
         split = parts[1].replace(f"拆分： ", "")
-        otehr_info = json.dumps(
+        other_info = json.dumps(
             dict(pair.split("： ") for pair in parts[2:]))
         return Character(char=char,
                          codes=codes,
                          split=split,
-                         other_info=otehr_info,
-                         table_id=table_id)
+                         other_info=other_info,
+                         table_db_id=table_db_id)
 
 
 # 针对不同的编码表，调用不同的 parser
@@ -79,13 +79,13 @@ def save_split_table(table: str,
                              version=version,
                              group_db_id=group_db_id)
     db.session.add(chars_table)  # 将 chars_table 插入表中
-    table_id = db.session.query(CharsTable) \
+    table_db_id = db.session.query(CharsTable) \
         .filter_by(name=table_name, version=version) \
         .first().id
 
     # 解析拆字表
     parser = parsers[table_type]
-    for char in parser.parse_table(table, table_id):  # 批量插入
+    for char in parser.parse_table(table, table_db_id):  # 批量插入
         db.session.add(char)
 
     # 最后提交修改
@@ -114,12 +114,12 @@ def get_info(char: str, table_name, version=None):
         version = str(get_latest_version(table_name))
 
     # 通过 version 查找拆字表 id
-    table_id = db.session.query(CharsTable.id) \
+    table_db_id = db.session.query(CharsTable.id) \
         .filter_by(version=version).first()[0]
 
     # 在该拆字表内查找 char 的信息
     info: Character = db.session.query(Character) \
-        .filter_by(char=char, table_id=table_id) \
+        .filter_by(char=char, table_db_id=table_db_id) \
         .first()
 
     info.other_info = json.loads(info.other_info)
