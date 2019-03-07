@@ -52,7 +52,7 @@ WorkingDirectory=/home/ryan/xhup-club-api
 
 # unix socket 配置有点麻烦。。先直接用 tcp 吧，nginx 也稍后再配，先跑起来再说
 ExecStart=/home/ryan/miniconda3/bin/gunicorn --pid /run/gunicorn/xhup-club-api.pid   \
-          --worker-class eventlet -w 1 \
+          --worker-class flask_sockets.worker -w 1 \
            --bind 0.0.0.0:8000 run:app
 
 ExecReload=/bin/kill -s HUP $MAINPID
