@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 
 import os
@@ -15,6 +16,12 @@ from flask_sockets import Sockets
 
 from config import config_by_name
 
+# 获取环境
+env = os.getenv("XHUP_ENV")
+current_config = config_by_name[env]
+logging.basicConfig(level=current_config.LOG_LEVEL)  # 日志
+
+# 初始化 flask 的各个插件
 db = SQLAlchemy()
 migrate = Migrate()
 rq = RQ()
@@ -25,10 +32,6 @@ sockets = Sockets()
 
 cors = CORS()  # REST API 允许跨域
 api_rest = Api()
-
-# 获取环境
-env = os.getenv("XHUP_ENV")
-current_config = config_by_name[env]
 
 
 def create_app():
@@ -42,6 +45,7 @@ def create_app():
         "supports_credentials": True,  # 允许跨域使用 cookie
     }})
 
+    # 将各 flask 插件注册到 app
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
@@ -64,8 +68,6 @@ def create_app():
     from . import events
     events.init_websockets(sockets)
 
-    # 日志
-    app.logger.setLevel(current_config.LOG_LEVEL)
     app.logger.info('拆小鹤后台系统开始启动～ hhh')
     return app
 
