@@ -16,7 +16,7 @@ in your /home/ryan/.bashrc ? [yes|no]`，选择 yes. 或者安装后你自己手
 
 ### 二. clone 仓库，配置环境：
 ```bash
-git clone git@github.com:ryan4yin/xhup-club-api.git
+git clone git@github.com:coding-and-typing/xhup-club-api.git 
 cd xhup-club-api
 pip install -r requirements.txt
 ```

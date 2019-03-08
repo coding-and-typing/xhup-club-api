@@ -1,8 +1,8 @@
 ## 拆小鹤 - 后端
 
-[![Build Status](https://travis-ci.org/ryan4yin/xhup-club-api.svg?branch=master)](https://travis-ci.org/ryan4yin/xhup-club-api)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6604eea2c1504a31887aa5bcfd86449f)](https://app.codacy.com/app/xiaoyin_c/xhup-club-api?utm_source=github.com&utm_medium=referral&utm_content=ryan4yin/xhup-club-api&utm_campaign=Badge_Grade_Dashboard)
-[![codecov](https://codecov.io/gh/ryan4yin/xhup-club-api/branch/master/graph/badge.svg)](https://codecov.io/gh/ryan4yin/xhup-club-api)
+[![Build Status](https://travis-ci.com/coding-and-typing/xhup-club-api.svg?branch=master)](https://travis-ci.com/coding-and-typing/xhup-club-api)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/495771d502b24336a7838ed39e285a07)](https://www.codacy.com/app/coding-and-typing/xhup-club-api?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=ryan4yin/xhup-club-api&amp;utm_campaign=Badge_Grade)
+[![codecov](https://codecov.io/gh/coding-and-typing/xhup-club-api/branch/master/graph/badge.svg)](https://codecov.io/gh/coding-and-typing/xhup-club-api)
 
 小鹤音形拆字、赛文、成绩记录系统后端（开发中）
 
