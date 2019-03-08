@@ -18,12 +18,14 @@ websocket 只在建立连接时需要使用到 token，token 存在数据库里�
 定时任务通过 socket.handler.server.clients.values() 获取到 client，
 然后调用 client.ws.send() 发送消息（应该能够判断 client 的 namespace）
 """
+import json
 import logging
 from flask import Blueprint, request, abort
 from geventwebsocket import WebSocketError
 from typing import Callable
 
-from app.service.auth.bot import validate_access_token
+from app.service.auth.bot import validate_bot_token
+from app.service.messages import handle_message
 from . import ws_prefix
 
 logger = logging.getLogger(__name__)
@@ -46,7 +48,7 @@ def authenticated_only(func: Callable):
         if not token_given:
             abort(401, description="请求未带有认证字段：`Authorization`，或认证字段不正确！")
 
-        if not validate_access_token(token_given):  # 验证 token
+        if not validate_bot_token(token_given):  # 验证 token
             abort(403, description="Token 不正确，禁止访问！")  # Forbidden
 
         return func(socket)
@@ -58,13 +60,15 @@ def authenticated_only(func: Callable):
 @authenticated_only
 def echo_socket(socket):
     """
-    TODO 待实现
+    被动消息处理
     """
     while not socket.closed:
         try:
             message = socket.receive()
             logger.debug(f"收到消息: {message}")
-            socket.send(message)
+
+            reply = handle_message(message)
+            socket.send(json.dumps(reply))
         except WebSocketError as e:
             logger.info(f"ws 连接异常：{e}")
 

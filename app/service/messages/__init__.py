@@ -1,7 +1,11 @@
 
 
 """
-处理 QQ 消息，或者 tg 消息。
-两边应该尽量用同样的数据格式
+处理 QQ/tg/wechat 消息。
 """
 
+
+def handle_message(msg: str):
+    """消息处理的入口"""
+    # TODO 待实现
+    return msg
