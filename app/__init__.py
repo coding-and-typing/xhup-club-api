@@ -5,6 +5,8 @@ import os
 
 from flask import Flask
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_rest_api import Api
 from flask_rq2 import RQ
 from flask_sqlalchemy import SQLAlchemy
@@ -13,6 +15,7 @@ from flask_login import LoginManager
 
 from flask_mail import Mail
 from flask_sockets import Sockets
+from werkzeug.contrib.fixers import ProxyFix
 
 from config import config_by_name
 
@@ -33,6 +36,9 @@ sockets = Sockets()
 cors = CORS()  # REST API 允许跨域
 api_rest = Api()
 
+# ip 访问频率限制
+limiter = Limiter(key_func=get_remote_address)
+
 
 def create_app():
     app = Flask(__name__)
@@ -52,6 +58,13 @@ def create_app():
     mail.init_app(app)
     sockets.init_app(app)
     api_rest.init_app(app)
+
+    # ip 访问频率限制
+    # 1. 如果 flask 跑在 proxy server 后面（比如 nginx），就需要用 ProxyFix
+    # app.wsgi_app = ProxyFix(app.wsgi_app, num_proxies=1)
+    limiter.init_app(app)
+    for handler in app.logger.handlers:  # 为 limiter 添加日志处理器
+        limiter.logger.addHandler(handler)
 
     # TODO elasticsearch 模糊搜索
     # app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \

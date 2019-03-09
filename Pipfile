@@ -22,6 +22,7 @@ redis = "*"
 elasticsearch = "*"
 flask-cors = "*"
 flask-sockets = "*"
+flask-limiter = "*"
 
 [dev-packages]
 pytest = "*"
