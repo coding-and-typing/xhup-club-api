@@ -53,8 +53,7 @@ password = "ihaveadream"
 @pytest.fixture
 def user(db):
     """A user for the tests."""
-    user = MainUser(username=username, email=email)
-    user.set_password(password)
+    user = MainUser(username=username, email=email, password=password)
     db.session.add(user)
     db.session.commit()
     return db.session.query(MainUser) \

@@ -79,8 +79,10 @@ class UserView(MethodView):
         if current_user.is_authenticated:
             abort(400, message="please logout first.")
 
-        user = MainUser(username=data['username'], email=data['email'])
-        user.set_password(data['password'])
+        user = MainUser(username=data['username'],
+                        email=data['email'],
+                        password=data['password'])
+
         try:
             db.session.add(user)
             db.session.commit()
