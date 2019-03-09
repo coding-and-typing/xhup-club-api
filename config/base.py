@@ -128,4 +128,7 @@ class BaseConfig(object):
     # 授权 TOKEN
     BOT_TOKEN = 'test_token'
 
+    # ip 频率限制（默认策略）
+    RATELIMIT_DEFAULT = "900/hour;30/minute;3/second"
+
 

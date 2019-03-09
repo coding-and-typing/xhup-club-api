@@ -20,10 +20,7 @@ from app.api.character import *
 
 
 def init_api(api_: Api):
-    # ip 访问频率限制
-    limiter.limit("2/second")(session_bp)
-    limiter.limit("2/second")(user_bp)
-    limiter.limit("2/second")(table_bp)
+    limiter.limit("666/hour;20/minute;3/second")(table_bp)  # 更严格的限制
 
     # 要将 flask-rest-api 定义的 blueprint 注册到 api_rest
     api_.register_blueprint(session_bp)
