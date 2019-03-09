@@ -31,3 +31,5 @@ class ProductionConfig(BaseConfig):
     IS_ERROR_MAIL_ENABLED = True
     LOG_LEVEL = logging.INFO
 
+    BOT_TOKEN = os.getenv("BOT_TOKEN")
+

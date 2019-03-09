@@ -126,6 +126,6 @@ class BaseConfig(object):
     SHORT_URL_TOKEN = os.getenv("SHORT_URL_TOKEN")
 
     # 授权 TOKEN
-    BOT_TOKEN = "iIUiuQ786tOU798TMt68&T*7567ygBzH'o32"
+    BOT_TOKEN = 'test_token'
 
 

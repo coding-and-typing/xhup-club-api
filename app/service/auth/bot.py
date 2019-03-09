@@ -15,6 +15,6 @@ def validate_bot_token(token: str):
     :param token:
     :return: boolean，是否有效
     """
-    return token == current_config.BOT_TOEKN
+    return token == current_config.BOT_TOKEN
 
 
