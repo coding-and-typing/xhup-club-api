@@ -18,6 +18,7 @@ websocket 只在建立连接时需要使用到 token，token 存在数据库里�
 定时任务通过 socket.handler.server.clients.values() 获取到 client，
 然后调用 client.ws.send() 发送消息（应该能够判断 client 的 namespace）
 """
+import functools
 import json
 import logging
 from flask import Blueprint, request, abort
@@ -37,7 +38,8 @@ def authenticated_only(func: Callable):
     """
     验证 WS 的 upgrade 请求是否带有有效的 token
     """
-    def deco(socket):
+    @functools.wraps(func)
+    def wrapper(socket):
         # websocket 是发生在 http 握手后的，而且是同一个 tcp 连接
         # 因此可以直接使用 request 获取握手阶段的请求信息
         auth = request.headers.get('Authorization', '')
@@ -53,7 +55,7 @@ def authenticated_only(func: Callable):
 
         return func(socket)
 
-    return deco
+    return wrapper
 
 
 @bot_bp.route('/')
