@@ -22,9 +22,13 @@ class Chars:
     fl_ascii_letters = fl_ascii_lowercase + fl_ascii_uppercase
     fl_digits = "０１２３４５６７８９"
 
+    fl_punctuation = r"""＃％＆＋－＝＠｀｛｜｝．"""
+
     # 全角与半角的对应表（不论是中文还是英文，都要使用此表做转换）
-    fl_table = dict(zip(fl_ascii_letters + fl_digits,  # 全角
-                        string.ascii_letters + string.digits))  # 半角
+    fl_table = str.maketrans(
+        dict(zip(fl_ascii_letters + fl_digits + fl_punctuation,  # 全角
+                 string.ascii_letters + string.digits + "#%&+-=@`{|}."))  # 半角
+    )
 
     # 2. 中英标点对照表（可相互转换）
     punctuation_table = {
@@ -39,18 +43,22 @@ class Chars:
         '[': '【',
         ']': '】',
         '~': '～',
+        "<": "《",
+        ">": "》",
+        "*": "×",
     }
 
     # 3. 中文文章文本替换，要使用的转换表
-    table_all_cn = fl_table.update(punctuation_table)
+    table_cn = str.maketrans(punctuation_table)  # 要用 str.maketrans
 
     # 4. 处理完成后，中文文章允许包含的标点
     SYMBOLS_CN = frozenset("".join(punctuation_table.values())
-                           + "、‘’“”{}《》〈〉〔〕|`@#￥%……&×——+-=·")  # 中英难以对应的标点（或者中英都使用同样的）
+                           + "、‘’“”{}《》〈〉〔〕|`@#￥%……&×——+-=·"  # 中英难以对应的标点（或者中英都使用同样的）
+                           + string.digits + string.ascii_letters)  # 中文也使用半角标点、字母
 
     # 5. 特殊字符中，可以转换成非特殊字符的
     SPECIAL_SPACE = "\u2001" + "\u200a" + "\u2009"  # 三个特殊空格
-    SPECIAL_MIDDLE_LINE = "─—"
+    SPECIAL_MIDDLE_LINE = '―' + "─" + "—"
 
     # 6. 未做处理前，文章中允许出现的标点
     SYMBOLS_ALL = frozenset(chain(string.printable,
@@ -88,7 +96,10 @@ def sub_punctuation(text: str):
     :param text: 文本
     :return: 转换后的文本
     """
-    text = text.translate(Chars.table_all_cn)
+    # 全角转半角
+    text = text.translate(Chars.fl_table)
+    # 英文转中文
+    text = text.translate(Chars.table_cn)
 
     # 引号成对转换
     # TODO 英文引号不分左右，不能这样直接替换
@@ -97,5 +108,7 @@ def sub_punctuation(text: str):
 
     # 破折号
     text = re.sub(rf"[{Chars.SPECIAL_MIDDLE_LINE}]+", "——", text)
+    # 省略号
+    text = re.sub(r"⋯+|\.{3,6}", "……", text)
 
     return text
