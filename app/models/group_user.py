@@ -11,6 +11,7 @@ from app import db
 
 
 class Group(db.Model):
+    """各群组"""
     id = db.Column(db.Integer, primary_key=True)
     platform = db.Column(db.String(10), index=True, nullable=False)  # qq、wechat 或 telegram
     group_id = db.Column(db.String(20), index=True, nullable=False)  # 群的唯一 id
@@ -24,6 +25,7 @@ class Group(db.Model):
 
 
 class GroupUser(db.Model):
+    """群组成员"""
     id = db.Column(db.Integer, primary_key=True)
     platform = db.Column(db.String(10), index=True, nullable=False)  # qq、wechat 或 telegram
     user_id = db.Column(db.String(20), index=True, nullable=False)  # 用户的唯一 id
