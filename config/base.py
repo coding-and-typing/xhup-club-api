@@ -17,7 +17,7 @@ class BaseConfig(object):
     TESTING = False
 
     # 项目根目录
-    PROJECT_ROOT = Path(__file__).parent[1].absolute()
+    PROJECT_ROOT = Path(__file__).parents[1].absolute()
 
     # 2. 数据库相关配置
     REDIS_URL = ""
