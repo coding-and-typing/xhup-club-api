@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
-from itertools import chain
-
 import os
 
 import logging
-import string
 from pathlib import Path
 
 """
@@ -20,7 +17,7 @@ class BaseConfig(object):
     TESTING = False
 
     # 项目根目录
-    PROJECT_ROOT = Path(__file__).parent.parent.absolute()
+    PROJECT_ROOT = Path(__file__).parent[1].absolute()
 
     # 2. 数据库相关配置
     REDIS_URL = ""
@@ -94,28 +91,6 @@ class BaseConfig(object):
     CHAIWUBI_URL = "http://www.chaiwubi.com/match/"  # 仅在登录后，用于获取赛文列表
     CHAIWUBI_API = "http://47.93.35.203/saiwen/json.php"  # 登录、赛文添加/修改/删除
 
-    # 中英标点对照表
-    PUNCTUATIONS_TABLE = {
-        ',': '',
-        '.': '',
-        '\\': '、',
-        ';': '；',
-        '!': '！',
-        '?': '？',
-        '[': '【',
-        ']': '】',
-        '(': '（',
-        ')': '）',
-        ':': '：',
-        '~': '～',
-    }
-
-    # 字符相关
-    SYMBOLS_US = frozenset(chain(string.printable, "  "))  # 也包含了数字和特殊标点
-    SYMBOLS_CN = frozenset(r"！“,”#￥%&‘’（）*+，-。、：；《〈=〉》？@「、」…… ——`『|』~【】〖〗〔〕．〃＂……¨ˉ·─　")
-    SYMBOLS_OTHER = frozenset(r"ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ０１２３４５６７８９")
-    SYMBOLS_ALL = frozenset(chain(SYMBOLS_US, SYMBOLS_CN, SYMBOLS_OTHER))
-
     # 6. 群聊相关配置
     # 图灵聊天 api
     TURING_API = "http://openapi.tuling123.com/openapi/api/v2"
@@ -130,5 +105,3 @@ class BaseConfig(object):
 
     # ip 频率限制（默认策略）
     RATELIMIT_DEFAULT = "900/hour;30/minute;3/second"
-
-
