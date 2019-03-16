@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 """Defines fixtures available to all tests."""
-import flask_login
 import os
 
 import pytest

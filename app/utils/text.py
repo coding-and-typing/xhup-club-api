@@ -101,11 +101,6 @@ def sub_punctuation(text: str):
     # 英文转中文
     text = text.translate(Chars.table_cn)
 
-    # 引号成对转换
-    # TODO 英文引号不分左右，不能这样直接替换
-    # text = re.sub(r'"([^"]*)"', r"“\1”", text)
-    # text = re.sub(r"'([^']*)'", r"‘\1’", text)
-
     # 破折号
     text = re.sub(rf"[{Chars.SPECIAL_MIDDLE_LINE}]+", "——", text)
     # 省略号
