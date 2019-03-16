@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 from itertools import chain
 
+import logging
 import re
 import random
 import string
 
 import chardet
+from typing import Iterable
+
+from app import current_config
 
 """
 文字处理相关的工具函数
 """
+
+logger = logging.getLogger(__name__)
 
 
 class Chars:
@@ -66,12 +72,22 @@ class Chars:
                                   SPECIAL_SPACE,
                                   SPECIAL_MIDDLE_LINE))
 
+    # 7. 处理完成后，中文文章允许包含的所有字符
+    UNICODE_CN = current_config.CHARS.union(SYMBOLS_CN)
+
+    # 8. 处理之前，中文文章允许包含的所有字符
+    UNICODE_ALL = current_config.CHARS.union(SYMBOLS_ALL)
+
 
 def auto_decode(content: bytes):
     """检测编码，读取文件"""
-    encoding = chardet.detect(content)['encoding']  # 检测编码
+    detect = chardet.detect(content)  # 检测编码
+    if detect['confidence'] < 0.7:
+        logger.warning(f"可信度小于 0.7：{detect['confidence']}")
+    else:
+        logger.debug(f"可信度：{detect['confidence']}")
 
-    return content.decode(encoding)
+    return content.decode(detect['encoding'])
 
 
 def shuffle_text(text: str):
@@ -107,3 +123,58 @@ def sub_punctuation(text: str):
     text = re.sub(r"⋯+|\.{3,6}", "……", text)
 
     return text
+
+
+def process_text_cn(text: str):
+    """中文文本处理"""
+    text = del_white_chars(text)
+    text = sub_punctuation(text)
+
+    return text
+
+
+def special_chars(text: str):
+    """返回 text 中的特殊字符"""
+    text_set = frozenset(text)
+
+    return text_set.difference(Chars.UNICODE_CN)
+
+
+def search_split_pos(text: str,
+                     keys: Iterable = "”’】）。！？；～…"):
+    """查找最适合切分的位置"""
+
+    def rindex(c: str):
+        try:
+            return text.rindex(c)
+        except ValueError:
+            return -1
+
+    return max(map(rindex, keys)) + 1  # 加 1 是因为，python 的切分，不包括右边的端点
+
+
+def split_text(text: str,
+               max_length: int,
+               minimal_length: int):
+    """
+    根据给定的长度切分文本
+    :param text: 文本
+    :param max_length: 切分长度
+    :param minimal_length: 文章允许的最短长度。比这还短就丢弃。
+    :return : 迭代器，每次返回切分出来的那一段
+    """
+    while len(text) > max_length:
+        s = text[:max_length]
+        index = search_split_pos(s)  # 上策
+        if index < minimal_length:
+            index = search_split_pos(s, keys="，")  # 中策
+        if index == -1:
+            index = (max_length + minimal_length) // 2  # 直接切分，下下策
+
+        yield text[:index]
+        text = text[index:]
+    else:
+        if len(text) < minimal_length:
+            return  # 结束迭代
+
+        yield text

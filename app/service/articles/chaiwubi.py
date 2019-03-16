@@ -31,8 +31,8 @@ class ArticleAdder(object):
         url: SplitResult = parse.urlsplit(current_config.CHAIWUBI_URL)
         self.session.headers = {
             "User-Agent": current_config.USER_AGENT,
-            "Host": url.netloc,
-            "Origin": parse.urlunsplit((url.scheme, url.hostname, *('',)*3)),
+            "Origin": parse.urlunsplit((url.scheme, url.hostname, *('',) * 3)),
+            "Referer": current_config.CHAIWUBI_URL,
         }
 
         # 先获取一下 cookie
@@ -53,19 +53,13 @@ class ArticleAdder(object):
         resp = self.session.post(current_config.CHAIWUBI_API, data=data)
         resp_json = resp.json()
 
-        if int(resp_json['code']) != 200:
-            logger.info(f"登录异常，msg: {resp_json['msg']}")
-            return {
-                "success": False,
-                "message": resp_json['msg']
-            }
-
-        logger.info("登录成功")
-        self.session.cookies = cookiejar_from_dict({"matchuser": self.username})  # cookie 是通过 js 设置的，直接用的用户名。。。
-        return {
-            "success": True,
-            "message": resp_json['msg']
-        }
+        if int(resp_json['code']) == 200:
+            logger.info(f"登录成功！消息：{resp_json['msg']}")
+            self.session.cookies = cookiejar_from_dict({"matchuser": self.username})  # cookie 是通过 js 设置的，直接用的用户名。。。
+            return True
+        else:
+            logger.info(f"登录异常，消息: {resp_json['msg']}")
+            return False
 
     def get_info(self, entries_index="list"):
         """
@@ -138,6 +132,7 @@ class ArticleAdder(object):
         :param 所有参数的含义见下面的注释
         :return:
         """
+        logger.info(f"开始添加赛文：《{title}》{content_type} - 第 {number} 期")
 
         article_dict = {
             "swid": swid,  # 赛文 id，为 0 时表示新增赛文。为已存在的赛文 id 时表示修改赛文
@@ -156,55 +151,54 @@ class ArticleAdder(object):
 
         resp_json = self.session.post(current_config.CHAIWUBI_API, data=article_dict).json()
 
-        return {
-            "success": int(resp_json['code']) == 200,
-            "message": resp_json['msg']
-        }
+        if int(resp_json['code']) == 200:
+            logger.info(f"赛文添加成功，返回信息：{resp_json['msg']}")
+            return True
+        else:
+            logger.warning(f"赛文添加出现问题，信息：{resp_json['msg']}")
+            return False
 
-    def edit_article_by_swid(self,
-                             swid,
-                             func=None,
-                             **kwargs):
+    def get_article_raw(self, swid):
         """
-        修改已添加赛文
-        :param swid: 需要修改的赛文的id
-        :param func: 用于修改的函数，用于对 content 做小修改
-        :param kwargs: 其它参数，见下
-        :return: 成功与否，还有附加信息
+        获取已添加赛文的信息
+        :param swid: 需要修改的赛文的 id
+        :return: 文章的详细数据，失败则返回 None
         """
-        resp = self.session.post(current_config.CHAIWUBI_API, data={
+
+        resp_json = self.session.post(current_config.CHAIWUBI_API, data={
             "action": "edit",
             "id": swid
-        })
-        article_raw = resp.json()['msg']
+        }).json()
 
-        logger.info(f"正在修改赛文：{article_raw['gm_title']} - {article_raw['gm_subtitle']} 第{article_raw['gm_qishu']}期")
+        message: dict = resp_json['msg']
+        if resp_json['code'] != 205:  # 205 reset content
+            logger.warning(f"赛文内容获取失败：{message}")
+            return None
 
-        payload = {
-            "swid": swid,  # 赛文 id，为 0 时表示新增赛文。为已存在的赛文 id 时表示修改赛文
-            "m_gid": kwargs.get("group_id", article_raw['gm_gid']),  # 群号
-            "m_qishu": kwargs.get("number", article_raw['gm_qishu']),  # 赛文期数
-            "m_title": kwargs.get("title", article_raw['gm_title']),  # 赛文标题
-            "m_subtitle": kwargs.get("subtitle", article_raw['gm_subtitle']),  # 子标题：日赛、周赛等
-            "m_chutiren": kwargs.get("producer", article_raw['gm_chutiren']),  # 赛文制作人
-            "m_zucheng": kwargs.get("content_type", article_raw['gm_zucheng']),  # 赛文内容：单字、散文等
-            "m_clock": article_raw['gm_clock'],  # 赛文跟打时间，好像没啥用
-            "m_nandu": kwargs.get("level", article_raw['gm_nandu']),  # 难度
-            "m_kaishi": kwargs.get("start_datetime", article_raw['gm_kaishi']),  # 开始时间，不能晚于当前时间  "2018-09-07 11:24"
-            "m_jieshu": kwargs.get("end_datetime", article_raw['gm_jieshu']),  # 结束时间
-            "m_content": kwargs.get("content", article_raw['gm_content'])  # 赛文内容
-        }
-
-        # 使用 func 做高级修改
-        if func is not None:
-            payload = func(payload)
-
-        resp_json = self.session.post(current_config.CHAIWUBI_API, data=payload).json()
-
+        # 消除数据的 key 与提交数据的 key 的差异
+        message['swid'] = message.pop("id")
         return {
-            "success": int(resp_json['code']) == 200,
-            "message": resp_json['msg']
+            key.replace("gm_", "m_"): value
+            for key, value in message.items()
         }
+
+    def patch_article(self, article_raw):
+        """
+        修改已添加赛文
+        :param article_raw: 可以直接当作 payload 的赛文数据
+        :return: 成功与否，还有附加信息
+        """
+        logger.info(f"正在修改赛文：{article_raw['m_title']} - {article_raw['m_subtitle']} 第{article_raw['m_qishu']}期")
+
+        resp_json = self.session.post(current_config.CHAIWUBI_API,
+                                      data=article_raw).json()
+
+        if int(resp_json['code']) == 200:
+            logger.info(f"赛文修改成功，信息：{resp_json['msg']}")
+            return True
+        else:
+            logger.warning(f"赛文修改出现问题，信息：{resp_json['msg']}")
+            return False
 
     def delete_article(self, swid):
         """通过给定的赛文id删除赛文"""
@@ -214,10 +208,12 @@ class ArticleAdder(object):
         })
         resp_json = resp.json()
 
-        return {
-            "success": resp_json['code'] == 200,
-            "message": resp_json['msg']
-        }
+        if int(resp_json['code']) == 200:
+            logger.info(f"赛文删除成功，信息：{resp_json['msg']}")
+            return True
+        else:
+            logger.warning(f"赛文删除出现问题，信息：{resp_json['msg']}")
+            return False
 
     def delete_article_by_date(self,
                                date_start: date,
@@ -291,15 +287,8 @@ class ArticleAdder(object):
             number = start_number + i
             start = start_datetime + date_step * i
             end = end_datetime + date_step * i
-            state, message = self.add_article(**article,
-                                              number=number,
-                                              start_datetime=start,
-                                              end_datetime=end,
-                                              **kwargs)
-
-            if state:
-                logger.info(f"添加成功，期数: {number}")
-            else:
-                logger.error(f"添加异常，期数: {number}，消息：{message}")
-
-
+            self.add_article(**article,
+                             number=number,
+                             start_datetime=start,
+                             end_datetime=end,
+                             **kwargs)

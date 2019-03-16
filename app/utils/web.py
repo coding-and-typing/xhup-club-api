@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import requests
+from bs4 import BeautifulSoup
 from urllib import parse
+from urllib.parse import SplitResult
 
-from app import current_config
+from app import current_config, utils
 
 """
 使用网络上其他 api 的工具函数
@@ -75,4 +77,34 @@ def talk(message: str, user_id, group_id=None, username=None):
     return "暂不提供该功能"
 
 
+class RandomArticle(object):
+    """每日一文的 API"""
+    def __init__(self):
+        self.session = requests.session()
+        url: SplitResult = parse.urlsplit(current_config.RANDOM_ARTICLE_API)
+        self.session.headers = {
+            "Host": url.netloc,
+            "User-Agent": current_config.USER_AGENT
+        }
 
+    def get_random_article(self):
+        """随机一篇散文
+
+        :return: 文章
+        """
+        resp = self.session.get(current_config.RANDOM_ARTICLE_API)
+        bsObj = BeautifulSoup(resp.text, "html.parser")
+
+        # 使用 class 属性匹配文章内容
+        content = bsObj.find(attrs={"class": "article_text"}).getText()
+
+        # 预处理文本
+        content = utils.text.process_text_cn(content)
+
+        return {
+            "content": content,
+            "title": bsObj.h1.getText(),
+            "content_type": "散文",
+            "author": bsObj.find(attrs={"class": "article_author"}).getText(),
+            "special_chars": utils.text.special_chars(content),
+        }

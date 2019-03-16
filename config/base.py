@@ -105,3 +105,8 @@ class BaseConfig(object):
 
     # ip 频率限制（默认策略）
     RATELIMIT_DEFAULT = "900/hour;30/minute;3/second"
+
+    # 允许出现的单字
+    with open(PROJECT_ROOT / "data/chars.txt", mode="r") as f:
+        CHARS = frozenset(f.read())
+
