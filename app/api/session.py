@@ -6,6 +6,7 @@ from flask.views import MethodView
 from flask_login import current_user, login_user, logout_user
 import marshmallow as ma
 from flask_rest_api import abort, Blueprint
+from marshmallow import validates_schema
 
 from app import api_rest
 from app.models import MainUser
@@ -41,7 +42,8 @@ class SessionCreateArgsSchema(ma.Schema):
         strict = True
         ordered = True
 
-    username = ma.fields.String(required=True)
+    username = ma.fields.String()
+    email = ma.fields.String()
     password = ma.fields.String(required=True)
     remember_me = ma.fields.Boolean(required=True)  # 记住我
 
@@ -68,7 +70,14 @@ class SessionView(MethodView):
             abort(400, message="please logout first.")
 
         # 验证登录
-        user = MainUser.query.filter_by(username=data['username']).first()
+        if data.get("username"):
+            user = MainUser.query.filter_by(username=data['username']).first()
+        elif data.get("email"):
+            user = MainUser.query.filter_by(username=data['email']).first()
+        else:
+            abort(401, message='required either username or email!!!')
+            return
+
         if user is not None \
                 and user.check_password(data['password']):
 

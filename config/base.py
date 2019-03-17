@@ -64,7 +64,7 @@ class BaseConfig(object):
             "securitySchemes": {
                 "api_key": {
                     "description": "更好的方案是再添加一个 secret-key，用于对数据做签名校验",
-                    "type": "apiKey",
+                    "content_type": "apiKey",
                     "name": "api_key",
                     "in": "header"
                 }
@@ -107,6 +107,10 @@ class BaseConfig(object):
     RATELIMIT_DEFAULT = "900/hour;30/minute;3/second"
 
     # 允许出现的单字
-    with open(PROJECT_ROOT / "data/chars.txt", mode="r") as f:
-        CHARS = frozenset(f.read())
+    with open(PROJECT_ROOT / "data/小鹤全部单字.txt", mode="r") as f:
+        CHARS_ALLOWED = frozenset(f.read())
+
+    with open(PROJECT_ROOT / "data/常用单字前1500.txt", mode="r") as f:
+        CHARS_1500 = f.read()
+        assert len(frozenset(CHARS_1500)) == len(CHARS_1500) == 1500
 

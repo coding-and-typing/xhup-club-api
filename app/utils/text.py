@@ -73,10 +73,10 @@ class Chars:
                                   SPECIAL_MIDDLE_LINE))
 
     # 7. 处理完成后，中文文章允许包含的所有字符
-    UNICODE_CN = current_config.CHARS.union(SYMBOLS_CN)
+    UNICODE_CN = current_config.CHARS_ALLOWED.union(SYMBOLS_CN)
 
     # 8. 处理之前，中文文章允许包含的所有字符
-    UNICODE_ALL = current_config.CHARS.union(SYMBOLS_ALL)
+    UNICODE_ALL = current_config.CHARS_ALLOWED.union(SYMBOLS_ALL)
 
 
 def auto_decode(content: bytes):

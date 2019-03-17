@@ -96,7 +96,7 @@ class ArticleAdder(object):
                 res = defaultdict(list)
 
                 for entry in entries:
-                    res[entry[str(index_type)]].append(entry)
+                    res[entry[index_type]].append(entry)
 
                 return res
 
