@@ -17,7 +17,7 @@ class BaseConfig(object):
     TESTING = False
 
     # 项目根目录
-    PROJECT_ROOT = Path(__file__).parents[1].absolute()
+    PROJECT_ROOT: Path = Path(__file__).parents[1].absolute()
 
     # 2. 数据库相关配置
     REDIS_URL = ""
@@ -113,4 +113,7 @@ class BaseConfig(object):
     with open(PROJECT_ROOT / "data/常用单字前1500.txt", mode="r") as f:
         CHARS_1500 = f.read()
         assert len(frozenset(CHARS_1500)) == len(CHARS_1500) == 1500
+
+    # 字体路径（用于验证码生成）
+    FONTS_PATH = [str(p) for p in (PROJECT_ROOT / "data/fonts").iterdir()]
 

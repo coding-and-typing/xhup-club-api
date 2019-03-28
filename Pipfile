@@ -23,6 +23,7 @@ elasticsearch = "*"
 flask-cors = "*"
 flask-sockets = "*"
 flask-limiter = "*"
+captcha = "*"
 
 [dev-packages]
 pytest = "*"

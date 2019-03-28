@@ -17,11 +17,11 @@ from flask_mail import Mail
 from flask_sockets import Sockets
 from werkzeug.contrib.fixers import ProxyFix
 
-from config import config_by_name
+from config import config_by_name, BaseConfig
 
 # 获取环境
 env = os.getenv("XHUP_ENV")
-current_config = config_by_name[env]
+current_config: BaseConfig = config_by_name[env]
 logging.basicConfig(level=current_config.LOG_LEVEL)  # 日志
 
 # 初始化 flask 的各个插件

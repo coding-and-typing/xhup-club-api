@@ -26,7 +26,7 @@ from geventwebsocket import WebSocketError
 from typing import Callable
 
 from app.service.auth.bot import validate_bot_token
-from app.service.messages import handle_message
+from app.service.messages import handle_update
 from . import ws_prefix
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ def echo_socket(socket):
             message = socket.receive()
             logger.debug(f"收到消息: {message}")
 
-            reply = handle_message(message)
+            reply = handle_update(message)
             socket.send(json.dumps(reply))
         except WebSocketError as e:
             logger.info(f"ws 连接异常：{e}")
