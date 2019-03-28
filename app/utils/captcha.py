@@ -18,13 +18,19 @@ def generate_captcha_code(seed, length):
     return "".join(random.choices(chars, k=length))
 
 
-def generate_image_bytes(code: str):
+def generate_image_bytes(code: str, format: str):
     """生成验证码（图片）"""
-    return image.generate_image(code).tobytes()
+    return image.generate(code, format=format).read()
 
 
-def generate_captcha(seed: Optional[int] = None, length: int = 4):
+def generate_captcha(seed: Optional[int] = None,
+                     length: int = 4,
+                     format: str = "png"):
     """生成验证码（先生成字符，再生成图片）"""
     code = generate_captcha_code(seed, length)
-    return generate_image_bytes(code)
 
+    return {
+        "code": code,
+        "image": generate_image_bytes(code, format=format),
+        "format": format,
+    }
