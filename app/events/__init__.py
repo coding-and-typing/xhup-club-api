@@ -7,7 +7,6 @@ from app import limiter
 ws_prefix = "/ws"
 
 from .bot import *
-from .web import *
 
 """
 WebSocket 事件处理
@@ -27,5 +26,4 @@ def init_websockets(sockets: Sockets):
 
     # 将 flask_sockets 的 blueprint 注册到 sockets 实例
     sockets.register_blueprint(bot_bp)
-    sockets.register_blueprint(web_bp)
 

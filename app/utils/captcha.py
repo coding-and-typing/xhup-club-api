@@ -11,7 +11,7 @@ chars = string.digits + string.ascii_letters
 image = ImageCaptcha(fonts=current_config.FONTS_PATH)
 
 
-def generate_captcha_code(seed, length):
+def generate_captcha_code(seed: int = None, length: int = 4):
     """生成验证码（字符）"""
     if seed:
         random.seed(seed)

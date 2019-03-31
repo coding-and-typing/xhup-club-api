@@ -112,6 +112,9 @@ class BaseConfig(object):
     # ip 频率限制（默认策略）
     RATELIMIT_DEFAULT = "900/hour;30/minute;3/second"
 
+    # 各种过期时间（expires）
+    VERIFICATION_CODE_EXPIRES = 180  # 秒
+
     # 允许出现的单字
     with open(PROJECT_ROOT / "data/小鹤全部单字.txt", mode="r") as f:
         CHARS_ALLOWED = frozenset(f.read())

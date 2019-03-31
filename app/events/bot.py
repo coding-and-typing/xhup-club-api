@@ -1,17 +1,13 @@
 
 """
-这部分 api，专门提供给聊天机器人前端调用。
+与群组聊天机器人交互的模块
 
-因此它不应该去依赖 flask-login ——这个是给单用户用的。
-
-websocket 只在建立连接时需要使用到 token，token 存在数据库里边儿，不应该让其他任何人知道。
-
-检查 request 的 `Authorization` 字段中的 token
+通过 request 的 `Authorization` 字段中的 token 做权限验证。
 因此程序应该使用 ssl！！！否则会很不安全。
 
 ---
 赛文续传仍然需要 session，session 用 group_user_id 标识，存在 redis 里边，设个 expire 时间。
-（可这样 session 过期不会提示，还是说用 apscheduler 定时删除 session，同时向群里发送过期时间？）
+同时用 rq-scheduler 定时删除 session（要先于 expire），同时向群里发送过期时间.
 
 --- 消息广播与 指定发送给特定的 namespace（定时任务）
 可以将 socket 存到全局，
@@ -58,7 +54,7 @@ def authenticated_only(func: Callable):
     return wrapper
 
 
-@bot_bp.route('/')
+@bot_bp.route('/api')
 @authenticated_only
 def echo_socket(socket):
     """
