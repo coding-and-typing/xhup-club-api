@@ -17,6 +17,8 @@
 import functools
 import json
 import logging
+from json import JSONDecodeError
+
 from flask import Blueprint, request, abort
 from geventwebsocket import WebSocketError
 from typing import Callable
@@ -62,13 +64,15 @@ def echo_socket(socket):
     """
     while not socket.closed:
         try:
-            message = socket.receive()
+            message = json.loads(socket.receive())
             logger.debug(f"收到消息: {message}")
 
             reply = handle_update(message)
             socket.send(json.dumps(reply))
         except WebSocketError as e:
             logger.info(f"ws 连接异常：{e}")
+        except JSONDecodeError as e:
+            logger.debug(f"收到非 json 信息，结束连接")
 
 
 
