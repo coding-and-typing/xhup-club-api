@@ -24,6 +24,7 @@ flask-cors = "*"
 flask-sockets = "*"
 flask-limiter = "*"
 captcha = "*"
+flask-and-redis = "*"
 
 [dev-packages]
 pytest = "*"

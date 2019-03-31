@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "aa4baa3ce7ebcb6bab5fc87d078954c5b4dba5cbfa4cc41eff46509facd11a06"
+            "sha256": "7b1a685c4b5d0cceacf464b7d20e09220c32138f52bd9c161d386bbf01461b82"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -101,6 +101,15 @@
             ],
             "index": "pypi-ustc",
             "version": "==1.0.2"
+        },
+        "flask-and-redis": {
+            "hashes": [
+                "sha256:4e6282089c4e3e23b54ee1b9deffc0b46cb085455aad4b41762ccde27935a3e5",
+                "sha256:7005ca42a8db76fe901023c15b7ecf1828974594b0e8f0ac7ecbef5941fe861a",
+                "sha256:e519f003f4ec02ed889ba791500c192d4ee4c768bcfa0af5951a77caa78e7d6b"
+            ],
+            "index": "pypi-ustc",
+            "version": "==1.0.0"
         },
         "flask-cors": {
             "hashes": [
@@ -340,10 +349,10 @@
         },
         "marshmallow": {
             "hashes": [
-                "sha256:01412e979b45c003aeb3632718780b15b01566ae0182cc9232434b30f6b85e1b",
-                "sha256:8a1a2e13c6a621f4970faf21e5d9b146e451e779d0f334a96eae4fcdef53455f"
+                "sha256:0e497a6447ffaad55578138ca512752de7a48d12f444996ededc3d6bf8a09ca2",
+                "sha256:e21a4dea20deb167c723e0ffb13f4cf33bcbbeb8a334e92406a3308cedea2826"
             ],
-            "version": "==2.19.1"
+            "version": "==2.19.2"
         },
         "pillow": {
             "hashes": [
@@ -574,11 +583,11 @@
         },
         "more-itertools": {
             "hashes": [
-                "sha256:0125e8f60e9e031347105eb1682cef932f5e97d7b9a1a28d9bf00c22a5daef40",
-                "sha256:590044e3942351a1bdb1de960b739ff4ce277960f2425ad4509446dbace8d9d1"
+                "sha256:2112d2ca570bb7c3e53ea1a35cd5df42bb0fd10c45f0fb97178679c3c03d64c7",
+                "sha256:c3e4748ba1aad8dba30a4886b0b1a2004f9a863837b8654e7059eebf727afa5a"
             ],
             "markers": "python_version > '2.7'",
-            "version": "==6.0.0"
+            "version": "==7.0.0"
         },
         "pluggy": {
             "hashes": [

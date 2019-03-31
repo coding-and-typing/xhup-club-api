@@ -20,12 +20,18 @@ class BaseConfig(object):
     PROJECT_ROOT: Path = Path(__file__).parents[1].absolute()
 
     # 2. 数据库相关配置
-    REDIS_URL = ""
     ELASTICSEARCH_URL = ""
     # SQLite
     SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(PROJECT_ROOT / "app-dev.db")
     # 是否在每次更新数据库时给出提示（追踪修改）
     SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+    # redis 相关配置
+    REDIS_HOST = "localhost"
+    REDIS_PORT = "6379"
+
+    REDIS0_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"  # 短信验证码等数据用 db 0 （flask-and-redis）
+    RQ_REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/1"  # 任务队列用 db 1 （flask-rq2）
 
     # 3. 权限与日志配置
     # 是否开启权限鉴定

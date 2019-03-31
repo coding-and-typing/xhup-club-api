@@ -8,6 +8,7 @@ from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_rest_api import Api
+from flask_redis import Redis
 from flask_rq2 import RQ
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -27,7 +28,8 @@ logging.basicConfig(level=current_config.LOG_LEVEL)  # 日志
 # 初始化 flask 的各个插件
 db = SQLAlchemy()
 migrate = Migrate()
-rq = RQ()
+redis = Redis()  # 用于短信验证码等信息的存储
+rq = RQ()  # 用于任务队列
 
 login_manager = LoginManager()
 mail = Mail()
@@ -70,8 +72,10 @@ def create_app():
     # app.elasticsearch = Elasticsearch([app.config['ELASTICSEARCH_URL']]) \
     #     if app.config['ELASTICSEARCH_URL'] else None
 
+    redis.init_app(app, config_prefix="REDIS0")  # 使用 REDIS0_URL
+
     # TODO 使用 rq 实现异步任务
-    # rq.init_app(app)
+    rq.init_app(app)
 
     # 注册 rest api 模块，
     from app import api as api_v1
