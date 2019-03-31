@@ -11,7 +11,7 @@
 
 --- 消息广播与 指定发送给特定的 namespace（定时任务）
 可以将 socket 存到全局，
-定时任务通过 socket.handler.server.clients.values() 获取到 client，
+定时任务通过 socket.handlers.server.clients.values() 获取到 client，
 然后调用 client.ws.send() 发送消息（应该能够判断 client 的 namespace）
 """
 import functools
@@ -24,7 +24,7 @@ from geventwebsocket import WebSocketError
 from typing import Callable
 
 from app.service.auth.bot import validate_bot_token
-from app.service.messages import handle_update
+from app.service.messages import dispatcher
 from . import ws_prefix
 
 logger = logging.getLogger(__name__)
@@ -67,8 +67,9 @@ def echo_socket(socket):
             message = json.loads(socket.receive())
             logger.debug(f"收到消息: {message}")
 
-            reply = handle_update(message)
-            socket.send(json.dumps(reply))
+            reply = dispatcher.handle_update(message)
+            if reply:
+                socket.send(json.dumps(reply))
         except WebSocketError as e:
             logger.info(f"ws 连接异常：{e}")
         except JSONDecodeError as e:
