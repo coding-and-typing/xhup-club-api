@@ -18,6 +18,8 @@ class CompArticle(db.Model):
     title = db.Column(db.String(128), index=True, nullable=False)  # 文章标题
     producer = db.Column(db.String(128), index=True, nullable=True)  # 赛文制作人
     content_type = db.Column(db.String(64), index=True, nullable=True)  # 散文、单字、政论等
+
+    # TODO content 可能为长篇小说。暂时没有考虑这种情况
     content = db.Column(db.Text, nullable=False)  # 文章内容
     hash = db.Column(db.String(128), nullable=False)  # 文章内容的 hash
 
@@ -72,9 +74,9 @@ class Article(db.Model):
     title = db.Column(db.String(128), index=True, nullable=False)  # 文章标题
     author = db.Column(db.String(128), index=True, nullable=True)  # 作者
     content_type = db.Column(db.String(64), index=True, nullable=True)  # 散文、单字、政论等
-    content = db.Column(db.Text, nullable=False)  # 文章内容
+    content = db.Column(db.Text, nullable=False)  # 文章内容，长度一般在 1000 字以内（但是很多数据库算的是字节数）
     hash = db.Column(db.String(128), nullable=False)  # 文章内容的 hash
-    special_chars = db.Column(db.String(2040))  # 文章包含的特殊字符
+    special_chars = db.Column(db.String(2040), nullable=False)  # 文章包含的特殊字符
 
     __table_args__ = (UniqueConstraint('title', 'hash', name='c_article'),)
 

@@ -17,6 +17,14 @@ articles_bp = Blueprint(
 )
 
 
+"""
+这里的文章，可能包括散文、中短篇小说、政论甚至长篇小说（目前没有考虑保存这么长的小说），
+用于在 comp_articles 中生成群组赛文。
+
+操作对象可以为复数个。
+"""
+
+
 @articles_bp.route("/")
 class CompArticlesView(MethodView):
     """赛文的增删查改"""

@@ -25,6 +25,8 @@ table_bp = Blueprint(
 
 """
 拆字表（小鹤音形等，即文字编码的详细）
+
+每次只能操作一个群组的拆字表，所以用单数。
 """
 
 
@@ -62,9 +64,10 @@ class TableSchema(ma.Schema):
 class TableView(MethodView):
     """拆字表查询 api"""
 
+    decorators = [login_required]
+
     @table_bp.arguments(TableSchema)
     @table_bp.response(TableSchema, code=201, description="拆字表创建成功")
-    @login_required
     @table_bp.doc(responses={"401": {'description': "仅与该拆字表绑定的群的管理员可更新此表"}})
     def post(self, data: dict):
         """提交新的拆字表

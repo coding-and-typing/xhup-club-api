@@ -20,6 +20,10 @@ session_bp = Blueprint(
     description="用户的登入登出，看作 session 的创建与删除"
 )
 
+"""
+不存在对多个 session 的操作，因此用单数
+"""
+
 
 @api_rest.definition('Session')
 class SessionSchema(ma.Schema):

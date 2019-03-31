@@ -20,6 +20,10 @@ user_bp = Blueprint(
     description="用户的注册、用户信息的获取与修改"
 )
 
+"""
+用户只能对自己的信息做 CURD，因此用单数。
+"""
+
 
 @api_rest.definition('User')
 class UserSchema(ma.Schema):
