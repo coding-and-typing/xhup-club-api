@@ -54,7 +54,7 @@ def authenticated_only(func: Callable):
     return wrapper
 
 
-@bot_bp.route('/api')
+@bot_bp.route('/')
 @authenticated_only
 def echo_socket(socket):
     """

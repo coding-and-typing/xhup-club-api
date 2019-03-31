@@ -13,7 +13,7 @@ update_format = {
         "type": "private",  # or 'group'
         "user_id": "",  # 用户 id，QQ 号等
         "text": "",  # 消息的 text 部分。（去除掉了表情、at 和多媒体数据）
-        "photo": "",  # 图片路径
+        "photo": [],  # 图片路径
 
         # 下列属性仅 group 可用
         "group_id": "",  # 群 id
