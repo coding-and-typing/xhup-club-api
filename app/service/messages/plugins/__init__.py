@@ -2,6 +2,6 @@
 from app.service.messages import on_command
 
 
-@on_command("usage", prefix="/", platform="default", group_id="default")
-def usage():
+@on_command("帮助", prefix="/", platform="default", group_id="default")
+def usage(data):
     pass

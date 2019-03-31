@@ -10,16 +10,7 @@ class Handler(object):
     def __init__(self, callback, weight=50, **kwargs):
         self.weight = weight
         self.callback = callback
-
-
-class NoticeHandler(Handler):
-    """Notice 处理器，处理系统消息，如加好友、加群等消息
-    TODO 待实现
-    """
-
-    def __init__(self, callback, weight=100, **kwargs):
-        Handler.__init__(self, callback, weight, **kwargs)
-        pass
+        self.usage = callback.__doc__
 
     def check_update(self, data: dict):
         """检测 data 是否 match 当前的处理器
@@ -48,6 +39,16 @@ class NoticeHandler(Handler):
         :return:
         """
         return check_result  # 暂时没啥参数需要过滤
+
+
+class NoticeHandler(Handler):
+    """Notice 处理器，处理系统消息，如加好友、加群等消息
+    TODO 待实现
+    """
+
+    def __init__(self, callback, weight=100, **kwargs):
+        Handler.__init__(self, callback, weight, **kwargs)
+        pass
 
 
 class MessageHandler(Handler):
