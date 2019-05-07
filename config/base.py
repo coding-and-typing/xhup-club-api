@@ -116,10 +116,10 @@ class BaseConfig(object):
     VERIFICATION_CODE_EXPIRES = 180  # 秒
 
     # 允许出现的单字
-    with open(PROJECT_ROOT / "data/小鹤全部单字.txt", mode="r") as f:
+    with open(PROJECT_ROOT / "data/小鹤全部单字.txt", mode="r", encoding='utf-8') as f:
         CHARS_ALLOWED = frozenset(f.read())
 
-    with open(PROJECT_ROOT / "data/常用单字前1500.txt", mode="r") as f:
+    with open(PROJECT_ROOT / "data/常用单字前1500.txt", mode="r", encoding='utf-8') as f:
         CHARS_1500 = f.read()
         assert len(frozenset(CHARS_1500)) == len(CHARS_1500) == 1500
 
