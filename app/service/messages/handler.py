@@ -5,12 +5,15 @@
 """
 import re
 
+from app.service.messages.session import Session
+
 
 class Handler(object):
     def __init__(self, callback, weight=50, **kwargs):
         self.weight = weight
         self.callback = callback
         self.usage = callback.__doc__
+        self.extra_doc = None
 
     def check_update(self, data: dict):
         """检测 data 是否 match 当前的处理器
@@ -28,7 +31,7 @@ class Handler(object):
             return False, None
         else:
             kwargs = self.collect_optional_args(check_result)
-            return True, self.callback(**kwargs)
+            return True, self.callback(data, Session(data), **kwargs)
 
     def collect_optional_args(self, check_result):
         """

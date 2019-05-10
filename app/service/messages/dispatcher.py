@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from operator import attrgetter
 from typing import Dict
 
 from app.service.messages.handler import Handler
+
+logger = logging.getLogger(__name__)
 
 
 class Dispatcher(object):
@@ -10,60 +14,43 @@ class Dispatcher(object):
     消息分派器，暂时忽略 Notice
 
     platform: 平台，目前只有 qq，未来可能会添加 telegtram、wechat
-    group_id: 群组id，四种可能：default（所有）、private（仅私聊）、group（仅群聊），或者特定的群号
+    group_id: 群组id，四种可能：private（仅私聊）、group（仅群聊），或者特定的群号
     """
 
     def __init__(self):
         self.handlers: Dict[str, Dict[str, list]] = {}  # platform:group_id，内层是已排序的 handlers list.
-        self.sort_key = attrgetter("weight")
+        self.sort_key = attrgetter("weight")  # 用于 handles 排序的 key
 
     def handle_update(self, data: dict):
         """处理消息"""
         platform = data['platform']
         message = data['message']
+
         if message['type'] == 'group':
-            for p, g_id in [(platform, message['group']['id']),  # 由特殊到一般
-                            (platform, "group"),
-                            (platform, "default"),
-                            ("default", "default")]:
-                match, reply = self._handle(data, p, g_id)
-                if match:
-                    return reply
+            group_id = message['group']['id']
+            handlers = self.handlers[platform].get(group_id)  # 首先考虑使用群自定义的 handlers
+            if not handlers:
+                handlers = self.handlers["default"]['group']  # 没有则使用默认 handlers（这个所有平台通用）
         elif message['type'] == 'private':
-            for p, g_id in [(platform, "private"),
-                            (platform, "default"),
-                            ("default", "default")]:
-                match, reply = self._handle(data, p, g_id)
-                if match:
-                    return reply
+            handlers = self.handlers['default']['private']  # 同样是所有平台通用
+        else:
+            logger.error("无法解析！消息格式不正确！")
+            return
 
-    def _handle(self, data: dict, platform: str = "default", group_id: str = "default"):
-        """
-        使用 `self.handlers[platform][group_id]` 中的处理器来处理消息（如果存在的话）
-        :param data: 数据
-        :param platform: 平台
-        :param group_id: 群组id
-        :return: match 表示是否匹配上，如果匹配上了，后续的 handler 就不需要调用了。
-                 reply 是回复
-        """""
-        if platform in self.handlers \
-                or group_id in self.handlers[platform]:
-            for handler in self.handlers[platform][group_id]:
-                match, reply = handler.handle_update(data)
-                if match:
-                    return match, reply
+        for handler in handlers:
+            match, reply = handler.handle_update(data)
+            if match:
+                return match, reply
 
-        return False, None
-
-    def add_handler(self, handler, platform='default', group_id="default"):
+    def add_handler(self, handler, platform='default', group_id="group", extra_doc=None):
         """
         注册消息处理器，default 表示该处理器为所有平台/群组所通用。
 
         1. 对每条消息而言，只可能触发最多一个消息处理器。处理器之间按权重排序。
-        2. 如果 group 不为 default，那么 platform 也不能为 default！
-        :param handler:
-        :param platform:
-        :param group_id:
+        :param handler: 需要添加的 handler
+        :param platform: 有 qq telegram wechat, 和 default
+        :param group_id: group、private、或者群 id
+        :param extra_doc: 补充的 docstring，不同的命令，在不同环境下，效果也可能不同
         :return:
         """
         if not isinstance(handler, Handler):
@@ -72,6 +59,9 @@ class Dispatcher(object):
             raise TypeError('platform is not str')
         if not isinstance(group_id, str):
             raise TypeError('group_id is not str')
+
+        if extra_doc:  # 添加补充的说明文档
+            handler.extra_doc = extra_doc
 
         if platform not in self.handlers:
             self.handlers[platform] = {
@@ -84,7 +74,7 @@ class Dispatcher(object):
             handlers_list.append(handler)
             handlers_list.sort(key=self.sort_key, reverse=True)  # 权重高的优先
 
-    def remove_handler(self, handler, platform='default', group_id="default"):
+    def remove_handler(self, handler, platform='default', group_id="group"):
         """移除消息处理器"""
         if platform in self.handlers \
                 and group_id in self.handlers[platform]:

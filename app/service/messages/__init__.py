@@ -10,21 +10,4 @@ from app.service.messages.dispatcher import Dispatcher
 dispatcher = Dispatcher()
 
 
-def on_message():
-    pass
-
-
-def on_command(command, prefix):
-    pass
-
-
-def on_regex(pattern):
-    pass
-
-
-def on_keyword(pattern):
-    pass
-
-
-
-from . import plugins  # 防止循环导入
+from . import handlers  # 防止循环导入
