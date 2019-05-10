@@ -3,18 +3,33 @@
 """
 消息处理器
 """
+import logging
+
 import re
+from typing import Dict, Optional
 
 from app.service.messages.argparse import ArgumentParser
 from app.service.messages.session import Session
 
 
+logger = logging.getLogger(__name__)
+
+
 class Handler(object):
-    def __init__(self, callback, weight, extra_doc=""):
-        self.weight = weight
+    def __init__(self, callback, weight, name, extra_doc=""):
+        self.name = name
         self.callback = callback
+        self.weight = weight
+
         self.usage = callback.__doc__
         self.extra_doc = extra_doc
+        # 对此 handler 的简短描述
+        self.description = self.usage.split("\n", maxsplit=1)[0]
+
+    @property
+    def synopsis(self):
+        """简介"""
+        return f"{self.name}：{self.description}"  # 开头缩进两个空格
 
     def check_update(self, data: dict):
         """检测 data 是否 match 当前的处理器
@@ -56,8 +71,8 @@ class NoticeHandler(Handler):
         :return:
         """
 
-    def __init__(self, callback, weight, extra_doc=""):
-        Handler.__init__(self, callback, weight, extra_doc)
+    def __init__(self, callback, weight, name, extra_doc=""):
+        Handler.__init__(self, callback, weight, name, extra_doc)
         pass
 
 
@@ -65,8 +80,8 @@ class MessageHandler(Handler):
     """消息处理器，处理各种聊天消息（去除首尾空格换行）
     """
 
-    def __init__(self, callback, weight, extra_doc=""):
-        Handler.__init__(self, callback, weight, extra_doc)
+    def __init__(self, callback, weight, name, extra_doc=""):
+        Handler.__init__(self, callback, weight, name, extra_doc)
 
     def check_update(self, data: dict):
         """检测 data 是否 match 当前的处理器
@@ -83,15 +98,19 @@ class CommandHandler(MessageHandler):
                  callback,
                  weight,
                  prefix: tuple,
-                 args=tuple(),
+                 name=None,
+                 arg_primary: Optional[Dict]=None,
+                 kwargs=tuple(),
                  pass_args=True,
                  extra_doc=""):
-        MessageHandler.__init__(self, callback, weight, extra_doc)
+        if not name:
+            name = command
+        MessageHandler.__init__(self, callback, weight, name, extra_doc)
         self.command = command
         self.prefix = prefix
         self.pass_args = pass_args
 
-        self.args_parser = ArgumentParser.make_args_parser(command, callback.__doc__, args)
+        self.args_parser = ArgumentParser.make_args_parser(command, self.description, arg_primary, kwargs)
         self.usage = self.args_parser.usage
 
     def check_update(self, data: dict):
@@ -108,17 +127,14 @@ class CommandHandler(MessageHandler):
             return False
 
         # 2. 解析额外的参数
-        args = self.args_parser.parse(command)
+        res = self.args_parser.parse(command)
 
-        if args:
-            return {"args": args}
-        else:
-            return False
+        return res if res else False
 
     def collect_optional_args(self, check_result):
         optional_kwargs = super(CommandHandler, self).collect_optional_args(check_result)
         if self.pass_args:
-            optional_kwargs['args'] = check_result['args']
+            optional_kwargs['args'] = check_result
         return optional_kwargs
 
 
@@ -132,14 +148,22 @@ class RegexHandler(MessageHandler):
                  pattern,
                  callback,
                  weight,
+                 name,
                  extra_doc="",
                  pass_groups=False,
                  pass_groupdict=False):
-        MessageHandler.__init__(self, callback, weight, extra_doc)
+        MessageHandler.__init__(self, callback, weight, name, extra_doc)
 
-        self.pattern = re.compile(pattern)
         self.pass_groups = pass_groups
         self.pass_groupdict = pass_groupdict
+
+        if isinstance(pattern, re.Pattern):
+            self.pattern = pattern
+        elif isinstance(pattern, str):
+            self.pattern = re.compile(pattern)
+        else:
+            logger.error("pattern must be str or regex pattern!!!")
+            exit(1)
 
     def check_update(self, data: dict):
         """检测 data 是否 match 当前的处理器
@@ -148,7 +172,7 @@ class RegexHandler(MessageHandler):
         Return：不匹配就返回 False，否则返回提供给 callback 的关键字参数。
         """
         text = data['message']['text']
-        match = self.pattern.fullmatch(text)
+        match = self.pattern.fullmatch(text.strip())
         if match:
             return {"match": match}
         else:
@@ -173,15 +197,27 @@ class KeywordHandler(MessageHandler):
                  pattern,
                  callback,
                  weight,
+                 name=None,
                  extra_doc=""):
-        MessageHandler.__init__(self, callback, weight, extra_doc)
+        if not name:
+            if isinstance(pattern, re.Pattern):
+                name = pattern.pattern
+            else:
+                name = pattern
+        MessageHandler.__init__(self, callback, weight, name, extra_doc)
 
-        self.pattern = re.compile(pattern)
+        if isinstance(pattern, re.Pattern):
+            self.pattern = pattern
+        elif isinstance(pattern, str):
+            self.pattern = re.compile(pattern)
+        else:
+            logger.error("pattern must be str or regex pattern!!!")
+            exit(1)
 
     def check_update(self, data: dict):
         """检测 data 是否 match 当前的处理器
         """
         text = data['message']['text']
-        match = self.pattern.search(text)
+        match = self.pattern.search(text.strip())
 
         return True if match else False

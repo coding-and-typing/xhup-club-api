@@ -21,8 +21,8 @@ class Dispatcher(object):
         self.handlers: Dict[str, Dict[str, list]] = {}  # platform:group_id，内层是已排序的 handlers list.
         self.sort_key = attrgetter("weight")  # 用于 handles 排序的 key
 
-    def handle_update(self, data: dict):
-        """处理消息"""
+    def get_handlers(self, data: dict):
+        """根据消息的内容，返回对应的 handlers 列表"""
         platform = data['platform']
         message = data['message']
 
@@ -35,7 +35,13 @@ class Dispatcher(object):
             handlers = self.handlers['default']['private']  # 同样是所有平台通用
         else:
             logger.error("无法解析！消息格式不正确！")
-            return
+            return None
+
+        return handlers
+
+    def handle_update(self, data: dict):
+        """处理消息"""
+        handlers = self.get_handlers(data)
 
         for handler in handlers:
             match, reply = handler.handle_update(data)
