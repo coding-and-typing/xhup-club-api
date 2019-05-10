@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from app.utils.text import special_chars, process_text_cn, split_text
+from app.utils.text import special_chars, process_text_cn, split_text_by_length
 
 
 @pytest.mark.usefixtures("app")
@@ -26,7 +26,7 @@ def test_text():
         assert len(special_chars(text)) > 0
         text = process_text_cn(text)
         assert len(special_chars(text)) == 0
-        for part in list(split_text(text, max_length=200,
-                                    minimal_length=150)):
+        for part in list(split_text_by_length(text, max_length=200,
+                                              minimal_length=150)):
             assert 150 <= len(part) <= 200
             assert part.endswith(tuple("”’】）。！？；～…，"))

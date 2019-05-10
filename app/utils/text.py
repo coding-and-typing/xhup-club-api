@@ -153,9 +153,9 @@ def search_split_pos(text: str,
     return max(map(rindex, keys)) + 1  # 加 1 是因为，python 的切分，不包括右边的端点
 
 
-def split_text(text: str,
-               max_length: int,
-               minimal_length: int):
+def split_text_by_length(text: str,
+                         max_length: int,
+                         minimal_length: int):
     """
     根据给定的长度切分文本
     :param text: 文本
@@ -178,3 +178,15 @@ def split_text(text: str,
             return  # 结束迭代
 
         yield text
+
+
+def split_text_by_sep(text: str,
+                      sep: str):
+    """通过分隔符(separator)切分文本
+        这适用于人工制作的赛文，使用工具批量添加的情况。
+
+        e.g. 分隔符为 '-', 此函数会在所有 '---' 处分割文本，其中 '-' 需要重复三次以上
+            分隔符也可以为多个字符，比如 '-#'，那么分割线应该是 '-#-#-#' 这样重复三次以上。
+    """
+    return re.split(rf"(?:{sep}){{3,}}", text)  # sep 重复三次以上
+
