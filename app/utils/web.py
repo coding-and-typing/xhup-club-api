@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import logging
+
 import requests
 from bs4 import BeautifulSoup
 from urllib import parse
@@ -9,6 +11,8 @@ from app import current_config, utils
 """
 使用网络上其他 api 的工具函数
 """
+
+logger = logging.getLogger(__name__)
 
 
 def short_the_url(url: str):
@@ -51,6 +55,7 @@ def talk(message: str, user_id, group_id=None, username=None):
     # 分析返回值
     code = resp['intent']["code"]
     if code < 10000:  # 异常
+        logger.warning(f"图灵机器人异常，数据：{resp}")
         return "异常状况，即将崩坏。9 8 7..."
 
     codes_text_only = [  # 可以直接输出的 code

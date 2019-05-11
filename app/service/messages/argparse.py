@@ -74,15 +74,16 @@ class ArgumentParser(object):
 
     @property
     def usage(self):
-        usage_required = (arg.usage for arg in self.kwargs_required.values())
-        usage_optional = (arg.usage for arg in self.kwargs_optional.values())
+        usages_required = [arg.usage for arg in self.kwargs_required.values()]
+        usages_optional = [arg.usage for arg in self.kwargs_optional.values()]
         usage_head = f"{self.command}：{self.description}"
         if self.arg_primary:
             usage_head += "\n" + self.arg_primary.usage
 
-        return "\n\n".join((usage_head,
-                            "必要参数：\n" + "\n".join(usage_required),
-                            "可选参数：\n" + "\n".join(usage_optional)))
+        usage1 = ("必要参数：\n" + "\n".join(usages_required)) if usages_required else ""
+        usage2 = ("可选参数：\n" + "\n".join(usages_optional)) if usages_optional else ""
+
+        return "\n\n".join((usage_head, usage1, usage2)).strip()
 
     def is_required(self, arg_name):
         return arg_name in self.kwargs_required
@@ -95,7 +96,7 @@ class ArgumentParser(object):
         }
 
         options_required = {arg.name: 1 for arg in self.kwargs_required.values()}
-        parts = re.split(r"\s+", command)
+        parts = re.split(r"\s+", command)[1:]
 
         for p in parts:
             matcher = kwarg_pattern.match(p)
@@ -112,17 +113,17 @@ class ArgumentParser(object):
                 if match:
                     res['options'][name] = value
                 else:
-                    return False, value  # 此时 value 是错误信息
+                    return False, {"message": value}  # 此时 value 是错误信息
             elif self.arg_primary:  # 主参数
                 if not res['primary']:
                     res['primary'] = p
                 else:
-                    return False, "请提供正确的参数"
+                    return False, {"message": "请提供正确的参数"}
 
             if options_required:
-                return False, f"参数缺失：{options_required}"
+                return False, {"message": f"参数缺失：{options_required}"}
 
-            return True, res
+        return True, res
 
     @staticmethod
     def make_args_parser(command, description, arg, options):

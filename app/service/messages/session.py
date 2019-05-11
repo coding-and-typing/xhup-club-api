@@ -24,8 +24,9 @@ class Session:
     @staticmethod
     def get_session_key(data):
         """会话"""
-        m_type = data['message']['type']
-        g_id = data["group"]['id'] if m_type == "group" else data['user']['id']
+        message = data['message']
+        m_type = message['type']
+        g_id = message["group"]['id'] if m_type == "group" else message['user']['id']
         key = f"{data['platform']}:{m_type}:{g_id}"  # e.g. qq:group:group_id, qq:private:user_id
 
         return key

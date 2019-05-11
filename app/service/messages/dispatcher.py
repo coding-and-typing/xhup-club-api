@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import copy
 import logging
 
 from operator import attrgetter
@@ -18,7 +19,15 @@ class Dispatcher(object):
     """
 
     def __init__(self):
-        self.handlers: Dict[str, Dict[str, list]] = {}  # platform:group_id，内层是已排序的 handlers list.
+        self.handlers: Dict[str, Dict[str, list]] = {
+            "qq": dict(),
+            "telegram": dict(),
+            "wechat": dict(),
+            "default": {
+                "group": [],
+                "private": [],
+            },
+        }
         self.sort_key = attrgetter("weight")  # 用于 handles 排序的 key
 
     def get_handlers(self, data: dict):
@@ -42,11 +51,25 @@ class Dispatcher(object):
     def handle_update(self, data: dict):
         """处理消息"""
         handlers = self.get_handlers(data)
+        data_back = copy.deepcopy(data)  # 用于回复的 dict，在 data 上稍做修改就行
+        reply = data_back['message']
 
+        # 处理消息
         for handler in handlers:
-            match, reply = handler.handle_update(data)
+            match, res = handler.handle_update(data)
             if match:
-                return match, reply
+                if reply['type'] == "group":
+                    reply['group'] = {
+                        'id': reply['group']['id'],
+                        'at_member': res.get("at_member")
+                    }
+                reply['text'] = res.get('text')
+                reply['images'] = res.get('images')
+
+        if reply['text'] or reply['image']:  # 有回复消息
+            return data_back  # 这个 dict 会被发送回 qq/telegram 前端
+        else:
+            return None  # 没有消息要回复
 
     def add_handler(self, handler, platform='default', group_id="group", extra_doc=None):
         """
