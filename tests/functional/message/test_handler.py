@@ -35,14 +35,14 @@ def test_usage_handler(app):
             },
             'group': {
                 'id': '234567',
-                'at_member': None
+                'at_members': None
             },
-            'text': '聊天：和机器人聊天',
+            'text': '聊天：和机器人聊天\n1. 在群内 @ 我\n2. 信息以“：”开头，例如“：你好”',
             'images': None}}
 
 
 def test_talk_handler(app):
-    """测试帮助命令"""
+    """测试聊天命令"""
     data = {
             "platform": "qq",
             "message": {  # 如果 update 类型是 message
