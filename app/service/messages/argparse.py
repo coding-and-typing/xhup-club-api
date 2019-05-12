@@ -12,16 +12,18 @@ class Argument(object):
                  type=None,
                  default=None,
                  choices=tuple(),
+                 required=False,
                  help=""):
         self.name = name
         self.type = type
         self.default = default
         self.choices = choices
+        self.required = required
         self.help = help
 
     @property
     def usage(self):
-        return f"  {self.name}\t{self.help}"  # 开头缩进两个空格
+        return f"  「{self.name}」\t-\t{self.help}"  # 开头缩进两个空格
 
     def parse(self, value):
         if self.type:
@@ -53,9 +55,10 @@ class ArgumentParser(object):
                         type=None,
                         default=None,
                         choices=tuple(),
+                        required=False,
                         help=""):
         """设置命令的目标参数"""
-        self.arg_primary = Argument(name, type, default, choices, help)
+        self.arg_primary = Argument(name, type, default, choices, required, help)
 
     def add_kwarg(self,
                   name,
@@ -65,7 +68,7 @@ class ArgumentParser(object):
                   required=False,
                   help=""):
         """添加关键字参数"""
-        argument = Argument(name, type, default, choices, help)
+        argument = Argument(name, type, default, choices, required, help)
 
         if required:
             self.kwargs_required[name] = argument
@@ -76,16 +79,24 @@ class ArgumentParser(object):
     def usage(self):
         usages_required = [arg.usage for arg in self.kwargs_required.values()]
         usages_optional = [arg.usage for arg in self.kwargs_optional.values()]
-        usage_head = f"{self.command}：{self.description}"
-        if self.arg_primary:
-            usage_head += "\n" + self.arg_primary.usage
 
         usage1 = ("必要参数：\n" + "\n".join(usages_required)) if usages_required else ""
         usage2 = ("可选参数：\n" + "\n".join(usages_optional)) if usages_optional else ""
 
-        return "\n\n".join((usage_head, usage1, usage2)).strip()
+        usage_final = "\n\n".join((usage1, usage2)).strip()
+
+        if not self.arg_primary:
+            return usage_final
+
+        optional = "「可选」" if not self.arg_primary.required else ""
+        usage_primary = "主参数：\n" + self.arg_primary.usage + optional
+
+        return "\n\n".join((usage_primary, usage_final)).strip()
 
     def is_required(self, arg_name):
+        if self.arg_primary and self.arg_primary.name == arg_name:
+            return self.arg_primary.required
+
         return arg_name in self.kwargs_required
 
     def parse(self, command):

@@ -158,7 +158,7 @@ class CommandHandler(MessageHandler):
         self.pass_args = pass_args
 
         self.args_parser = ArgumentParser.make_args_parser(command, self.description, arg_primary, kwargs)
-        self.doc = self.args_parser.usage
+        self.doc += "\n\n" + self.args_parser.usage
 
     def check_update(self, data: dict):
         """检测 data 是否 match 当前的处理器

@@ -61,7 +61,7 @@ class Dispatcher(object):
                 if reply['type'] == "group":
                     reply['group'] = {
                         'id': reply['group']['id'],
-                        'at_member': res.get("at_member")
+                        'at_members': res.get("at_members")
                     }
                 reply['text'] = res.get('text')
                 reply['images'] = res.get('images')

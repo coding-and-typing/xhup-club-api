@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import List
 
 import re
 
 from app import utils
 from app.service.messages import dispatcher, as_command_handler, as_regex_handler, as_at_me_handler
+from app.service.messages.handler import Handler
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +17,12 @@ logger = logging.getLogger(__name__)
                     arg_primary={
                         "name": "功能",
                         "type": str,
-                        "help": "查看指定功能的帮助信息"
+                        "required": False,
+                        "help": "显示某功能的说明"
                     })
 def usage_handler(data, session, args):
     """查看帮助信息
-    可以通过"帮助 [功能]" 来查看指定功能的帮助信息
+    “？帮助” ：显示所有支持的功能
     ------
     :param data:
     :param session:
@@ -28,10 +31,18 @@ def usage_handler(data, session, args):
     """
     reply = dict()
 
-    handlers = dispatcher.get_handlers(data)
+    handlers: List[Handler] = dispatcher.get_handlers(data)
     fname = args['primary']  # function name
     if not fname:  # 返回所有功能的 usage
-        usages = (f"{i}. {handler.synopsis}" for i, handler in enumerate(handlers))
+        handler_names = set()
+        handlers_uniq = []
+        for h in handlers:
+            # 同一个 handler 可能会注册了多个命令（比如 talk），这里做去重工作
+            if h.name not in handler_names:
+                handler_names.add(h.name)
+                handlers_uniq.append(h)
+
+        usages = (f"{i}. {h.synopsis}" for i, h in enumerate(handlers_uniq))
         reply['text'] = "\n".join(usages)
 
     # 通过 fname 查找对应的 function
@@ -44,6 +55,8 @@ def usage_handler(data, session, args):
 
 def talk_handler(data, session, message):
     """和机器人聊天
+    1. 在群内 @ 我
+    2. 信息以“：”开头，例如“：你好”
     ---
     :param data:
     :param session:
@@ -59,7 +72,7 @@ def talk_handler(data, session, message):
                                    group_id)
 
     if group_id:
-        reply['at_member'] = [message['user']['id'], ]
+        reply['at_members'] = [message['user']['id'], ]
     return reply
 
 
