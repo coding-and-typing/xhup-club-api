@@ -101,13 +101,16 @@ class ArgumentParser(object):
 
     def parse(self, command):
         """解析命令"""
+        cmd, *parts = re.split(r"\s+", command)
+        if cmd != self.command:  # 命令不匹配
+            return False, None
+
         res = {
             "primary": None,
             "options": dict(),
         }
 
         options_required = {arg.name: 1 for arg in self.kwargs_required.values()}
-        parts = re.split(r"\s+", command)[1:]
 
         for p in parts:
             matcher = kwarg_pattern.match(p)
