@@ -10,7 +10,7 @@ from app.service.messages import dispatcher, as_command_handler, as_regex_handle
 from app.service.messages.handler import Handler
 from app.service.words.character import get_info
 from app.utils.text import split_text_by_length, generate_comp_content
-from app.utils.web import daily_article
+from app.utils.web import daily_article, char_zdict_url
 
 logger = logging.getLogger(__name__)
 
@@ -98,8 +98,15 @@ def xhup_char_query_handler(data, session, groupdict):
     :param groupdict:
     :return:
     """
-    return {
-        "text": get_info(groupdict['char'], "小鹤双拼")
+    info = get_info(groupdict['char'], "小鹤音形拆字表")
+    return {"text": '\n'.join((
+        f"{info.char}：　{info.codes}",
+        f"拆分：　{info.split}",
+        f"首末：　{info.other_info['首末']}",
+        f"编码：　{info.other_info['编码']}",
+        f"汉典：{char_zdict_url(info.char)}",
+    ))
+
     }
 
 

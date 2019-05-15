@@ -72,9 +72,16 @@ def save_split_table(table: str,
         raise RuntimeError("the version has existed!")
 
     # 新建 version 行
-    group_db_id = db.session.query(Group) \
+    group_db = db.session.query(Group) \
         .filter_by(group_id=group_id, platform=platform) \
-        .first().id
+        .first()
+    if group_db is None:
+        return False, {
+            "message": f"不存在 id 为 {group_id} 的 {platform} 群组！"
+        }
+    else:
+        group_db_id = group_db.id
+
     chars_table = CharsTable(name=table_name,
                              version=version,
                              group_db_id=group_db_id)
@@ -91,7 +98,7 @@ def save_split_table(table: str,
     # 最后提交修改
     db.session.commit()
 
-    return {
+    return True, {
         "version": version,
         "table_name": table_name,
         "group_id": group_id,

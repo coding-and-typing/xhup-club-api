@@ -83,7 +83,11 @@ class TableView(MethodView):
                    group_id=data['group_id'], platform=data['platform']):
             abort(401, message="you are not the admin of this group")
 
-        return character.save_split_table(**data)
+        success, res = character.save_split_table(**data)
+        if not success:
+            abort(400, message=res['message'])
+
+        return res
 
 
 class CharInfoSchema(ma.Schema):
