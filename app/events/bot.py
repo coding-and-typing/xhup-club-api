@@ -23,6 +23,9 @@ from flask import Blueprint, request, abort
 from geventwebsocket import WebSocketError
 from typing import Callable
 
+from sqlalchemy.exc import IntegrityError
+
+from app import db
 from app.service.auth.bot import validate_bot_token
 from app.service.messages import dispatcher
 from . import ws_prefix
@@ -72,8 +75,11 @@ def echo_socket(socket):
                 socket.send(json.dumps(reply))
         except WebSocketError as e:
             logger.info(f"ws 连接异常：{e}")
-        except JSONDecodeError as e:
+        except JSONDecodeError:
             logger.debug(f"收到非 json 信息，结束连接")
+        except IntegrityError as e:
+            logger.warning(f"数据库错误：{e}")
+            db.session.rollback()
 
 
 

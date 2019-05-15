@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
+import json
+
 import functools
 import logging
 from typing import List
 
 import re
 
-from app import utils
+from app import utils, redis, db
+from app.models import MainUser
 from app.service.messages import dispatcher, as_command_handler, as_regex_handler, as_at_me_handler
 from app.service.messages.handler import Handler
 from app.service.words.character import get_info
+from app.utils.db import get_or_insert_group, get_or_insert_group_user, insert_group_user_relation
 from app.utils.text import split_text_by_length, generate_comp_content
 from app.utils.web import daily_article, char_zdict_url
 
@@ -28,10 +32,7 @@ def usage_handler(data, session, args):
     """查看帮助信息
     “？帮助” ：显示所有支持的功能
     ------
-    :param data:
-    :param session:
-    :param args:
-    :return:
+    分割线后的内容，不会包含在 usage 内
     """
     reply = dict()
 
@@ -62,10 +63,6 @@ def talk_handler(data, session, message):
     1. 在群内 @ 我
     2. 信息以“：”开头，例如“：你好”
     ---
-    :param data:
-    :param session:
-    :param message:
-    :return:
     """
     group_id = message['group']['id'] if message['type'] == "group" else None
 
@@ -93,10 +90,6 @@ def xhup_char_query_handler(data, session, groupdict):
     """查询小鹤双拼拆字表
         用法：“？字”
     ------
-    :param data:
-    :param session:
-    :param groupdict:
-    :return:
     """
     info = get_info(groupdict['char'], "小鹤音形拆字表")
     return {"text": '\n'.join((
@@ -114,11 +107,8 @@ def _daily_article_handler_maker(random=False):
     def handler(data, session, args, message):
         """每天一篇赛文
         来自网站《每日一文》
-        :param data:
-        :param session:
-        :param args:
-        :param message:
-        :return:
+
+        ------
         """
         article = daily_article.get_article(random=random)
         article['content'] = list(split_text_by_length(article['content'],
@@ -174,10 +164,7 @@ random_article_handler = as_command_handler(command="随机一文",
 def next_segment_handler(data, session, args, message):
     """下一段
 
-    :param data:
-    :param session:
-    :param args:
-    :return:
+    ------
     """
     article = session.get("article")
     segment_num = session.get("segment_num")
@@ -212,10 +199,6 @@ def status_handler(data, session, args):
     """跟打状态
 
     ---
-    :param data:
-    :param session:
-    :param args:
-    :return:
     """
     article = session.get("article")
     segment_num = session.get("segment_num")
@@ -239,10 +222,6 @@ def destroy_session_handler(data, session, args):
     """结束跟打
 
     ---
-    :param data:
-    :param session:
-    :param args:
-    :return:
     """
     session.destroy()
     return {"text": "结束跟打。"}
@@ -256,15 +235,44 @@ def destroy_session_handler(data, session, args):
                         "type": str,
                         "required": False,
                         "help": "用于群组绑定"
-                    })
-def group_bind_handler(data, session, args):
+                    },
+                    pass_message=True)
+def group_bind_handler(data, session, args, message):
     """群组绑定
 
     ---
-    :param data:
-    :param session:
-    :return:
     """
+    assert data['message']['type'] == 'group'
+
+    veri_code = args['primary']
+    payload = redis.connection.get(veri_code)
+    if not payload:
+        return {'text': "请先通过 Web 端获取验证码"}
+    else:  # 读取到数据，开始进行绑定
+        payload = json.loads(payload)
+
+    user_db_id = payload['user_db_id']
+
+    group_id = message['group']['id']
+    group_name = message['group']['name']
+    group_user_id = message['user']['id']
+    group_username = message['user']['nickname']
+
+    main_user = db.session.query(MainUser).filter_by(id=user_db_id).first()
+    if main_user is None:
+        return {'text': "用户已注销，无法绑定。"}
+
+    group = get_or_insert_group(data['platform'], group_id, group_name)
+    group_user = get_or_insert_group_user(data['platform'], group_user_id, group_username, main_user)
+    if str(group_user.main_user_id) != user_db_id:
+        return {"text": f"操作失败！该{data['platform']}用户已经绑定到了其他拆小鹤账号！"}
+
+    role = message['group']['role']
+    is_admin = role == "admin"
+    is_owner = role == "owner"
+
+    message = insert_group_user_relation(data['platform'], group.id, user_db_id, is_admin, is_owner)
+    return {'text': message}
 
 
 def typing_score(data, session, message):
@@ -316,3 +324,6 @@ dispatcher.add_handler(destroy_session_handler, platform="default", group_id="pr
 
 
 # 7. 群组绑定
+dispatcher.add_handler(group_bind_handler, platform="default", group_id="group")
+
+

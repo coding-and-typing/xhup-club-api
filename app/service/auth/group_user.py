@@ -5,12 +5,7 @@ from typing import Iterable, List
 
 from app import db
 from app.models import Group, GroupUser, MainUser, GroupUserRelation
-
-
-def _get_group(group_id, platform):
-    return db.session.query(Group) \
-        .filter_by(group_id=group_id, platform=platform) \
-        .first()
+from app.utils.db import get_group
 
 
 def is_(role: List[str], main_user: MainUser, group_id, platform):
@@ -23,7 +18,7 @@ def is_(role: List[str], main_user: MainUser, group_id, platform):
     :param platform: 群组所属平台
     :return: boolean
     """
-    group = _get_group(group_id, platform)
+    group = get_group(group_id, platform)
 
     # 查询到 main_user 绑定的属于该群的账号
     group_users_id: Iterable[GroupUser.id] = db.session.query(GroupUser.id) \

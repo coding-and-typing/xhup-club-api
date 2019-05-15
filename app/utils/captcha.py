@@ -4,7 +4,7 @@ import string
 from captcha.image import ImageCaptcha
 from typing import Optional
 
-from app import current_config
+from app import current_config, redis
 
 chars = string.digits + string.ascii_letters
 
@@ -15,7 +15,10 @@ def generate_captcha_code(seed: int = None, length: int = 4):
     """生成验证码（字符）"""
     if seed:
         random.seed(seed)
-    return "".join(random.choices(chars, k=length))
+    while True:
+        code = "".join(random.choices(chars, k=length))
+        if not redis.connection.exist(code):  # 保证唯一性
+            return code
 
 
 def generate_image_bytes(code: str, format: str):
