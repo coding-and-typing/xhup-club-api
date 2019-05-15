@@ -97,7 +97,7 @@ class CharInfoSchema(ma.Schema):
     other_info = ma.fields.Dict()
 
 
-@api_rest.definition('Char')
+@api_rest.schema('Char')
 class CharSchema(ma.Schema):
     class Meta:
         strict = True

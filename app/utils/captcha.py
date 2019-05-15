@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from uuid import uuid4
+
 import random
 import string
 from captcha.image import ImageCaptcha
@@ -18,6 +20,7 @@ def generate_captcha_code(seed: int = None, length: int = 4):
     while True:
         code = "".join(random.choices(chars, k=length))
         if not redis.connection.exist(code):  # 保证唯一性
+            # (多线程下，不能保证这里的 check 与后面的 insert 的原子性，可能会出错)
             return code
 
 
@@ -31,8 +34,13 @@ def generate_captcha(seed: Optional[int] = None,
                      format: str = "png"):
     """生成验证码（先生成字符，再生成图片）"""
     code = generate_captcha_code(seed, length)
+    capthca_key = uuid4()  # 理论上有碰撞的可能，但验证码嘛，换一个就是了。
 
+    key = current_config.CAPTCHA_FORMAT.format(capthca_key)
+    redis.connection.set(key, code,   # 验证码存入 redis
+                         ex=current_config.VERIFICATION_CODE_EXPIRES)
     return {
+        "key": key,
         "code": code,
         "image": generate_image_bytes(code, format=format),
         "format": format,

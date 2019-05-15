@@ -2,13 +2,14 @@
 import logging
 import typing
 
+from flask import Response
 from flask.views import MethodView
 from flask_login import current_user, login_user, logout_user
 import marshmallow as ma
 from flask_rest_api import abort, Blueprint
 from marshmallow import validates_schema
 
-from app import api_rest
+from app import api_rest, redis, current_config
 from app.models import MainUser
 from app.utils.common import login_required
 from app.api import api_prefix
@@ -25,7 +26,7 @@ session_bp = Blueprint(
 """
 
 
-@api_rest.definition('Session')
+@api_rest.schema('Session')
 class SessionSchema(ma.Schema):
     """应该暴露给 API 的 Session 属性
     """
@@ -51,6 +52,10 @@ class SessionCreateArgsSchema(ma.Schema):
     password = ma.fields.String(required=True)
     remember_me = ma.fields.Boolean(required=True)  # 记住我
 
+    # # 验证码
+    # captcha_key = ma.fields.String(required=True)
+    # captcha_code = ma.fields.String(required=True)
+
 
 @session_bp.route('/')
 class SessionView(MethodView):
@@ -60,8 +65,9 @@ class SessionView(MethodView):
 
     @session_bp.arguments(SessionCreateArgsSchema)
     @session_bp.response(SessionSchema, code=201, description="登录成功")
+    @session_bp.doc(responses={"200": {'description': "已处于登录状态"}})
     @session_bp.doc(responses={"401": {'description': "用户名或密码错误"}})
-    @session_bp.doc(responses={"400": {'description': "请先登出当前账号"}})
+    @session_bp.doc(responses={"400": {'description': "验证码错误"}})
     def post(self, data: typing.Dict):
         """用户登录
 
@@ -71,7 +77,12 @@ class SessionView(MethodView):
         :return:
         """
         if current_user.is_authenticated:
-            abort(400, message="please logout first.")
+            return current_user, 200
+
+        # check 验证码
+        # key = current_config.CAPTCHA_FORMAT.format(data['captcha_key'])
+        # if redis.connection.get(key) != data['captcha_code']:
+        #     abort(400, message="captcha error, please print the wright captcha code!")
 
         # 验证登录
         if data.get("username"):

@@ -7,7 +7,7 @@ from typing import List
 
 import re
 
-from app import utils, redis, db
+from app import utils, redis, db, current_config
 from app.models import MainUser
 from app.service.messages import dispatcher, as_command_handler, as_regex_handler, as_at_me_handler
 from app.service.messages.handler import Handler
@@ -244,8 +244,9 @@ def group_bind_handler(data, session, args, message):
     """
     assert data['message']['type'] == 'group'
 
-    veri_code = args['primary']
-    payload = redis.connection.get(veri_code)
+    verification_code = args['primary']
+    key = current_config.VERIFICATION_FORMAT.format(verification_code)
+    payload = redis.connection.get(key)  # 从 redis 中 get 信息
     if not payload:
         return {'text': "请先通过 Web 端获取验证码"}
     else:  # 读取到数据，开始进行绑定

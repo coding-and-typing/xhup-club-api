@@ -21,7 +21,7 @@ relation_bp = Blueprint(
 )
 
 
-@api_rest.definition('Relation')
+@api_rest.schema('Relation')
 class RelationSchema(ma.Schema):
     class Meta:
         strict = True
@@ -49,7 +49,9 @@ class RelationView(MethodView):
             "verification_code": verification_code,
             "timestamp": timestamp(),
         }
-        redis.connection.set(str(verification_code),
+
+        key = current_config.VERIFICATION_FORMAT.format(verification_code)
+        redis.connection.set(key,
                              json.dumps(payload),
                              ex=current_config.VERIFICATION_CODE_EXPIRES)
         return payload  # 返回的是临时验证信息

@@ -25,7 +25,7 @@ user_bp = Blueprint(
 """
 
 
-@api_rest.definition('User')
+@api_rest.schema('User')
 class UserSchema(ma.Schema):
     """应该暴露给 API 的 User 属性
     """
@@ -64,14 +64,14 @@ class UserDeleteArgsSchema(ma.Schema):
 
 @user_bp.route('/')
 class UserView(MethodView):
-    """登录与登出
+    """注册与注销
 
-    将登录与登出看作是对 session 的创建与删除
+    即用户的创建与删除
     """
 
     @user_bp.arguments(UserCreateArgsSchema)
     @user_bp.response(UserSchema, code=201, description="新用户注册成功")
-    @user_bp.doc(responses={"400": {'description': "当前已有用户登录，需要先退出登录"}})
+    @user_bp.doc(responses={"403": {'description': "当前已有用户登录，需要先退出登录"}})
     @user_bp.doc(responses={"409": {'description': "用户名或 email 已被使用"}})
     def post(self, data: typing.Dict):
         """用户注册
@@ -81,7 +81,7 @@ class UserView(MethodView):
         :return:
         """
         if current_user.is_authenticated:
-            abort(400, message="please logout first.")
+            abort(403, message="please logout first.")
 
         user = MainUser(username=data['username'],
                         email=data['email'],

@@ -126,3 +126,7 @@ class BaseConfig(object):
     # 字体路径（用于验证码生成）
     FONTS_PATH = [str(p) for p in (PROJECT_ROOT / "data/fonts").iterdir()]
 
+    # 各种 redis key 的格式串
+    CAPTCHA_FORMAT = "captcha:{}"  # 登录验证码
+    VERIFICATION_FORMAT = "group_user_relation:{}"  # 群组绑定验证码
+
