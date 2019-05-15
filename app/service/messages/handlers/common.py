@@ -12,7 +12,7 @@ from app.models import MainUser
 from app.service.messages import dispatcher, as_command_handler, as_regex_handler, as_at_me_handler
 from app.service.messages.handler import Handler
 from app.service.words.character import get_info
-from app.utils.db import get_or_insert_group, get_or_insert_group_user, insert_group_user_relation
+from app.utils.db import get_or_insert_group, insert_group_user_relation
 from app.utils.text import split_text_by_length, generate_comp_content
 from app.utils.web import daily_article, char_zdict_url
 

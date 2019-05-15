@@ -5,10 +5,6 @@
 通过 request 的 `Authorization` 字段中的 token 做权限验证。
 因此程序应该使用 ssl！！！否则会很不安全。
 
----
-赛文续传仍然需要 session，session 用 group_user_id 标识，存在 redis 里边，设个 expire 时间。
-同时用 rq-scheduler 定时删除 session（要先于 expire），同时向群里发送过期时间.
-
 --- 消息广播与 指定发送给特定的 namespace（定时任务）
 可以将 socket 存到全局，
 定时任务通过 socket.handlers.server.clients.values() 获取到 client，
