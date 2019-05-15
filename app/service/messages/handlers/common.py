@@ -295,10 +295,10 @@ dispatcher.add_handler(usage_handler, platform="default", group_id="group")
 dispatcher.add_handler(usage_handler, platform="default", group_id="private")
 
 # 2. 聊天机器人
-dispatcher.add_handler(at_me_talk_handler, platform="default", group_id="group")  # 只有群内才能 at
-
-dispatcher.add_handler(regex_talk_handler, platform="default", group_id="group")
-dispatcher.add_handler(regex_talk_handler, platform="default", group_id="private")
+# dispatcher.add_handler(at_me_talk_handler, platform="default", group_id="group")  # 只有群内才能 at
+#
+# dispatcher.add_handler(regex_talk_handler, platform="default", group_id="group")
+# dispatcher.add_handler(regex_talk_handler, platform="default", group_id="private")
 
 # 3. 小鹤拆字
 dispatcher.add_handler(xhup_char_query_handler, platform="default", group_id="group")

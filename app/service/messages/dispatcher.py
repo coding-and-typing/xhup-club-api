@@ -67,7 +67,7 @@ class Dispatcher(object):
             elif res is not None:  # 解析出现问题
                 reply['text'] = res.get("message")  # 返回错误信息
 
-        if reply['text'] or reply['image']:  # 有回复消息
+        if reply['text'] or reply['images']:  # 有回复消息
             return data_back  # 这个 dict 会被发送回 qq/telegram 前端
         else:
             return None  # 没有消息要回复
