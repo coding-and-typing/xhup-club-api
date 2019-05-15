@@ -12,7 +12,7 @@ from app.models import MainUser
 from app.service.messages import dispatcher, as_command_handler, as_regex_handler, as_at_me_handler
 from app.service.messages.handler import Handler
 from app.service.words.character import get_info
-from app.utils.db import get_or_insert_group, insert_group_user_relation
+from app.utils.db import get_or_insert_group, insert_group_user_relation, get_or_insert_group_user
 from app.utils.text import split_text_by_length, generate_comp_content
 from app.utils.web import daily_article, char_zdict_url
 
@@ -77,10 +77,10 @@ def talk_handler(data, session, message):
     return reply
 
 
-at_me_talk_handler = as_at_me_handler(weight=300, name="聊天", pass_message=True)(talk_handler)
+at_me_talk_handler = as_at_me_handler(weight=250, name="聊天", pass_message=True)(talk_handler)
 regex_talk_handler = as_regex_handler(
     re.compile(r"(?:\:|：)\S+.*"),
-    weight=300, name="聊天", pass_message=True)(talk_handler)
+    weight=250, name="聊天", pass_message=True)(talk_handler)
 
 
 @as_regex_handler(
@@ -255,9 +255,9 @@ def group_bind_handler(data, session, args, message):
     user_db_id = payload['user_db_id']
 
     group_id = message['group']['id']
-    group_name = message['group']['name']
+    group_name = message['group'].get("name")
     group_user_id = message['user']['id']
-    group_username = message['user']['nickname']
+    group_username = message['user'].get("nickname")
 
     main_user = db.session.query(MainUser).filter_by(id=user_db_id).first()
     if main_user is None:
@@ -265,10 +265,10 @@ def group_bind_handler(data, session, args, message):
 
     group = get_or_insert_group(data['platform'], group_id, group_name)
     group_user = get_or_insert_group_user(data['platform'], group_user_id, group_username, main_user)
-    if str(group_user.main_user_id) != user_db_id:
+    if group_user.main_user_id != user_db_id:
         return {"text": f"操作失败！该{data['platform']}用户已经绑定到了其他拆小鹤账号！"}
 
-    role = message['group']['role']
+    role = message['user']['role']
     is_admin = role == "admin"
     is_owner = role == "owner"
 

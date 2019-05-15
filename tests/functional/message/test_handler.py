@@ -2,11 +2,13 @@
 from pprint import pprint
 
 import pytest
+from flask import url_for
+from flask.testing import FlaskClient
 
 from app.service.messages import dispatcher
 from app.service.words import character
 from tests.api.test_character import test_post_table_query
-from tests.conftest import group_id, platform
+from tests.conftest import group_id, platform, login
 
 
 def test_usage_handler(app):
@@ -76,7 +78,7 @@ def test_talk_handler(app):
     assert reply['message']['text'] not in ["暂不提供该功能", "异常状况，即将崩坏。9 8 7..."]
 
 
-def test_char_query_handler(db, group_admin):
+def test_char_query_handler(group_admin):
     """3. 测试小鹤拆字命令"""
     # 1. 首先上传拆字表
     payload = {
@@ -102,7 +104,7 @@ def test_char_query_handler(db, group_admin):
                 },
                 "group": {
                     "id": "234567",  # 群 id
-                    "at_me": True,  # 是否是 at 我
+                    "at_me": False,  # 是否是 at 我
                 },
 
                 "text": "？皆",  # 消息的 text 部分。（去除掉了表情、at 和多媒体数据）
@@ -117,3 +119,30 @@ def test_char_query_handler(db, group_admin):
                                        "首末：　比左 白\n" \
                                        "编码：　b b\n" \
                                        "汉典：http://xhup.club/?G3"
+
+
+def test_group_binding(group_admin, client: FlaskClient):
+    login(client)
+
+    resp = client.post(url_for("relation.RelationView"))  # 获取验证码
+
+    data = {
+            "platform": "qq",
+            "message": {  # 如果 update 类型是 message
+                "type": "group",  # 'private' or 'group'
+                "user": {
+                    "id": "123456",  # 用户 id，QQ 号等
+                    "nickname": "riki",
+                    "role": "member",  # 群组 owner/admin/other
+                },
+                "group": {
+                    "id": "234567",  # 群 id
+                    "name": "234567",
+                    "at_me": False,  # 是否是 at 我
+                },
+
+                "text": f"？群组绑定 {resp.json['verification_code']}",  # 消息的 text 部分。（去除掉了表情、at 和多媒体数据）
+            },
+        }
+    reply = dispatcher.handle_update(data)
+    assert reply['message']['text'] == "绑定完成！"

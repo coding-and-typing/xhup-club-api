@@ -28,17 +28,18 @@ def get_group_user(group_user_id, platform):
         .first()
 
 
-# def get_or_insert_group_user(platform, group_user_id, group_username, mainuser):
-#     while True:
-#         group_user = get_group_user(group_user_id, platform)
-#         if not group_user:  # 不存在
-#             group_user = GroupUser(platform,
-#                                    user_id=group_user_id,
-#                                    username=group_username,
-#                                    main_user_id=mainuser.id)
-#             db.session.add(group_user)
-#         else:
-#             return group_user
+def get_or_insert_group_user(platform, group_user_id, group_username, mainuser):
+    while True:
+        group_user = get_group_user(group_user_id, platform)
+        if not group_user:  # 不存在
+            group_user = GroupUser(platform=platform,
+                                   user_id=group_user_id,
+                                   username=group_username,
+                                   main_user_id=mainuser.id)
+            db.session.add(group_user)
+            db.session.commit()
+        else:
+            return group_user
 
 
 def insert_group_user_relation(platform, group_db_id, user_db_id, is_admin, is_owner):
@@ -53,8 +54,13 @@ def insert_group_user_relation(platform, group_db_id, user_db_id, is_admin, is_o
         db.session.commit()
         return "绑定信息更新成功！"
     else:  # 添加新关系
-        relation = GroupUserRelation(platform, group_db_id, user_db_id, is_admin, is_owner)
+        relation = GroupUserRelation(platform=platform,
+                                     group_db_id=group_db_id,
+                                     user_db_id=user_db_id,
+                                     is_admin=is_admin,
+                                     is_owner=is_owner)
         db.session.add(relation)
+        db.session.commit()
         return "绑定完成！"
 
 

@@ -29,7 +29,7 @@ flask-and-redis = "*"
 [dev-packages]
 pytest = "*"
 pytest-cov = "*"
-"psycopg2" = "*"
+#"psycopg2" = "*"
 codecov = "*"
 
 [requires]

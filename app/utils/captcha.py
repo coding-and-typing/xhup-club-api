@@ -19,7 +19,7 @@ def generate_captcha_code(seed: int = None, length: int = 4):
         random.seed(seed)
     while True:
         code = "".join(random.choices(chars, k=length))
-        if not redis.connection.exist(code):  # 保证唯一性
+        if not redis.connection.exists(code):  # 保证唯一性
             # (多线程下，不能保证这里的 check 与后面的 insert 的原子性，可能会出错)
             return code
 

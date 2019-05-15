@@ -9,17 +9,7 @@ from flask import Response, url_for
 from flask.testing import FlaskClient
 
 from app.models import MainUser
-from tests.conftest import username, password, email
-
-
-def login(client):
-    resp: Response = client.post(url_for("session.SessionView"), json={
-        "username": username,
-        "password": password,
-        "remember_me": False
-    })
-
-    return resp
+from tests.conftest import username, password, email, login
 
 
 class TestSession(object):
