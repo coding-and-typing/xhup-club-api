@@ -7,6 +7,7 @@ from urllib import parse
 from urllib.parse import SplitResult
 
 from app import current_config, utils
+from app.utils.text import is_not_special_char
 
 """
 使用网络上其他 api 的工具函数
@@ -82,7 +83,7 @@ def talk(message: str, user_id, group_id=None, username=None):
     return "暂不提供该功能"
 
 
-class RandomArticle(object):
+class DailyArticle(object):
     """每日一文的 API"""
     def __init__(self):
         self.session = requests.session()
@@ -92,12 +93,13 @@ class RandomArticle(object):
             "User-Agent": current_config.USER_AGENT
         }
 
-    def get_random_article(self):
+    def get_article(self, random=True, del_special_chars=True):
         """随机一篇散文
 
         :return: 文章
         """
-        resp = self.session.get(current_config.RANDOM_ARTICLE_API)
+        url = current_config.RANDOM_ARTICLE_API if random else current_config.DAILY_ARTICLE_API
+        resp = self.session.get(url)
         bsObj = BeautifulSoup(resp.text, "html.parser")
 
         # 使用 class 属性匹配文章内容
@@ -106,10 +108,21 @@ class RandomArticle(object):
         # 预处理文本
         content = utils.text.process_text_cn(content)
 
+        # 去除特殊字符
+        special_chars = None
+        if del_special_chars:
+            content = ''.join(filter(is_not_special_char, content))
+        else:
+            special_chars = utils.text.special_chars(content)
+
         return {
             "content": content,
             "title": bsObj.h1.getText(),
+            "sub_title": "随机一文" if random else "每日一文",
             "content_type": "散文",
             "author": bsObj.find(attrs={"class": "article_author"}).getText(),
-            "special_chars": utils.text.special_chars(content),
+            "special_chars": special_chars,
         }
+
+
+daily_article = DailyArticle()

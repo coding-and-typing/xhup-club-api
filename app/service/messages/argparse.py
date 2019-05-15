@@ -107,7 +107,7 @@ class ArgumentParser(object):
 
         res = {
             "primary": None,
-            "options": dict(),
+            "options": {arg.name: arg.default for arg in self.kwargs_optional.values()},
         }
 
         options_required = {arg.name: 1 for arg in self.kwargs_required.values()}
@@ -130,13 +130,15 @@ class ArgumentParser(object):
                     return False, {"message": value}  # 此时 value 是错误信息
             elif self.arg_primary:  # 主参数
                 if not res['primary']:
-                    res['primary'] = p
+                    res['primary'] = self.arg_primary.type(p)
                 else:
-                    return False, {"message": "请提供正确的参数"}
+                    return False, {"message": "请提供正确的参数"}  # 错误：提供了多个主参数
 
             if options_required:
                 return False, {"message": f"参数缺失：{options_required}"}
 
+        if self.arg_primary and not res['primary']:
+            res['primary'] = self.arg_primary.type(self.arg_primary.default)
         return True, res
 
     @staticmethod

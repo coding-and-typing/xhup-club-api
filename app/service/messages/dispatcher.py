@@ -53,18 +53,19 @@ class Dispatcher(object):
         handlers = self.get_handlers(data)
         data_back = copy.deepcopy(data)  # 用于回复的 dict，在 data 上稍做修改就行
         reply = data_back['message']
+        if reply['type'] == "group":
+            reply['group'] = {'id': reply['group']['id']}
 
         # 处理消息
         for handler in handlers:
             match, res = handler.handle_update(data)
             if match:
                 if reply['type'] == "group":
-                    reply['group'] = {
-                        'id': reply['group']['id'],
-                        'at_members': res.get("at_members")
-                    }
+                    reply['group']['at_members'] = res.get("at_members")
                 reply['text'] = res.get('text')
                 reply['images'] = res.get('images')
+            elif res is not None:  # 解析出现问题
+                reply['text'] = res.get("message")  # 返回错误信息
 
         if reply['text'] or reply['image']:  # 有回复消息
             return data_back  # 这个 dict 会被发送回 qq/telegram 前端

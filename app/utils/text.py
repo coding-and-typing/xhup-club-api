@@ -5,9 +5,10 @@ import logging
 import re
 import random
 import string
+from datetime import datetime
 
 import chardet
-from typing import Iterable
+from typing import Iterable, Optional
 
 from app import current_config
 
@@ -140,6 +141,10 @@ def special_chars(text: str):
     return text_set.difference(Chars.UNICODE_CN)
 
 
+def is_not_special_char(ch: str):
+    return ch in Chars.UNICODE_CN
+
+
 def search_split_pos(text: str,
                      keys: Iterable = "”’】）。！？；～…"):
     """查找最适合切分的位置"""
@@ -154,15 +159,29 @@ def search_split_pos(text: str,
 
 
 def split_text_by_length(text: str,
-                         max_length: int,
-                         minimal_length: int):
+                         length: Optional[int] = None,  # 方案一：length + delta
+                         delta: Optional[int] = 30,
+                         max_length: Optional[int] = None,  # 方案二：直接确定长度上下限
+                         minimal_length: Optional[int] = None,
+                         ignore_=False):
     """
     根据给定的长度切分文本
     :param text: 文本
-    :param max_length: 切分长度
+    :param delta:
+    :param length:
+    :param max_length: 文章允许的最长长度。
     :param minimal_length: 文章允许的最短长度。比这还短就丢弃。
     :return : 迭代器，每次返回切分出来的那一段
+    :param ignore_: 如果最后一段太短，是否丢弃掉该段。默认不丢弃
     """
+    if length:
+        max_length = length + delta
+        minimal_length = length - delta
+
+    if not max_length or not minimal_length:
+        logger.error(f"split_text_by_length 缺少必要参数！！！")
+        return None
+
     while len(text) > max_length:
         s = text[:max_length]
         index = search_split_pos(s)  # 上策
@@ -174,7 +193,7 @@ def split_text_by_length(text: str,
         yield text[:index]
         text = text[index:]
     else:
-        if len(text) < minimal_length:
+        if len(text) < minimal_length and ignore_:
             return  # 结束迭代
 
         yield text
@@ -190,3 +209,20 @@ def split_text_by_sep(text: str,
     """
     return re.split(rf"(?:{sep}){{3,}}", text)  # sep 重复三次以上
 
+
+def generate_comp_content(content, title, sub_title, content_type, author, segment_num: int):
+    """将 article 组装成跟打器可以识别的赛文格式
+
+    :param content: 内容
+    :param title: 文章标题
+    :param sub_title: 子标题，日赛、周赛、每日赛文等
+    :param content_type: 文章类型
+    :param author: 作者
+    :param segment_num: 文章段号
+    :return:
+    """
+    date = datetime.now().date()
+    return f"《{title}》{sub_title}第{date}期-作者：{author}\n" \
+        f"{content}\n" \
+        f"-----第{segment_num}段--xxx--c.sw.1.1\n" \
+        f"本文由 {content_type} 组成"

@@ -53,9 +53,7 @@ class Handler(object):
 
         success, check_result = self.check_update(data)
         if not success:
-            if check_result:
-                return True, check_result  # 参数问题，回馈给用户
-            return False, None  # 命令不匹配
+            return False, check_result  # 解析出现问题
         else:
             optional_kwargs = self.collect_optional_args(data, check_result)
             return True, self.callback(data, Session(data), **optional_kwargs)

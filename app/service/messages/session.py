@@ -7,7 +7,7 @@ from app import redis
 
 
 class Session:
-    def __init__(self, data, expires=180):
+    def __init__(self, data, expires=1800):
         """
 
         :param data: 当前消息的数据
@@ -17,7 +17,8 @@ class Session:
         self.key = self.get_session_key(data)
         self.expires = expires
 
-        self.context = self.conn.get(self.key)
+        context = self.conn.get(self.key)
+        self.context = json.loads(context) if context else dict()
         if not self.context:
             self.context = dict()
 
@@ -45,4 +46,6 @@ class Session:
         v = json.dumps(self.context)
         self.conn.set(self.key, v, ex=self.expires)
 
-
+    def destroy(self):
+        """销毁当前 session"""
+        self.conn.delete(self.key)
