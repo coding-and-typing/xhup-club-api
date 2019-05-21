@@ -12,5 +12,4 @@ class TestingConfig(BaseConfig):
     TESTING = True
     RATELIMIT_ENABLED = False  # 测试时，关掉 ip 访问频率限制
 
-    # Use in-memory SQLite database for testing（empty url for in-memory）
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    # 测试使用 SQLite 内存数据库，以保证测试环境一致

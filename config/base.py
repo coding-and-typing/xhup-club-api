@@ -22,7 +22,7 @@ class BaseConfig(object):
     # 2. 数据库相关配置
     ELASTICSEARCH_URL = ""
     # SQLite
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(PROJECT_ROOT / "app-dev.db")
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # 默认使用内存数据库，就是说每次运行都是全新数据库
     # 是否在每次更新数据库时给出提示（追踪修改）
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -32,6 +32,10 @@ class BaseConfig(object):
 
     REDIS0_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"  # 短信验证码等数据用 db 0 （flask-and-redis）
     RQ_REDIS_URL = f"redis://{REDIS_HOST}:{REDIS_PORT}/1"  # 任务队列用 db 1 （flask-rq2）
+
+    # 各种 redis key 的格式串
+    CAPTCHA_FORMAT = "captcha:{}"  # 登录验证码对应的 key
+    VERIFICATION_FORMAT = "group_user_relation:{}"  # 群组绑定验证码对应的 key
 
     # 3. 权限与日志配置
     # 是否开启权限鉴定
@@ -113,20 +117,21 @@ class BaseConfig(object):
     RATELIMIT_DEFAULT = "900/hour;30/minute;3/second"
 
     # 各种过期时间（expires）
-    VERIFICATION_CODE_EXPIRES = 180  # 秒
+    VERIFICATION_CODE_EXPIRES = 3 * 60  # 验证码过期时间，3 分钟
 
     # 允许出现的单字
     with open(PROJECT_ROOT / "data/小鹤全部单字.txt", mode="r", encoding='utf-8') as f:
         CHARS_ALLOWED = frozenset(f.read())
 
     with open(PROJECT_ROOT / "data/常用单字前1500.txt", mode="r", encoding='utf-8') as f:
-        CHARS_1500 = f.read()
-        assert len(frozenset(CHARS_1500)) == len(CHARS_1500) == 1500
+        CHARS_TOP_1500 = f.read()
+
+        CHARS_TOP_500 = CHARS_TOP_1500[:500]  # 前五百
+        CHARS_MIDDLE_500 = CHARS_TOP_1500[500:1000]  # 中五百
+        CHARS_LAST_500 = CHARS_TOP_1500[1000:]  # 后五百
+
+        assert len(frozenset(CHARS_TOP_1500)) == len(CHARS_TOP_1500) == 1500
 
     # 字体路径（用于验证码生成）
     FONTS_PATH = [str(p) for p in (PROJECT_ROOT / "data/fonts").iterdir()]
-
-    # 各种 redis key 的格式串
-    CAPTCHA_FORMAT = "captcha:{}"  # 登录验证码
-    VERIFICATION_FORMAT = "group_user_relation:{}"  # 群组绑定验证码
 

@@ -8,6 +8,9 @@ from .base import BaseConfig
 class DevelopmentConfig(BaseConfig):
     DEBUG = True
 
+    # SQLite
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(BaseConfig.PROJECT_ROOT / "app-dev.db")
+
     # PostgreSQL
     # DB_USER = 'ryan'
     # DB_PASSWORD = ''
