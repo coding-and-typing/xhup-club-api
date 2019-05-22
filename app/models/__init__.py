@@ -11,3 +11,5 @@ from .character import *
 from .word import *
 
 from .scores import *
+
+from .chaiwubi_user import *

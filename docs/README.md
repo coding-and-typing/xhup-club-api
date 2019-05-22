@@ -9,9 +9,7 @@
 
 ### 已知 bug
 
-- 绑定平台账号后，用户账号无法删除（需要级联删除所有相关行，添加 relationship：on_delete - cascade）
-
-
+None
 
 ### 待实现的功能
 
