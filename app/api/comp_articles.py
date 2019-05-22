@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import Dict
 
 from flask.views import MethodView
 import marshmallow as ma
@@ -33,7 +34,7 @@ class ArticlesCreateArgsSchema(ma.Schema):
 
     id = ma.fields.String(dump_only=True)  # 数据库的主键
 
-    boxes = ma.fields.Boolean(required=True)  # 是否从 boxes 添加赛文
+    use_boxes = ma.fields.Boolean(required=True)  # 是否从 boxes 添加赛文
     platform = ma.fields.String(required=True)
     group_id = ma.fields.String(required=True)  # 要求当前用户为指定群组的管理员
 
@@ -43,9 +44,9 @@ class ArticlesCreateArgsSchema(ma.Schema):
     end_time = ma.fields.Time(required=True)   # 赛文结束时间（默认为 23:30:00）
     sub_type = ma.fields.String(required=True)  # 赛事类型（周赛日赛等）
 
-    # boxes 为 true 时，下列参数可用
+    # use_boxes 为 true 时，下列参数可用
     mode = ma.fields.String()  # random / top2down / proportionally
-    scale_list = ma.fields.Dict()  # 仅 mode 为 proportionally 时可用。{id1: scale, id2: scale, id3:scale}
+    scale_list = ma.fields.Dict()  # 分配比例，仅 mode 为 proportionally 时可用。{id1: scale, id2: scale, id3:scale}
 
 
 class ArticlesBoxCreateArgsSchema(ma.Schema):
@@ -55,27 +56,24 @@ class ArticlesBoxCreateArgsSchema(ma.Schema):
 
     id = ma.fields.String(dump_only=True)  # 数据库的主键
 
-    mode = ma.fields.String(required=True)  # 随机赛文、乱序单字、从文档添加
+    content_type = ma.fields.String(required=True)  # 随机赛文、乱序单字、从文档添加
     length = ma.fields.Integer(required=True)  # 赛文长度，建议 300-800 之间，乱序单字 30 - 70 之间
-    count = ma.fields.Integer(required=True,
-                              validate=lambda x: 0 < x < 300)  # 添加的赛文篇数，不得超过这个数额。
+    count = ma.fields.Integer(required=True)  # 添加的赛文篇数，不得超过这个数额。
     # 如果是从文档添加，下列参数可用
     title = ma.fields.String()  # 赛文标题
-    text_type = ma.fields.String()  # 文本类型
+    content_type_2 = ma.fields.String()  # 赛文文本的类型
 
 
 @comp_articles_bp.route("/boxes")
 class CompArticlesBoxView(MethodView):
     """赛文 box 的增删查改
         将赛文分成不同的 box，这样在提交赛文时，就可以指定赛文的混合方式。（通过 post comp_articles/）
-
-        box 存放在 redis 里边儿，有效期为 1h。直接用列表存，id 就为 索引
     """
 
     decorators = [login_required]
 
     @comp_articles_bp.arguments(ArticlesBoxCreateArgsSchema)
-    def post(self):
+    def post(self, data: Dict):
         """添加一个赛文 box
         """
         pass
@@ -95,7 +93,7 @@ class CompArticlesBoxView(MethodView):
 
 @comp_articles_bp.route("/")
 class CompArticlesView(MethodView):
-    """赛文的增删查改"""
+    """赛文的增删查改，要求用户有群管理权限"""
 
     decorators = [login_required]
 

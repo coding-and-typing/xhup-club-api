@@ -17,6 +17,18 @@ class MainUser(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
 
+    # 一个账号，可以绑定多个群组用户
+    group_users = db.relationship("GroupUser", backref="main_user", lazy="dynamic",
+                                  passive_deletes="cascade")
+
+    # 此账号创建的 articles
+    articles = db.relationship("Article", backref="main_user", lazy="dynamic",
+                               passive_deletes="cascade")
+
+    # 此账号创建的候选赛文
+    comp_article_boxes = db.relationship("CompArticleBox", backref="main_user", lazy="dynamic",
+                                         passive_deletes="cascade")
+
     def __init__(self, username, email, password):
         self.username = username
         self.email = email

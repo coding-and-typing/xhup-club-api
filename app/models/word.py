@@ -18,7 +18,9 @@ class WordsTable(db.Model):
     version = db.Column(db.String(20), index=True, nullable=False)
 
     # 码表所属群组，只有该群管理员可编辑该表
-    group_db_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
+    group_db_id = db.Column(db.Integer,
+                            db.ForeignKey('group.id', ondelete="CASCADE", onupdate="CASCADE"),
+                            index=True, nullable=False)
 
     # 同一张码表的同一个版本号只能使用一次
     __table_args__ = (UniqueConstraint('name', 'version', name='c_words_table'),)
@@ -34,7 +36,9 @@ class Word(db.Model):
     code = db.Column(db.String(12), nullable=False)  # 词的编码
 
     # 所属的码表 id
-    table_db_id = db.Column(db.Integer, db.ForeignKey('words_table.id'), index=True, nullable=False)
+    table_db_id = db.Column(db.Integer,
+                            db.ForeignKey('words_table.id', ondelete="CASCADE", onupdate="CASCADE"),
+                            index=True, nullable=False)
 
     # 同一张码表中，一个编码的同一个位置，只能有一个词。
     __table_args__ = (UniqueConstraint('table_db_id', 'code', 'position', name="c_word"),)

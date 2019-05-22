@@ -26,28 +26,28 @@ articles_bp = Blueprint(
 
 
 @articles_bp.route("/")
-class CompArticlesView(MethodView):
-    """赛文的增删查改"""
+class ArticlesView(MethodView):
+    """文章的增删查改"""
 
     decorators = [login_required]
 
     def post(self):
-        """增加赛文
+        """增加文章
 
-        可选：随机赛文、乱序单字、从文档添加
+        可选：随机一文、从文档添加
         """
         pass
 
     def delete(self):
-        """删除赛文"""
+        """删除文章"""
         pass
 
     def get(self):
-        """获取赛文"""
+        """获取文章列表"""
         pass
 
     def patch(self):
-        """修改赛文
+        """修改文章
 
         ---
         :return:

@@ -17,8 +17,14 @@ class CharsTable(db.Model):
     # 所属的拆字表版本号，应使用 pkg_resources.parse_version 做比较
     version = db.Column(db.String(20), index=True, nullable=False)
 
-    # 拆字表所属群组，只有该群管理员可编辑该表
-    group_db_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
+    # 拆字表所属群组，只有该群管理员可编辑该表，其他群只能选用该表，不能修改（TODO 设置级联删除）
+    # 通过 backref 添加了 group 引用
+    group_db_id = db.Column(db.Integer,
+                            db.ForeignKey('group.id', ondelete="CASCADE", onupdate="CASCADE"),
+                            index=True, nullable=False)
+
+    # 添加 character 条目列表
+    characters = db.relationship("Character", backref="table",  lazy="dynamic")
 
     # 同一张拆字表的同一个版本号只能使用一次
     __table_args__ = (UniqueConstraint('name', 'version', name="c_chars_table"),)
@@ -34,8 +40,11 @@ class Character(db.Model):
     split = db.Column(db.String(200))  # 单字的拆分
     other_info = db.Column(db.String(200))  # 其他拆分信息，对小鹤音形来说，这是"首末编码"信息
 
-    # 所属的拆字表 id
-    table_db_id = db.Column(db.Integer, db.ForeignKey('chars_table.id'), index=True, nullable=False)
+    # 所属的拆字表 id（TODO 设置级联删除）
+    # 通过 backref 添加了 table
+    table_db_id = db.Column(db.Integer,
+                            db.ForeignKey('chars_table.id', ondelete="CASCADE", onupdate="CASCADE"),
+                            index=True, nullable=False)
 
     # 同一张拆字表中，同一个单字只应该有一个词条
     __table_args__ = (UniqueConstraint('table_db_id', 'char', name='c_char'),)

@@ -15,23 +15,33 @@ from app.utils import text
 class CompArticle(db.Model):
     """赛文库（包括历史赛文，和未来的赛文）"""
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(128), index=True, nullable=False)  # 文章标题
+    title = db.Column(db.String(128), index=True, nullable=False)  # 赛文标题
     producer = db.Column(db.String(128), index=True, nullable=True)  # 赛文制作人
+
     content_type = db.Column(db.String(64), index=True, nullable=True)  # 散文、单字、政论等
+    content = db.Column(db.Text, nullable=False)  # 赛文内容
+    length = db.Column(db.Integer, index=True, nullable=False)  # 赛文长度
+    hash = db.Column(db.String(128), nullable=False)  # 赛文内容的 hash
 
-    # TODO content 可能为长篇小说。暂时没有考虑这种情况
-    content = db.Column(db.Text, nullable=False)  # 文章内容
-    hash = db.Column(db.String(128), nullable=False)  # 文章内容的 hash
-
-    date = db.Column(db.Date, nullable=False)  # 赛文日期
-    number = db.Colum(db.Integer, nullable=False)  # 赛文期数（编号）
-    comp_type = db.Column(db.String(128), nullable=False)  # 比赛类型（日赛、周赛等）
+    date = db.Column(db.Date, index=True, nullable=False)  # 赛文日期
+    number = db.Column(db.Integer, nullable=False)  # 赛文期数（编号）
+    comp_type = db.Column(db.String(128), index=True, nullable=False)  # 比赛类型（日赛、周赛等）
     level = db.Column(db.Integer, nullable=True)  # 赛文难度评级
 
-    # 赛文所属群组
-    group_db_id = db.Column(db.Integer, db.ForeignKey('group.id'), index=True, nullable=False)
+    # 赛文所属群组，可以为 null（当群组被删除掉时）
+    # 通过 backref 添加了 group 引用
+    group_db_id = db.Column(db.Integer,
+                            db.ForeignKey('group.id', ondelete="CASCADE", onupdate="CASCADE"),
+                            index=True, nullable=True)
 
-    __table_args__ = (UniqueConstraint('title', 'hash', 'group_db_id', name='c_comp_article'),)
+    __table_args__ = (
+        # 群内的赛文内容不要重复。
+        UniqueConstraint('title', 'hash', 'length', 'group_db_id', name='c_comp_article_1'),
+        # 群内某一种类型的赛事，期数不能出现重复
+        UniqueConstraint('number', 'group_db_id', 'comp_type', name='c_comp_article_2'),
+        # 一个群一天只有一篇赛文
+        UniqueConstraint('date', 'group_db_id', name='c_comp_article_3')
+    )
 
     def __init__(self,
                  title,
@@ -42,11 +52,15 @@ class CompArticle(db.Model):
                  number,
                  comp_type,
                  group_db_id,
+                 hash_=None,
                  level=None):
         self.title = title
         self.producer = producer
+
         self.content_type = content_type
         self.content = content
+        self.length = len(content)
+
         self.date = date
         self.number = number
         self.comp_type = comp_type
@@ -54,7 +68,10 @@ class CompArticle(db.Model):
         self.level = level
 
         # 自动生成 hash，使用 sha1 算法（只是用于防碰撞，不需要 sha256）
-        self.hash = hashlib.sha1(content.encode("utf-8"))
+        if hash_ and isinstance(hash_, str):
+            self.hash = hash_
+        else:
+            self.hash = hashlib.sha1(content.encode("utf-8"))
 
     @validates("content")
     def validate_content(self):
@@ -73,18 +90,29 @@ class Article(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), index=True, nullable=False)  # 文章标题
     author = db.Column(db.String(128), index=True, nullable=True)  # 作者
+
     content_type = db.Column(db.String(64), index=True, nullable=True)  # 散文、单字、政论等
     content = db.Column(db.Text, nullable=False)  # 文章内容，长度一般在 1000 字以内（但是很多数据库算的是字节数）
     hash = db.Column(db.String(128), nullable=False)  # 文章内容的 hash
+    length = db.Column(db.Integer, index=True, nullable=False)  # 文章长度
+
     special_chars = db.Column(db.String(2040), nullable=False)  # 文章包含的特殊字符
 
-    __table_args__ = (UniqueConstraint('title', 'hash', name='c_article'),)
+    # 文章的上传者，用户只可以对自己上传的文章进行 CURD 操作。（用户注销后，它为 null）
+    # 通过 backref 添加了 main_user 引用
+    main_user_id = db.Column(db.Integer,
+                             db.ForeignKey('main_user.id', ondelete="CASCADE", onupdate="CASCADE"),
+                             index=True, nullable=True)
+
+    __table_args__ = (UniqueConstraint('title', 'hash', "length", name='c_article'),)
 
     def __init__(self,
                  title,
                  author,
                  content_type,
-                 content: str):
+                 content: str,
+                 main_user_id,
+                 hash_=None):
         self.title = title
         self.author = author
         self.content_type = content_type
@@ -92,13 +120,41 @@ class Article(db.Model):
         # 对文章进行处理
         content = text.process_text_cn(content)
         self.content = content
+        self.length = len(content)
+
+        self.main_user_id = main_user_id
 
         special_chars = text.special_chars(content)
         self.special_chars = json.dumps(list(special_chars))  # set 不能序列化，得转成 list
 
         # 自动生成 hash，使用 sha1 算法（只是用于防碰撞，不需要 sha256）
-        self.hash = hashlib.sha1(content.encode("utf-8"))
+        if hash_ and isinstance(hash_, str):
+            self.hash = hash_
+        else:
+            self.hash = hashlib.sha1(content.encode("utf-8"))
 
     def __repr__(self):
         return "<Stored Article '{}' - by {}>".format(self.title, self.author)
+
+
+class CompArticleBox(db.Model):
+    """候选赛文盒子，用于赛文混合"""
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(128), index=True, nullable=False)  # 文章标题
+    author = db.Column(db.String(128), index=True, nullable=True)  # 作者
+
+    content_type = db.Column(db.String(64), index=True, nullable=True)  # 散文、单字、政论等
+    content = db.Column(db.Text, nullable=False)  # 文章内容，长度一般在 1000 字以内（但是很多数据库算的是字节数）
+    hash = db.Column(db.String(128), nullable=False)  # 文章内容的 hash
+    length = db.Column(db.Integer, index=True, nullable=False)  # 文章长度
+
+    # 赛文条目的的所有者
+    # 通过 backref 添加了 main_user 引用
+    main_user_id = db.Column(db.Integer,
+                             db.ForeignKey('main_user.id', ondelete="CASCADE", onupdate="CASCADE"),
+                             index=True, nullable=True)
+    box_id = db.Column(db.Integer, index=True, nullable=False)  # 条目所属的 box 的 id
+
+    __table_args__ = (UniqueConstraint('hash', "length", "main_user_id", name='c_article'),)
+
 

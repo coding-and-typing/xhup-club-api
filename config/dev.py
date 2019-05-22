@@ -9,7 +9,7 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
 
     # SQLite
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(BaseConfig.PROJECT_ROOT / "app-dev.db")
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///{}'.format(BaseConfig.PROJECT_ROOT / "app-dev.db")
 
     # PostgreSQL
     # DB_USER = 'ryan'
@@ -24,5 +24,19 @@ class DevelopmentConfig(BaseConfig):
     #     port=DB_PORT,
     #     name=DB_NAME,
     # )
+
+    # MySQL
+    DB_USER = os.getenv("DB_USER")
+    DB_PASSWORD = parse.quote_plus(os.getenv("DB_PASSWORD", ""))
+    DB_NAME = os.getenv("DB_NAME")
+    DB_HOST = os.getenv("DB_HOST")
+    DB_PORT = os.getenv("DB_PORT")
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{user}:{password}@{host}:{port}/{name}'.format(
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT,
+        name=DB_NAME,
+    )
 
 
