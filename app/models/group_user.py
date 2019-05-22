@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 
-from sqlalchemy import UniqueConstraint
+from sqlalchemy import UniqueConstraint, and_
 
 from app import db
 
@@ -69,8 +69,14 @@ class GroupUser(db.Model):
                              index=True, nullable=False)
 
     # 所属群组（可以有多个）
+    condition = and_(  # 多对多的关联条件
+        GroupUserRelation.c.user_db_id == id,  # 这个是默认条件
+        GroupUserRelation.c.platform == platform  # 添加条件：平台要对应
+    )
     groups = db.relationship("Group",
                              secondary=GroupUserRelation.__table__,  # secondary 指定多对多的关联表（中间表）
+                             primaryjoin=condition,  # 用于 GroupUser.groups
+                             secondaryjoin=condition,  # 用于 Group.users
                              backref="users",  # 在表 group 中添加反向引用键 'user'
                              lazy="dynamic")  # 动态计算表关系
 

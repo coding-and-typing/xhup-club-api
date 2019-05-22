@@ -147,6 +147,7 @@ class CompArticleBox(db.Model):
     content = db.Column(db.Text, nullable=False)  # 文章内容，长度一般在 1000 字以内（但是很多数据库算的是字节数）
     hash = db.Column(db.String(128), nullable=False)  # 文章内容的 hash
     length = db.Column(db.Integer, index=True, nullable=False)  # 文章长度
+    level = db.Column(db.Integer, nullable=True)  # 赛文难度评级
 
     # 赛文条目的的所有者（级联删除）
     # 通过 backref 添加了 main_user 引用
@@ -156,5 +157,32 @@ class CompArticleBox(db.Model):
     box_id = db.Column(db.Integer, index=True, nullable=False)  # 条目所属的 box 的 id
 
     __table_args__ = (UniqueConstraint('hash', "length", "main_user_id", name='c_article'),)
+
+    def __init__(self,
+                 title,
+                 author,
+                 content_type,
+                 content: str,
+                 main_user_id,
+                 box_id,
+                 hash_=None,
+                 level=None):
+        self.title = title
+        self.author = author
+
+        self.content_type = content_type
+        self.content = content
+
+        self.level = level
+        self.length = len(content)
+
+        self.main_user_id = main_user_id
+        self.box_id = box_id
+
+        # 自动生成 hash，使用 sha1 算法（只是用于防碰撞，不需要 sha256）
+        if hash_ and isinstance(hash_, str):
+            self.hash = hash_
+        else:
+            self.hash = hashlib.sha1(content.encode("utf-8"))
 
 
