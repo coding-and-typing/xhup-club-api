@@ -18,16 +18,33 @@ class MainUser(UserMixin, db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
 
     # 一个账号，可以绑定多个群组用户
-    group_users = db.relationship("GroupUser", backref="main_user", lazy="dynamic",
+    group_users = db.relationship("GroupUser",
+                                  backref=db.backref("main_user", lazy="dynamic"),
+                                  lazy="dynamic",
                                   passive_deletes="cascade")
 
-    # 此账号创建的 articles
-    articles = db.relationship("Article", backref="main_user", lazy="dynamic",
-                               passive_deletes="cascade")
+    # 此账号创建的 articles（不级联删除，所以不加 passive_deletes）
+    articles = db.relationship("Article",
+                               backref=db.backref("main_user", lazy="dynamic"),
+                               lazy="dynamic")
 
     # 此账号创建的候选赛文
-    comp_article_boxes = db.relationship("CompArticleBox", backref="main_user", lazy="dynamic",
+    comp_article_boxes = db.relationship("CompArticleBox",
+                                         backref=db.backref("main_user", lazy="dynamic"),
+                                         lazy="dynamic",
                                          passive_deletes="cascade")
+
+    # 此账号创建的码表
+    word_tables = db.relationship("WordTable",
+                                  backref=db.backref("main_user", lazy="dynamic"),
+                                  lazy="dynamic",
+                                  passive_deletes="cascade")
+
+    # 此账号创建的拆字表
+    char_table = db.relationship("CharTable",
+                                 backref=db.backref("main_user", lazy="dynamic"),
+                                 lazy="dynamic",
+                                 passive_deletes="cascade")
 
     def __init__(self, username, email, password):
         self.username = username
@@ -50,4 +67,3 @@ class MainUser(UserMixin, db.Model):
 @login_manager.user_loader
 def load_user(user_id):
     return MainUser.query.get(int(user_id))
-

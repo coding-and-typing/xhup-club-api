@@ -28,11 +28,11 @@ class CompArticle(db.Model):
     comp_type = db.Column(db.String(128), index=True, nullable=False)  # 比赛类型（日赛、周赛等）
     level = db.Column(db.Integer, nullable=True)  # 赛文难度评级
 
-    # 赛文所属群组，可以为 null（当群组被删除掉时）
+    # 赛文所属群组（级联）
     # 通过 backref 添加了 group 引用
     group_db_id = db.Column(db.Integer,
                             db.ForeignKey('group.id', ondelete="CASCADE", onupdate="CASCADE"),
-                            index=True, nullable=True)
+                            index=True, nullable=False)
 
     __table_args__ = (
         # 群内的赛文内容不要重复。
@@ -101,7 +101,7 @@ class Article(db.Model):
     # 文章的上传者，用户只可以对自己上传的文章进行 CURD 操作。（用户注销后，它为 null）
     # 通过 backref 添加了 main_user 引用
     main_user_id = db.Column(db.Integer,
-                             db.ForeignKey('main_user.id', ondelete="CASCADE", onupdate="CASCADE"),
+                             db.ForeignKey('main_user.id'),
                              index=True, nullable=True)
 
     __table_args__ = (UniqueConstraint('title', 'hash', "length", name='c_article'),)
@@ -148,11 +148,11 @@ class CompArticleBox(db.Model):
     hash = db.Column(db.String(128), nullable=False)  # 文章内容的 hash
     length = db.Column(db.Integer, index=True, nullable=False)  # 文章长度
 
-    # 赛文条目的的所有者
+    # 赛文条目的的所有者（级联删除）
     # 通过 backref 添加了 main_user 引用
     main_user_id = db.Column(db.Integer,
                              db.ForeignKey('main_user.id', ondelete="CASCADE", onupdate="CASCADE"),
-                             index=True, nullable=True)
+                             index=True, nullable=False)
     box_id = db.Column(db.Integer, index=True, nullable=False)  # 条目所属的 box 的 id
 
     __table_args__ = (UniqueConstraint('hash', "length", "main_user_id", name='c_article'),)

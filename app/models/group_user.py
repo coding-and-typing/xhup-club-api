@@ -41,11 +41,10 @@ class Group(db.Model):
 
     # 通过 backref，这里动态添加了一个 users 属性
 
-    # 添加拆字表引用
-    chars_table = db.relationship("CharsTable", backref="group", lazy="dynamic",
-                                  passive_deletes="cascade")
+    # 添加拆字表引用（不级联删除）
+    char_table = db.relationship("CharTable", backref="group", lazy="dynamic")
 
-    # 赛文引用
+    # 赛文引用（级联）
     comp_articles = db.relationship("CompArticle", backref="group", lazy="dynamic",
                                     passive_deletes="cascade")
 
@@ -63,21 +62,20 @@ class GroupUser(db.Model):
     user_id = db.Column(db.String(20), index=True, nullable=False)  # 用户的唯一 id
     username = db.Column(db.String(50), nullable=False)
 
-    # 表关系
+    # 当前用户所绑定到的 main_user（级联）
+    # 通过 backref 添加了 main_user 属性
+    main_user_id = db.Column(db.Integer,
+                             db.ForeignKey('main_user.id', ondelete="CASCADE", onupdate="CASCADE"),
+                             index=True, nullable=False)
+
+    # 所属群组（可以有多个）
     groups = db.relationship("Group",
                              secondary=GroupUserRelation.__table__,  # secondary 指定多对多的关联表（中间表）
                              backref="users",  # 在表 group 中添加反向引用键 'user'
                              lazy="dynamic")  # 动态计算表关系
-
-    # 当前用户所绑定到的 main_user
-    # 通过 backref 添加了 main_user 属性
-    main_user_id = db.Column(db.Integer, db.ForeignKey('main_user.id'), index=True, nullable=False)
 
     # 特定平台下，用户的 id 应该是唯一的
     __table_args__ = (UniqueConstraint('platform', 'user_id', name='c_group_user'),)
 
     def __repr__(self):
         return "<{} Group '{}', Id '{}'>".format(self.platform, self.username, self.user_id)
-
-
-
