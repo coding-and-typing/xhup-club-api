@@ -92,7 +92,7 @@ def test_char_query_handler(group_admin):
         "group_id": group_id,
         "platform": platform,
     }
-    character.save_split_table(**payload)
+    character.save_char_table(**payload)
 
     # 2. 测试查字
     data = {

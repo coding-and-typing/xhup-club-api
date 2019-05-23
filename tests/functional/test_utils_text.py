@@ -27,7 +27,7 @@ def test_text():
         text = process_text_cn(text)
         assert len(special_chars(text)) == 0
         parts = list(split_text_by_length(text, max_length=200,
-                                          minimal_length=150))
+                                          min_length=150))
         for part in parts[:-1]:
             assert 150 <= len(part) <= 200
             assert part.endswith(tuple("”’】）。！？；～…，"))

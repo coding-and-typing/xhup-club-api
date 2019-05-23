@@ -83,9 +83,9 @@ class TableView(MethodView):
                    group_id=data['group_id'], platform=data['platform']):
             abort(401, message="you are not the admin of this group")
 
-        success, res = character.save_split_table(**data)
-        if not success:
-            abort(400, message=res['message'])
+        success, res = character.save_char_table(**data)
+        if not success:  # 拆字表已经存在
+            abort(400, message=res['message'])  # bad request, 无法处理该请求
 
         return res
 

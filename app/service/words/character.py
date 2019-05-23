@@ -7,7 +7,7 @@ from pkg_resources import parse_version
 
 from app import db
 from app.models import Group
-from app.models.character import Character, CharsTable
+from app.models.character import Character, CharTable
 
 """
 小鹤音形 - 拆字表查询
@@ -50,12 +50,12 @@ parsers = {
 }
 
 
-def save_split_table(table: str,
-                     version: str,
-                     table_type: str,
-                     table_name: str,
-                     group_id: str,
-                     platform: str):
+def save_char_table(table: str,
+                    version: str,
+                    table_type: str,
+                    table_name: str,
+                    group_id: str,
+                    platform: str):
     """
 
     :param table: 待解析的拆字表字符串
@@ -82,11 +82,11 @@ def save_split_table(table: str,
     else:
         group_db_id = group_db.id
 
-    chars_table = CharsTable(name=table_name,
-                             version=version,
-                             group_db_id=group_db_id)
+    chars_table = CharTable(name=table_name,
+                            version=version,
+                            group_db_id=group_db_id)
     db.session.add(chars_table)  # 将 chars_table 插入表中
-    table_db_id = db.session.query(CharsTable) \
+    table_db_id = db.session.query(CharTable) \
         .filter_by(name=table_name, version=version) \
         .first().id
 
@@ -108,7 +108,7 @@ def save_split_table(table: str,
 
 def get_latest_version(table_name: str):
     """获取最新的拆字表版本号"""
-    versions = map(itemgetter(0), db.session.query(CharsTable.version) \
+    versions = map(itemgetter(0), db.session.query(CharTable.version) \
                    .filter_by(name=table_name))
     versions = list(map(parse_version, versions))
     latest_version = max(versions) if versions else parse_version("0.0.0")
@@ -121,7 +121,7 @@ def get_info(char: str, table_name, version=None):
         version = str(get_latest_version(table_name))
 
     # 通过 version 查找拆字表 id
-    table_db_id = db.session.query(CharsTable.id) \
+    table_db_id = db.session.query(CharTable.id) \
         .filter_by(version=version).first()[0]
 
     # 在该拆字表内查找 char 的信息

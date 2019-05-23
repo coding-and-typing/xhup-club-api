@@ -141,7 +141,6 @@ class CompArticleBox(db.Model):
     """候选赛文盒子，用于赛文混合"""
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), index=True, nullable=False)  # 文章标题
-    author = db.Column(db.String(128), index=True, nullable=True)  # 作者
 
     content_type = db.Column(db.String(64), index=True, nullable=True)  # 散文、单字、政论等
     content = db.Column(db.Text, nullable=False)  # 文章内容，长度一般在 1000 字以内（但是很多数据库算的是字节数）
@@ -160,7 +159,6 @@ class CompArticleBox(db.Model):
 
     def __init__(self,
                  title,
-                 author,
                  content_type,
                  content: str,
                  main_user_id,
@@ -168,7 +166,6 @@ class CompArticleBox(db.Model):
                  hash_=None,
                  level=None):
         self.title = title
-        self.author = author
 
         self.content_type = content_type
         self.content = content

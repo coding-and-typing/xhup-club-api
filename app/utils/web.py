@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+from typing import Optional
 
 import requests
 from bs4 import BeautifulSoup
@@ -7,7 +8,7 @@ from urllib import parse
 from urllib.parse import SplitResult
 
 from app import current_config, utils
-from app.utils.text import is_not_special_char
+from app.utils.text import is_not_special_char, split_text_by_length
 
 """
 使用网络上其他 api 的工具函数
@@ -85,6 +86,7 @@ def talk(message: str, user_id, group_id=None, username=None):
 
 class DailyArticle(object):
     """每日一文的 API"""
+
     def __init__(self):
         self.session = requests.session()
         url: SplitResult = parse.urlsplit(current_config.RANDOM_ARTICLE_API)
@@ -93,9 +95,23 @@ class DailyArticle(object):
             "User-Agent": current_config.USER_AGENT
         }
 
-    def get_article(self, random=True, del_special_chars=True):
+    def get_article(self,
+                    length: Optional[int] = None,  # 方案一：length + delta
+                    delta: Optional[int] = 30,
+                    max_length: Optional[int] = None,  # 方案二：直接确定长度上下限
+                    min_length: Optional[int] = None,
+                    cut_content: Optional[bool] = False,
+                    random=True,
+                    del_special_chars=True):
         """随机一篇散文
+        :param delta:
+        :param length:
+        :param max_length: 文章允许的最长长度。
+        :param min_length: 文章允许的最短长度。比这还短就丢弃。
+        :param cut_content: 如果文章过长，是否使用 split_text 做 cut 操作？
 
+        :param random:
+        :param del_special_chars:
         :return: 文章
         """
         url = current_config.RANDOM_ARTICLE_API if random else current_config.DAILY_ARTICLE_API
@@ -107,6 +123,21 @@ class DailyArticle(object):
 
         # 预处理文本
         content = utils.text.process_text_cn(content)
+
+        # 检查文章长度是否符合要求
+        if length:
+            max_length = length + delta
+            min_length = length - delta
+
+        if min_length and len(content) < min_length:  # 如果给了最小长度，并且赛文短于这个长度
+            return self.get_article(min_length, random, del_special_chars)  # 重新获取文章
+
+        if max_length and len(content) > max_length:
+            if cut_content:  # 对文章内容做剪切
+                content = next(split_text_by_length(
+                    content, max_length=max_length, min_length=min_length))
+            else:  # 不允许剪切文章，只好获取新文章了
+                return self.get_article(min_length, random, del_special_chars)  # 重新获取文章
 
         # 去除特殊字符
         special_chars = None

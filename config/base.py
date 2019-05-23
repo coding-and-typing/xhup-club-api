@@ -50,6 +50,10 @@ class BaseConfig(object):
     # api 版本，1
     API_VERSION = '1'
 
+    # 默认的分页参数
+    DEFAULT_PAGINATION_PARAMETERS = {
+        'page': 1, 'page_size': 25, 'max_page_size': 1000}
+
     # 指定遵守的 openapi 版本
     OPENAPI_VERSION = '3.0.2'
 
