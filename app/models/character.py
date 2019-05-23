@@ -30,7 +30,7 @@ class CharTable(db.Model):
 
     # 单字列表（级联删除）
     characters = db.relationship("Character",
-                                 backref=db.backref("table", lazy="dynamic"),
+                                 backref="table",
                                  lazy="dynamic",
                                  passive_deletes="cascade")
 

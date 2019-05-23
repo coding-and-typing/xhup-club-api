@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+from typing import List
+
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db, login_manager
+from app.models import GroupUser
 
 """
 这个用户，是指系统的主用户，需要绑定邮箱，设置密码
@@ -19,36 +22,36 @@ class MainUser(UserMixin, db.Model):
 
     # 拆五笔账号（仅群管理）
     chaiwubi_user = db.relationship("ChaiWuBiUser",
-                                    backref=db.backref("main_user", lazy="dynamic"),
+                                    backref="main_user",  # 逆向是一对一的关系，不需要 filter，所以不需要加 lazy！
                                     lazy="dynamic",
                                     passive_deletes="cascade")
 
     # 一个账号，可以绑定多个群组用户
-    group_users = db.relationship("GroupUser",
-                                  backref=db.backref("main_user", lazy="dynamic"),
-                                  lazy="dynamic",
-                                  passive_deletes="cascade")
+    group_users: List[GroupUser] = db.relationship("GroupUser",
+                                                   backref="main_user",
+                                                   lazy="dynamic",
+                                                   passive_deletes="cascade")
 
     # 此账号创建的 articles（不级联删除，所以不加 passive_deletes）
     articles = db.relationship("Article",
-                               backref=db.backref("main_user", lazy="dynamic"),
+                               backref="main_user",
                                lazy="dynamic")
 
     # 此账号创建的候选赛文
     comp_article_boxes = db.relationship("CompArticleBox",
-                                         backref=db.backref("main_user", lazy="dynamic"),
+                                         backref="main_user",
                                          lazy="dynamic",
                                          passive_deletes="cascade")
 
     # 此账号创建的码表
     word_tables = db.relationship("WordTable",
-                                  backref=db.backref("main_user", lazy="dynamic"),
+                                  backref="main_user",
                                   lazy="dynamic",
                                   passive_deletes="cascade")
 
     # 此账号创建的拆字表
     char_table = db.relationship("CharTable",
-                                 backref=db.backref("main_user", lazy="dynamic"),
+                                 backref="main_user",
                                  lazy="dynamic",
                                  passive_deletes="cascade")
 

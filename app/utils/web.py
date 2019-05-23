@@ -8,7 +8,7 @@ from urllib import parse
 from urllib.parse import SplitResult
 
 from app import current_config, utils
-from app.utils.text import is_not_special_char, split_text_by_length
+from app.utils.text import split_text_by_length
 
 """
 使用网络上其他 api 的工具函数
@@ -102,7 +102,7 @@ class DailyArticle(object):
                     min_length: Optional[int] = None,
                     cut_content: Optional[bool] = False,
                     random=True,
-                    del_special_chars=True):
+                    del_special_char=True):
         """随机一篇散文
         :param delta:
         :param length:
@@ -111,7 +111,7 @@ class DailyArticle(object):
         :param cut_content: 如果文章过长，是否使用 split_text 做 cut 操作？
 
         :param random:
-        :param del_special_chars:
+        :param del_special_char:
         :return: 文章
         """
         url = current_config.RANDOM_ARTICLE_API if random else current_config.DAILY_ARTICLE_API
@@ -130,19 +130,19 @@ class DailyArticle(object):
             min_length = length - delta
 
         if min_length and len(content) < min_length:  # 如果给了最小长度，并且赛文短于这个长度
-            return self.get_article(min_length, random, del_special_chars)  # 重新获取文章
+            return self.get_article(min_length, random, del_special_char)  # 重新获取文章
 
         if max_length and len(content) > max_length:
             if cut_content:  # 对文章内容做剪切
                 content = next(split_text_by_length(
                     content, max_length=max_length, min_length=min_length))
             else:  # 不允许剪切文章，只好获取新文章了
-                return self.get_article(min_length, random, del_special_chars)  # 重新获取文章
+                return self.get_article(min_length, random, del_special_char)  # 重新获取文章
 
         # 去除特殊字符
         special_chars = None
-        if del_special_chars:
-            content = ''.join(filter(is_not_special_char, content))
+        if del_special_char:
+            content = utils.text.del_special_char(text)
         else:
             special_chars = utils.text.special_chars(content)
 

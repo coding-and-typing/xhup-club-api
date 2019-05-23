@@ -48,6 +48,9 @@ class Group(db.Model):
     comp_articles = db.relationship("CompArticle", backref="group", lazy="dynamic",
                                     passive_deletes="cascade")
 
+    relations = db.relationship("GroupUserRelation", backref="group", lazy="dynamic",
+                                passive_deletes="cascade")
+
     # 特定平台下，群的 id 应该是唯一的
     __table_args__ = (UniqueConstraint('platform', 'group_id', name="c_group"),)
 
@@ -68,17 +71,9 @@ class GroupUser(db.Model):
                              db.ForeignKey('main_user.id', ondelete="CASCADE", onupdate="CASCADE"),
                              index=True, nullable=False)
 
-    # 所属群组（可以有多个）
-    condition = and_(  # 多对多的关联条件
-        GroupUserRelation.c.user_db_id == id,  # 这个是默认条件
-        GroupUserRelation.c.platform == platform  # 添加条件：平台要对应
-    )
-    groups = db.relationship("Group",
-                             secondary=GroupUserRelation.__table__,  # secondary 指定多对多的关联表（中间表）
-                             primaryjoin=condition,  # 用于 GroupUser.groups
-                             secondaryjoin=condition,  # 用于 Group.users
-                             backref="users",  # 在表 group 中添加反向引用键 'user'
-                             lazy="dynamic")  # 动态计算表关系
+    # 所属群组（可以有多个）relation.group
+    relations = db.relationship("GroupUserRelation", backref="user", lazy="dynamic",
+                                passive_deletes="cascade")
 
     # 特定平台下，用户的 id 应该是唯一的
     __table_args__ = (UniqueConstraint('platform', 'user_id', name='c_group_user'),)

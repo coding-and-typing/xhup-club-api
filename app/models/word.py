@@ -30,7 +30,7 @@ class WordsTable(db.Model):
 
     # 码表中的所有条目
     words = db.relationship("Word",
-                            backref=db.backref("table", lazy="dynamic"),
+                            backref="table",
                             lazy="dynamic",
                             passive_deletes="cascade")
 

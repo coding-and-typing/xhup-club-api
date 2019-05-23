@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import datetime
 import logging
 from typing import Dict
 
@@ -31,28 +32,6 @@ comp_article_bp = Blueprint(
 """
 
 
-class ArticleCreateArgsSchema(ma.Schema):
-    class Meta:
-        strict = True
-        ordered = True
-
-    id = ma.fields.String(dump_only=True)  # 数据库的主键
-
-    use_boxes = ma.fields.Boolean(required=True)  # 是否从 boxes 添加赛文
-    platform = ma.fields.String(required=True)
-    group_id = ma.fields.String(required=True)  # 要求当前用户为指定群组的管理员
-
-    start_number = ma.fields.String(required=True)  # 赛文起始期数
-    start_date = ma.fields.Date(required=True)  # 赛文起始日期
-    start_time = ma.fields.Time(required=True)  # 赛文起始时间(默认为 00:00:00)
-    end_time = ma.fields.Time(required=True)   # 赛文结束时间（默认为 23:30:00）
-    sub_type = ma.fields.String(required=True)  # 赛事类型（周赛日赛等）
-
-    # use_boxes 为 true 时，下列参数可用
-    mode = ma.fields.String()  # random / top2down / proportionally
-    scale_list = ma.fields.Dict()  # 分配比例，仅 mode 为 proportionally 时可用。{id1: scale, id2: scale, id3:scale}
-
-
 class ArticleBoxCreateArgsSchema(ma.Schema):
     class Meta:
         strict = True
@@ -70,6 +49,7 @@ class ArticleBoxCreateArgsSchema(ma.Schema):
     # 如果是从文档添加，下列参数可用
     title = ma.fields.String()  # 赛文标题
     text = ma.fields.String()  # 文档的内容，str
+    separator = ma.fields.String()  # 如果指定了这个，就忽略掉 length
 
     __content_type_options = [  # content_type 的可选项
         "random_article",  # 随机散文
@@ -99,6 +79,27 @@ class ArticleBoxArgsSchema(ma.Schema):
     title = ma.fields.String()  # 赛文标题
     content = ma.fields.String()  # 文档的内容，str
     length = ma.fields.Integer()  # 赛文长度，建议 300-800 之间，乱序单字 30 - 70 之间
+
+
+class ArticleCreateArgsSchema(ma.Schema):
+    class Meta:
+        strict = True
+        ordered = True
+
+    platform = ma.fields.String(required=True)
+    group_id = ma.fields.String(required=True)  # 要求当前用户为指定群组的管理员
+
+    sub_type = ma.fields.String(required=True)  # 赛事类型（周赛日赛等）
+
+    start_number = ma.fields.String(required=True)  # 赛文起始期数
+    start_date = ma.fields.Date(default=None)  # 赛文起始日期，默认为已有赛文的最后一天+1
+    start_time = ma.fields.Time(default=datetime.time(0, 0, 0, 0))  # 赛文起始时间(默认为 00:00:00)
+    end_time = ma.fields.Time(default=datetime.time(23, 30, 0, 0))   # 赛文结束时间（默认为 23:30:00）
+
+    # use_boxes 为 true 时，下列参数可用
+    mode = ma.fields.String()  # random / top2down / proportionally
+    en = ma.fields.Boolean()  # 内容为英文，使用英文的处理函数。
+    scale_list = ma.fields.Dict()  # 分配比例，仅 mode 为 proportionally 时可用。{id1: scale, id2: scale, id3:scale}
 
 
 @comp_article_bp.route("/box")
@@ -142,11 +143,10 @@ class CompArticleView(MethodView):
 
     decorators = [login_required]
 
-    def post(self):
-        """添加赛文到赛文列表，有两种方式：
-            2. 赛文起始期数、赛文起始日期
-            3. 赛文开始时间、赛文结束时间（一般是 00:00:00 到 23:30:00）
-            4. 赛事类型（日赛周赛等）
+    @comp_article_bp.arguments(ArticleCreateArgsSchema)
+    @comp_article_bp.response(code=201, description="赛文添加成功")
+    def post(self, data: dict):
+        """将所有候选赛文盒的内容添加为赛文
         """
         pass
 

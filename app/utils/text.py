@@ -47,8 +47,8 @@ class Chars:
         ':': '：',
         '(': '（',
         ')': '）',
-        '[': '【',
-        ']': '】',
+        '[': '【',  # 「『
+        ']': '】',  # 」』
         '~': '～',
         "<": "《",
         ">": "》",
@@ -57,6 +57,12 @@ class Chars:
 
     # 3. 中文文章文本替换，要使用的转换表
     table_cn = str.maketrans(punctuation_table)  # 要用 str.maketrans
+
+    table_en = str.maketrans(
+        {val: key for key, val in punctuation_table.items()})  # 逆转一下
+
+    # 英文中（用于跟打），空白字符只允许出现空格
+    CHARS_EN = string.digits + string.ascii_letters + string.punctuation + ' '
 
     # 4. 处理完成后，中文文章允许包含的标点
     SYMBOLS_CN = frozenset("".join(punctuation_table.values())
@@ -133,29 +139,40 @@ def cycle_str(string_, shuffle=True):
         yield from cycle_str(string_)
 
 
-def del_white_chars(s: str):
+def del_white_chars(s: str, en=False):
     """去除所有空白字符
     包括几个特殊空格
     """
     # \s 表示任意空白字符（tab space \n）
-    return re.sub(rf"[\s{Chars.SPECIAL_SPACE}]", "", s)
+    return re.sub(rf"[\s{Chars.SPECIAL_SPACE}]+",
+                  " " if en else '',  # 英文模式下，保留非连续的空格。
+                  s)
 
 
-def sub_punctuation(text: str):
+def sub_punctuation(text: str, en=False):
     """
-    将文本中的半角标点转换成全角标点
     :param text: 文本
     :return: 转换后的文本
     """
-    # 全角转半角
+    # 全角转半角，中英通用
     text = text.translate(Chars.fl_table)
-    # 英文转中文
-    text = text.translate(Chars.table_cn)
 
-    # 破折号
-    text = re.sub(rf"[{Chars.SPECIAL_MIDDLE_LINE}]+", "——", text)
-    # 省略号
-    text = re.sub(r"⋯+|\.{3,6}", "……", text)
+    if not en:  # 中文，将文本中的半角标点转换成全角标点
+        # 英文标点转中文标点
+        text = text.translate(Chars.table_cn)
+
+        # 破折号
+        text = re.sub(rf"[{Chars.SPECIAL_MIDDLE_LINE}]+", "——", text)
+        # 省略号
+        text = re.sub(r"⋯+|\.{3,}|…+", "……", text)
+    else:  # 英文
+        # 中文标点转英文标点
+        text = text.translate(Chars.table_en)
+
+        # 替换成英文破折号
+        text = re.sub(rf"[{Chars.SPECIAL_MIDDLE_LINE}]+", "-", text)
+        # 替换成英文省略号（三个点）
+        text = re.sub(r"⋯+|\.{3,}|…+", "...", text)
 
     return text
 
@@ -168,6 +185,14 @@ def process_text_cn(text: str):
     return text
 
 
+def process_text_en(text: str):
+    """英文文本处理"""
+    text = del_white_chars(text, en=True)
+    text = sub_punctuation(text, en=True)
+
+    return text
+
+
 def special_chars(text: str):
     """返回 text 中的特殊字符"""
     text_set = frozenset(text)
@@ -175,8 +200,16 @@ def special_chars(text: str):
     return text_set.difference(Chars.UNICODE_CN)
 
 
-def is_not_special_char(ch: str):
-    return ch in Chars.UNICODE_CN
+def is_not_special_char(ch: str, en=False):
+    if not en:  # 中文
+        return ch in Chars.UNICODE_CN
+    else:  # 英文
+        return ch in Chars.CHARS_EN
+
+
+def del_special_char(text, en=False):
+    ''.join(filter(lambda ch: is_not_special_char(ch, en),
+                   text))
 
 
 def search_split_pos(text: str,
