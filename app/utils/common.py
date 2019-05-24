@@ -4,9 +4,11 @@
 实用函数
 """
 import time
+from itertools import chain, zip_longest
 
 from flask_login import login_required as login_required_
 from flask_rest_api.utils import deepupdate
+from operator import truth
 
 
 def login_required(func):
@@ -25,4 +27,22 @@ def timestamp():
     return int(time.time())
 
 
+def group_each(a, size: int, allow_none=False):
+    """
+        将一个可迭代对象 a 内的元素, 每 size 个分为一组
+        group_each([1,2,3,4], 2) -> [(1,2), (3,4)]
+    """
+    func = zip_longest if allow_none else zip
 
+    iterators = [iter(a)] * size  # 将新构造的 iterator 复制 size 次（浅复制）
+    return func(*iterators)  # 然后 zip
+
+
+def iter_one_by_one(items, allow_none=False):
+    func = zip_longest if allow_none else zip
+
+    return chain.from_iterable(func(*items))
+
+
+def filter_truth(items):
+    return filter(truth, items)  # 过滤掉判断为 False 的 items

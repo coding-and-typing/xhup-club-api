@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 
 import logging
 import requests
@@ -272,16 +272,25 @@ class ArticleAdder(object):
 
     def add_articles(self, articles: list,
                      start_number: int,
-                     start_datetime: datetime,
-                     end_datetime: datetime,
+                     start_date: date,
+                     start_time: time,
+                     end_time: time,
                      date_step: timedelta = timedelta(days=1),
                      **kwargs):
         """批量添加赛文
-            articles  赛文 list，内部是 dict
-            start_number 批量赛文的起始期数
-            start_datetime 赛文开始的时间
-            end_datetime  赛文结束时间
-            """
+
+        :param articles: 赛文 list，内部是 dict
+        :param start_number: 赛文的起始期数
+        :param start_date: 赛文开始的日期
+        :param start_time: 赛文开始的时间
+        :param end_time: 赛文结束时间
+        :param date_step: 赛事间隔（每这么多天一篇赛文）
+        :param kwargs: 其他参数
+        :return:
+        """
+        start_datetime = datetime.combine(start_date, start_time)
+        end_datetime = datetime.combine(start_date, end_time)
+
         # 上传文章
         for i, article in enumerate(articles):
             number = start_number + i

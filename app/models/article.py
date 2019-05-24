@@ -24,6 +24,9 @@ class CompArticle(db.Model):
     hash = db.Column(db.String(128), nullable=False)  # 赛文内容的 hash
 
     date = db.Column(db.Date, index=True, nullable=False)  # 赛文日期
+    start_time = db.Column(db.Time, nullable=False)  # 赛文开始日期（一般 0 点）
+    end_time = db.Column(db.Time, nullable=False)  # 赛文结束时间（一般 23:30:00）
+
     number = db.Column(db.Integer, nullable=False)  # 赛文期数（编号）
     comp_type = db.Column(db.String(128), index=True, nullable=False)  # 比赛类型（日赛、周赛等）
     level = db.Column(db.Integer, nullable=True)  # 赛文难度评级
@@ -45,23 +48,31 @@ class CompArticle(db.Model):
 
     def __init__(self,
                  title,
-                 producer,
-                 content_type,
                  content: str,
-                 date,
+                 content_type,
+
+                 producer,
+
+                 date_,
+                 start_time,
+                 end_time,
+
                  number,
                  comp_type,
                  group_db_id,
                  hash_=None,
                  level=None):
         self.title = title
-        self.producer = producer
-
-        self.content_type = content_type
         self.content = content
+        self.content_type = content_type
         self.length = len(content)
 
-        self.date = date
+        self.producer = producer
+
+        self.date = date_
+        self.start_time = start_time
+        self.end_time = end_time
+
         self.number = number
         self.comp_type = comp_type
         self.group_db_id = group_db_id

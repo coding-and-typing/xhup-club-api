@@ -3,15 +3,24 @@
 """
 赛文添加相关
 """
-from itertools import cycle
+from datetime import date, time, timedelta
+import logging
+from functools import reduce
+from itertools import chain
+from typing import Iterable
 
+import random
+from operator import add
 from sqlalchemy import func
 
 from app import current_config, db
-from app.models import CompArticleBox
+from app.models import CompArticleBox, CompArticle, Group
+from app.utils.common import group_each, iter_one_by_one, filter_truth
 from app.utils.text import Chars, generate_articles_from_chars, split_text_by_length, split_text_by_sep, \
     process_text_en, process_text_cn, del_special_char
 from app.utils.web import daily_article
+
+logger = logging.getLogger(__name__)
 
 
 def add_comp_article_box(data: dict, main_user):
@@ -88,20 +97,104 @@ def delete_comp_article_box(data: dict, main_user):
     db.session.commit()
 
 
+def generate_comp_articles(comp_articles: Iterable,
+                           main_user,
+                           group_db_id,
+                           start_number: int,
+                           start_date: date,
+                           start_time: time,
+                           end_time: time,
+                           comp_type: str,
+                           date_step: timedelta = timedelta(days=1),
+                           ):
+    """
+
+    :param comp_articles: 赛文列表
+    :param main_user: 当前用户（其实可以直接 import current_user）
+    :param group_db_id: 群号
+    :param start_number: 起始期数
+    :param start_date: 起始日期
+    :param start_time: 赛文开始时间
+    :param end_time: 赛文结束时间
+    :param comp_type: 赛事类型
+    :param date_step: 赛事间隔（每这么多天一篇赛文）
+    :return:
+    """
+    date_ = start_date
+    number = start_number
+    for article in comp_articles:
+        yield CompArticle(
+            title=article['title'],
+            content=article['content'],
+            content_type=article['content_type'],
+
+            producer=main_user.username,  # 用户的用户名
+
+            date_=date_,
+            start_time=start_time,
+            end_time=end_time,
+
+            number=number,
+            comp_type=comp_type,
+            group_db_id=group_db_id,
+        )
+
+        number += 1
+        date_ += date_step
+
+
 def add_comp_articles_from_box(data: dict, main_user):
     """候选赛文全部转正"""
     box_count = db.session.query(func.count(CompArticleBox.box_id)) \
         .filter_by(main_user_id=main_user.id).scalar()
     boxes = []
-    for i in range(1, box_count+1):
+    for i in range(1, box_count + 1):
         comp_articles = db.session.query(CompArticleBox) \
             .filter_by(main_user_id=main_user.id, box_id=i).all()
         boxes.append(comp_articles)
 
+    count = reduce(add, (len(it) for it in boxes))
+
     # 1. 赛文混合
+    mix_mode = data['mix_mode']
+    if mix_mode == "proportionally":  # 按比例分配
+        # 1) 先分组
+        scale_list = data['scale_list']
+        for i, box in enumerate(boxes):
+            boxes[i] = group_each(box, scale_list[i], allow_none=True)
+
+        # 2) 再混合
+        boxes = iter_one_by_one(boxes, allow_none=True)  # 分组混合
+        boxes = filter_truth(boxes)  # 过滤掉 None 值
+        comp_articles = chain.from_iterable(boxes)  # flat 化
+        comp_articles = list(filter_truth(comp_articles))  # 再次过滤 None 值
+    else:
+        comp_articles = list(chain(*boxes))  # 按序首尾相连，即 top2down
+        if mix_mode == "random":
+            random.shuffle(comp_articles)  # 乱序
+        elif mix_mode != "top2down":
+            return 400, "invalid mix_mod!"
 
     # 2. 添加到 CompArticle 表
-    pass
+    group = db.session.query(Group) \
+        .filter_by(group_id=data['group_id'], platform=data['platform']).first()
+    items = generate_comp_articles(comp_articles,
+                                   main_user=main_user,
+                                   start_date=data['start_date'],
+                                   start_time=data['start_time'],
+                                   end_time=data['end_time'],
+
+                                   start_number=data['start_number'],
+                                   comp_type=data['comp_type'],
+                                   group_db_id=group.id)
+
+    db.session.add_all(items)
+    db.session.commit()
+    return 200, {
+        "count": count,
+        "start_date": data['start_date'],
+        "end_date": data['start_date'] + timedelta(days=count)
+    }
 
 
 def sync_to_chaiwubi(data, main_user):

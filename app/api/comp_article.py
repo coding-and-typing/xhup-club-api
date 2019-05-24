@@ -12,7 +12,7 @@ from marshmallow import validates, ValidationError
 from app import api_rest, db
 from app.api import api_prefix
 from app.models import CompArticleBox
-from app.service.articles.article_ import add_comp_article_box, delete_comp_article_box
+from app.service.articles.article_ import add_comp_article_box, delete_comp_article_box, add_comp_articles_from_box
 from app.utils.common import login_required
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ comp_article_bp = Blueprint(
 """
 
 
-class ArticleBoxCreateArgsSchema(ma.Schema):
+class CompArticleBoxCreateArgsSchema(ma.Schema):
     class Meta:
         strict = True
         ordered = True
@@ -63,7 +63,7 @@ class ArticleBoxCreateArgsSchema(ma.Schema):
             raise ValidationError(f"invalid content_type, not in {self.__content_type_options}")
 
 
-class ArticleBoxArgsSchema(ma.Schema):
+class CompArticleBoxArgsSchema(ma.Schema):
     class Meta:
         strict = True
         ordered = True
@@ -81,7 +81,7 @@ class ArticleBoxArgsSchema(ma.Schema):
     length = ma.fields.Integer()  # 赛文长度，建议 300-800 之间，乱序单字 30 - 70 之间
 
 
-class ArticleCreateArgsSchema(ma.Schema):
+class CompArticleCreateArgsSchema(ma.Schema):
     class Meta:
         strict = True
         ordered = True
@@ -89,17 +89,16 @@ class ArticleCreateArgsSchema(ma.Schema):
     platform = ma.fields.String(required=True)
     group_id = ma.fields.String(required=True)  # 要求当前用户为指定群组的管理员
 
-    sub_type = ma.fields.String(required=True)  # 赛事类型（周赛日赛等）
+    comp_type = ma.fields.String(required=True)  # 赛事类型（周赛日赛等）
 
     start_number = ma.fields.String(required=True)  # 赛文起始期数
     start_date = ma.fields.Date(default=None)  # 赛文起始日期，默认为已有赛文的最后一天+1
     start_time = ma.fields.Time(default=datetime.time(0, 0, 0, 0))  # 赛文起始时间(默认为 00:00:00)
     end_time = ma.fields.Time(default=datetime.time(23, 30, 0, 0))   # 赛文结束时间（默认为 23:30:00）
 
-    # use_boxes 为 true 时，下列参数可用
-    mode = ma.fields.String()  # random / top2down / proportionally
+    mix_mode = ma.fields.String(required=True)  # random / top2down / proportionally
     en = ma.fields.Boolean()  # 内容为英文，使用英文的处理函数。
-    scale_list = ma.fields.Dict()  # 分配比例，仅 mode 为 proportionally 时可用。{id1: scale, id2: scale, id3:scale}
+    scale_list = ma.fields.Dict()  # 分配比例，仅 mode 为 proportionally 时可用。[ 3, 2, 1]
 
 
 @comp_article_bp.route("/box")
@@ -110,25 +109,25 @@ class CompArticleBoxView(MethodView):
 
     decorators = [login_required]
 
-    @comp_article_bp.arguments(ArticleBoxCreateArgsSchema)
+    @comp_article_bp.arguments(CompArticleBoxCreateArgsSchema)
     @comp_article_bp.response(code=201, description="赛文盒添加成功")
     def post(self, data: Dict):
         """添加一个赛文 box
         """
-        success, res = add_comp_article_box(data, current_user)
-        if success == "200":
+        code, res = add_comp_article_box(data, current_user)
+        if code == 200:
             return res
         else:
-            abort(success, description=res)
+            abort(code, description=res)
 
-    @comp_article_bp.arguments(ArticleBoxArgsSchema)
+    @comp_article_bp.arguments(CompArticleBoxArgsSchema)
     @comp_article_bp.response(code=204, description="赛文盒删除成功")
     def delete(self, data: dict):
         """删除赛文 box"""
         delete_comp_article_box(data, current_user)
 
-    @comp_article_bp.arguments(ArticleBoxArgsSchema)
-    @comp_article_bp.response(ArticleBoxArgsSchema(many=True), code=200, "成功获取到数据")
+    @comp_article_bp.arguments(CompArticleBoxArgsSchema)
+    @comp_article_bp.response(CompArticleBoxArgsSchema(many=True), code=200, "成功获取到数据")
     @comp_article_bp.paginate(Page)  # 分页
     def get(self, data: dict):
         """获取赛文 box，分页"""
@@ -143,12 +142,16 @@ class CompArticleView(MethodView):
 
     decorators = [login_required]
 
-    @comp_article_bp.arguments(ArticleCreateArgsSchema)
+    @comp_article_bp.arguments(CompArticleCreateArgsSchema)
     @comp_article_bp.response(code=201, description="赛文添加成功")
     def post(self, data: dict):
         """将所有候选赛文盒的内容添加为赛文
         """
-        pass
+        code, res = add_comp_articles_from_box(data, current_user)
+        if code == 200:
+            return res
+        else:
+            abort(code, description=res)
 
     def delete(self):
         """删除赛文"""
