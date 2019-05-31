@@ -32,7 +32,7 @@ def short_the_url(url: str):
 
 def char_zdict_url(chars: str):
     """查询汉典"""
-    return short_the_url('http://m.zdic.net/s/?q=' + parse.quote(chars))
+    return short_the_url('https://www.zdic.net/hans/' + parse.quote(chars))
 
 
 def talk(message: str, user_id, group_id=None, username=None):
