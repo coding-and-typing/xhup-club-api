@@ -101,6 +101,23 @@ class CompArticleCreateArgsSchema(ma.Schema):
     scale_list = ma.fields.Dict()  # 分配比例，仅 mode 为 proportionally 时可用。[ 3, 2, 1]
 
 
+class CompArticleQueryArgsSchema(ma.Schema):
+    class Meta:
+        strict = True
+        ordered = True
+
+    platform = ma.fields.String(required=True)
+    group_id = ma.fields.String(required=True)  # 要求当前用户为指定群组的管理员
+
+    comp_type = ma.fields.String()  # 赛事类型（周赛日赛等）
+
+    start_number = ma.fields.Integer()  # 赛文起始期数
+    end_number = ma.fields.Integer()
+
+    start_date = ma.fields.Date()  # 赛文起始日期，默认为已有赛文的最后一天+1
+    end_date = ma.fields.Date()
+
+
 @comp_article_bp.route("/box")
 class CompArticleBoxView(MethodView):
     """赛文 box 的增删查改
@@ -127,7 +144,7 @@ class CompArticleBoxView(MethodView):
         delete_comp_article_box(data, current_user)
 
     @comp_article_bp.arguments(CompArticleBoxArgsSchema)
-    @comp_article_bp.response(CompArticleBoxArgsSchema(many=True), code=200, "成功获取到数据")
+    @comp_article_bp.response(CompArticleBoxArgsSchema(many=True), code=200, description="成功获取到数据")
     @comp_article_bp.paginate(Page)  # 分页
     def get(self, data: dict):
         """获取赛文 box，分页"""
@@ -157,7 +174,8 @@ class CompArticleView(MethodView):
         """删除赛文"""
         pass
 
-    def get(self):
+
+    def get(self, data):
         """获取赛文"""
         pass
 

@@ -208,7 +208,7 @@ def is_not_special_char(ch: str, en=False):
 
 
 def del_special_char(text, en=False):
-    ''.join(filter(lambda ch: is_not_special_char(ch, en),
+    return ''.join(filter(lambda ch: is_not_special_char(ch, en),
                    text))
 
 

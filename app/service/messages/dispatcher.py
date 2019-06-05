@@ -52,7 +52,8 @@ class Dispatcher(object):
         """处理消息"""
         handlers = self.get_handlers(data)
         data_back = copy.deepcopy(data)  # 用于回复的 dict，在 data 上稍做修改就行
-        reply = data_back['message']
+        reply: dict = data_back['message']
+        reply.update({"text": "", "images": []})  # 先清除收到的消息
         if reply['type'] == "group":
             reply['group'] = {'id': reply['group']['id']}
 

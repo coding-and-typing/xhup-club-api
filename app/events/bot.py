@@ -57,7 +57,7 @@ def authenticated_only(func: Callable):
 
 @bot_bp.route('/')
 @authenticated_only
-def echo_socket(socket):
+def event_processor(socket):
     """
     被动消息处理
     """
@@ -68,6 +68,7 @@ def echo_socket(socket):
 
             reply = dispatcher.handle_update(message)
             if reply:
+                logger.debug(f"回复消息: {message}")
                 socket.send(json.dumps(reply))
         except WebSocketError as e:
             logger.info(f"ws 连接异常：{e}")

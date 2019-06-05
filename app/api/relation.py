@@ -22,8 +22,8 @@ relation_bp = Blueprint(
 )
 
 
-@api_rest.schema('Relation')
-class RelationCreateSchema(ma.Schema):
+@api_rest.schema('RelationCreateArgs')
+class RelationCreateArgsSchema(ma.Schema):
     class Meta:
         strict = True
         ordered = True
@@ -52,7 +52,7 @@ class RelationView(MethodView):
 
     decorators = [login_required]
 
-    @relation_bp.response(schema=RelationCreateSchema, code=201,
+    @relation_bp.response(schema=RelationCreateArgsSchema, code=201,
                           description="成功生成验证码，三分钟内有效。\n"
                                       "请将收到的验证码发送到需要绑定的群组中，以完成绑定。（验证消息格式：`拆小鹤验证：xxxxxx`）")
     def post(self):

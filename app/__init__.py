@@ -89,4 +89,4 @@ def create_app():
     return app
 
 
-from . import models  # Import SQLAlchemy models
+from . import models  # Import SQLAlchemy models，放最下面防止循环导入

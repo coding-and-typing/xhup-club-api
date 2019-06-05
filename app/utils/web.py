@@ -142,7 +142,7 @@ class DailyArticle(object):
         # 去除特殊字符
         special_chars = None
         if del_special_char:
-            content = utils.text.del_special_char(text)
+            content = utils.text.del_special_char(content)
         else:
             special_chars = utils.text.special_chars(content)
 

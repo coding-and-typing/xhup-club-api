@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
 
-import functools
 import logging
 from typing import List
 
@@ -103,6 +102,13 @@ def xhup_char_query_handler(data, session, groupdict):
     }
 
 
+def xhup_word_query_handler(data, session, groupdict):
+    """编码查询，给出「word」的所有编码，与对应的位置（首选，次选等）
+    """
+    # TODO 待实现
+    pass
+
+
 def _daily_article_handler_maker(random=False):
     def handler(data, session, args, message):
         """每天一篇赛文
@@ -158,11 +164,11 @@ random_article_handler = as_command_handler(command="随机一文",
                                             pass_message=True)(_daily_article_handler_maker(random=True))
 
 
-@as_command_handler(command="下一段",
+@as_command_handler(command="继续",
                     weight=300,
                     prefix=("?", "？"), pass_message=True)
 def next_segment_handler(data, session, args, message):
-    """下一段
+    """继续发下一段文章
 
     ------
     """
@@ -276,7 +282,7 @@ def group_bind_handler(data, session, args, message):
     return {'text': message}
 
 
-def typing_score(data, session, message):
+def typing_score_handler(data, session, message):
     """跟打成绩记录
 
     ------
