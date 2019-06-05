@@ -7,7 +7,7 @@
 最方便的当然是直接安装 miniconda
 
 ```bash
-wget https://mirrors.tuna.tsinghua.edu.cn/anaconda/miniconda/Miniconda3-latest-Linux-x86_64.sh
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 bash Miniconda3-latest-Linux-x86_64.sh
 ```
 Lincence 那里可以直接按 q 退出，然后 yes 就好。
