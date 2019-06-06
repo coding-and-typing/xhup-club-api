@@ -117,6 +117,45 @@ class CompArticleQueryArgsSchema(ma.Schema):
     start_date = ma.fields.Date()  # 赛文起始日期，默认为已有赛文的最后一天+1
     end_date = ma.fields.Date()
 
+    id = ma.fields.Integer()  # 赛文 id，查询/修改赛文时，如果给定 id，就直接用 id 进行操作
+
+
+class GroupSchema(ma.Schema):
+    class Meta:
+        strict = True
+        ordered = True
+
+    id = ma.fields.Integer()
+    platform = db.Columnma.fields.String()  # qq、wechat 或 telegram
+    group_id = ma.fields.String()  # 群的唯一 id
+    group_name = ma.fields.String()  # 群名称
+
+
+@api_rest.definition("CompArticle")
+class CompArticleSchema(ma.Schema):
+    class Meta:
+        strict = True
+        ordered = True
+
+    id = ma.fields.Integer()
+    title = ma.fields.String()  # 赛文标题
+    producer = ma.fields.String()  # 赛文制作人
+
+    content_type = ma.fields.String()  # 散文、单字、政论等
+    content = ma.fields.String()  # 赛文内容
+    length = ma.fields.Integer()  # 赛文长度
+    hash = ma.fields.String()  # 赛文内容的 hash
+
+    date = ma.fields.Date()  # 赛文日期
+    start_time = ma.fields.Time()  # 赛文开始日期（一般 0 点）
+    end_time = ma.fields.Time()  # 赛文结束时间（一般 23:30:00）
+
+    number = ma.fields.Integer()  # 赛文期数（编号）
+    comp_type = ma.fields.String()  # 比赛类型（日赛、周赛等）
+    level = ma.fields.Integer()  # 赛文难度评级
+
+    group = ma.fields.Nested(GroupSchema)  # 赛文所属群组
+
 
 @comp_article_bp.route("/box")
 class CompArticleBoxView(MethodView):
@@ -170,15 +209,21 @@ class CompArticleView(MethodView):
         else:
             abort(code, description=res)
 
+    @comp_article_bp.arguments(CompArticleQueryArgsSchema)
+    @comp_article_bp.response(code=201, description="删除成功")
     def delete(self):
         """删除赛文"""
         pass
 
-
+    @comp_article_bp.arguments(CompArticleQueryArgsSchema)
+    @comp_article_bp.response(CompArticleSchema(many=True), code=200, description="成功获取到数据")
+    @comp_article_bp.paginate(Page)
     def get(self, data):
         """获取赛文"""
         pass
 
+    @comp_article_bp.arguments(CompArticleSchema)
+    @comp_article_bp.response(CompArticleSchema, code=200, description="修改成功，返回最新内容")
     def patch(self):
         """修改赛文
 

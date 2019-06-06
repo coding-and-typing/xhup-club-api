@@ -122,6 +122,7 @@ class UserView(MethodView):
         else:
             abort(400, message="wrong password")
 
+    @user_bp.response(UserSchema, code=200, description="修改成功")
     @login_required
     def patch(self):
         """修改当前用户信息

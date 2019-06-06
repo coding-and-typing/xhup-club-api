@@ -72,7 +72,7 @@ class RelationView(MethodView):
                              ex=current_config.VERIFICATION_CODE_EXPIRES)
         return payload  # 返回的是临时验证信息
 
-    @relation_bp.response(RelationSchema, code=200, description="成功获取到数据")
+    @relation_bp.response(RelationSchema(many=True), code=200, description="成功获取到数据")
     @relation_bp.paginate(Page)
     def get(self):
         """获取已有的关系表"""

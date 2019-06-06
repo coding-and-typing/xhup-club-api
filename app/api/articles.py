@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 articles_bp = Blueprint(
     'articles', __name__, url_prefix=f'{api_prefix}/articles',
-    description="文章库的增删查改"
+    description="文章库的增删查改（待实现）"
 )
 
 
