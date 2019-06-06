@@ -12,7 +12,6 @@ from typing import Iterable
 import random
 from operator import add
 from sqlalchemy import func
-from sqlalchemy.orm import Query
 
 from app import current_config, db
 from app.models import CompArticleBox, CompArticle, Group
@@ -196,39 +195,6 @@ def add_comp_articles_from_box(data: dict, main_user):
         "start_date": data['start_date'],
         "end_date": data['start_date'] + timedelta(days=count)
     }
-
-
-def query_comp_article(data: dict, main_user):
-    """查询赛文"""
-    platform = data.pop("platform")
-    group_id = data.pop("group_id")
-
-    comp_type = data.get("comp_type")
-
-    start_number = data.get("start_number")
-    end_number = data.get("end_number")
-
-    start_date = data.get("start_date")
-    end_date = data.get("end_date")
-
-    id = data.get("id")
-
-
-
-    articles_query: Query = db.session.qeury(CompArticle) \
-        .filter_by(platform=platform) \
-        .join(CompArticle.group, aliased=True) \
-        .filter(group_id=group_id)
-
-    if comp_type:
-        articles_query = articles_query.filter_by(comp_type=comp_type)
-
-    if start_number:
-        # TODO 待续
-        pass
-
-
-
 
 
 def sync_to_chaiwubi(data, main_user):

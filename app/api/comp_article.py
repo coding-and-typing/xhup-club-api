@@ -7,11 +7,15 @@ from flask.views import MethodView
 import marshmallow as ma
 from flask_login import current_user
 from flask_rest_api import abort, Blueprint, Page
+from flask_rest_api.pagination import PaginationParameters
+from flask_sqlalchemy import BaseQuery
 from marshmallow import validates, ValidationError
+from sqlalchemy import desc, asc
+from sqlalchemy.orm import Query
 
 from app import api_rest, db
 from app.api import api_prefix
-from app.models import CompArticleBox
+from app.models import CompArticleBox, CompArticle, MainUser
 from app.service.articles.article_ import add_comp_article_box, delete_comp_article_box, add_comp_articles_from_box
 from app.utils.common import login_required
 
@@ -109,15 +113,12 @@ class CompArticleQueryArgsSchema(ma.Schema):
     platform = ma.fields.String(required=True)
     group_id = ma.fields.String(required=True)  # 要求当前用户为指定群组的管理员
 
+    mode = ma.fields.String()  # 历史文章（past）/未开始赛文（future）
+
     comp_type = ma.fields.String()  # 赛事类型（周赛日赛等）
 
-    start_number = ma.fields.Integer()  # 赛文起始期数
-    end_number = ma.fields.Integer()
-
-    start_date = ma.fields.Date()  # 赛文起始日期，默认为已有赛文的最后一天+1
-    end_date = ma.fields.Date()
-
-    id = ma.fields.Integer()  # 赛文 id，查询/修改赛文时，如果给定 id，就直接用 id 进行操作
+    # 查询的起点，只查询此日期之前的赛文（历史），或者这之后的赛文（未来）
+    date = ma.fields.Date()  # 赛文日期（默认使用当天日期）
 
 
 class GroupSchema(ma.Schema):
@@ -137,7 +138,8 @@ class CompArticleSchema(ma.Schema):
         strict = True
         ordered = True
 
-    id = ma.fields.Integer()
+    id = ma.fields.Integer(required=True)  # delete/patch 方法的参数里必须有 id
+
     title = ma.fields.String()  # 赛文标题
     producer = ma.fields.String()  # 赛文制作人
 
@@ -154,20 +156,32 @@ class CompArticleSchema(ma.Schema):
     comp_type = ma.fields.String()  # 比赛类型（日赛、周赛等）
     level = ma.fields.Integer()  # 赛文难度评级
 
-    group = ma.fields.Nested(GroupSchema)  # 赛文所属群组
+    group = ma.fields.Nested(GroupSchema, dump_only=True)  # 赛文所属群组，不允许修改
 
 
 class SQLAlchemyPage(Page):
     """分页时，使用 SQLAlchemy 的 Query 类进行分页，
     提升性能。"""
+    def __init__(self, collection: BaseQuery, page_params: PaginationParameters):
+        """Create a Page instance
+
+        :param sequence collection: base_query
+        :page PaginationParameters page_params: Pagination parameters
+        """
+        # 使用 flask_sqlalchemy 提供的 分页函数进行分页
+        self.pagination = collection.paginate(page=page_params.page,
+                                              per_page=page_params.page_size)
+
+        super().__init__(collection, page_params)
+
+
     @property
     def items(self):
-        return list(self.collection[
-            self.page_params.first_item: self.page_params.last_item + 1])
+        return self.pagination.items
 
     @property
     def item_count(self):
-        return self.collection.count()  # query 有 count 方法
+        return self.pagination.total
 
 
 @comp_article_bp.route("/box")
@@ -223,25 +237,69 @@ class CompArticleView(MethodView):
             abort(code, description=res)
 
     @comp_article_bp.arguments(CompArticleQueryArgsSchema)
-    @comp_article_bp.response(code=201, description="删除成功")
-    def delete(self):
-        """删除赛文"""
-        pass
-
-    @comp_article_bp.arguments(CompArticleQueryArgsSchema)
     @comp_article_bp.response(CompArticleSchema(many=True), code=200, description="成功获取到数据")
-    @comp_article_bp.paginate(Page)
+    @comp_article_bp.paginate(SQLAlchemyPage)
     def get(self, data):
         """获取赛文"""
-        pass
+        articles_query: BaseQuery = db.session.qeury(CompArticle) \
+            .filter_by(platform=data["platform"]) \
+            .join(CompArticle.group, aliased=True) \
+            .filter(group_id=data['group_id'])
+
+        if "comp_type" in data:
+            articles_query = articles_query.filter_by(comp_type=data['comp_type'])
+
+        mode = data['mode']
+        date = data.get("date",  # 默认使用当前日期
+                        datetime.datetime.now().date())
+        if mode == "past":  # 查看历史赛文
+            articles_query = articles_query.filter(CompArticle.date <= date)\
+                .order_by(desc(CompArticle.date))
+        elif mode == "future":  # 未开始的赛文
+            articles_query = articles_query.filter(CompArticle.date >= date) \
+                .order_by(asc(CompArticle.date))
+        else:
+            abort(400, message="'mode' must be 'past' or 'future'!")
+
+        return articles_query
+
+    @comp_article_bp.arguments(CompArticleSchema)
+    @comp_article_bp.response(code=201, description="删除成功")
+    def delete(self, data):
+        """删除赛文"""
+        article: CompArticle = db.session.qeury(CompArticle) \
+            .filter_by(id=data.pop('id')).first()
+
+        if not article:
+            abort(400, message="the id you specified not exist!")
+
+        if article.group not in current_user.auth_groups:
+            abort(401, message="you don't have the authority to modify this article!")
+
+        db.session.delete(article)
+        db.session.commit()
 
     @comp_article_bp.arguments(CompArticleSchema)
     @comp_article_bp.response(CompArticleSchema, code=200, description="修改成功，返回最新内容")
-    def patch(self):
+    def patch(self, data: dict):
         """修改赛文
 
         ---
         :return:
         """
-        pass
+        article: CompArticle = db.session.qeury(CompArticle) \
+            .filter_by(id=data.pop('id')).first()
+
+        if not article:
+            abort(400, message="the id you specified not exist!")
+
+        if article.group not in current_user.auth_groups:
+            abort(401, message="you don't have the authority to modify this article!")
+
+        for key, value in data.items():
+            article.__setattr__(key, value)  # 修改赛文
+
+        db.session.commit()  # 最后提交
+
+
 

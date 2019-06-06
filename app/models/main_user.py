@@ -62,15 +62,26 @@ class MainUser(UserMixin, db.Model):
         # 设置密码（hash）
         self.password_hash = generate_password_hash(password)
 
-    def __repr__(self):
-        return '<Main User {}>'.format(self.username)
-
     def set_password(self, password: str):
         """只用于修改密码"""
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password: str):
         return check_password_hash(self.password_hash, password)
+
+    @property
+    def auth_groups(self):
+        """当前用户有管理权限的所有群组"""
+        groups = set()
+        for user in self.group_users:
+            for relation in user.relations:
+                if relation.is_owner or relation.is_admin:
+                    groups.add(relation.group)
+
+        return groups
+
+    def __repr__(self):
+        return '<Main User {}>'.format(self.username)
 
 
 @login_manager.user_loader
