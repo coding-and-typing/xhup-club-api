@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 import typing
 
@@ -8,9 +9,10 @@ import marshmallow as ma
 from flask_rest_api import abort, Blueprint
 from sqlalchemy.exc import IntegrityError
 
-from app import api_rest, db
+from app import api_rest, db, current_config, redis
 from app.models import MainUser
-from app.utils.common import login_required
+from app.utils.captcha import generate_captcha_code
+from app.utils.common import login_required, timestamp
 from app.api import api_prefix
 
 logger = logging.getLogger(__name__)
@@ -48,7 +50,7 @@ class UserCreateArgsSchema(ma.Schema):
 
     username = ma.fields.String(required=True)
     email = ma.fields.Email(required=True)
-    password = ma.fields.String(required=True)
+    password = ma.fields.String(required=True, load_only=True)
 
 
 class UserDeleteArgsSchema(ma.Schema):
@@ -59,7 +61,18 @@ class UserDeleteArgsSchema(ma.Schema):
         strict = True
         ordered = True
 
-    password = ma.fields.String(required=True)
+    password = ma.fields.String(required=True, load_only=True)
+
+class UserPatchArgsSchema(ma.Schema):
+    """修改用户信息需要的参数
+
+    """
+    class Meta:
+        strict = True
+        ordered = True
+
+    username = ma.fields.String()
+    email = ma.fields.Email()
 
 
 @user_bp.route('/')
@@ -122,12 +135,42 @@ class UserView(MethodView):
         else:
             abort(400, message="wrong password")
 
+    @user_bp.arguments(UserPatchArgsSchema)
     @user_bp.response(UserSchema, code=200, description="修改成功")
     @login_required
-    def patch(self):
-        """修改当前用户信息
+    def patch(self, data: dict):
+        """修改当前用户信息（不包含修改密码）
 
         ---
         :return:
         """
+        for key, value in data.items():
+            current_user.__setattr__(key, value)
+
+        db.session.commit()
+        return current_user
+
+
+@user_bp.route('/password')
+class UserPasswordView(MethodView):
+    """修改用户密码"""
+    def patch(self):
+        """修改用户密码
+        将返回验证码，用户需要通过已绑定的群组，将验证码发送给拆小鹤。
+        才能才能进入密码修改的下一个流程。
+        """
+        # 生成验证码
+        verification_code = generate_captcha_code()
+        payload = {
+            "user_db_id": current_user.id,
+            "verification_code": verification_code,
+            "timestamp": timestamp(),
+            "expires": current_config.VERIFICATION_CODE_EXPIRES
+        }
+
+        key = current_config.RESET_PASSWORD_VERI_FORMAT.format(verification_code)
+        redis.connection.set(key,
+                             json.dumps(payload),
+                             ex=current_config.VERIFICATION_CODE_EXPIRES)
+        return payload  # 返回的是临时验证信息
 

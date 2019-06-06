@@ -251,7 +251,7 @@ def group_bind_handler(data, session, args, message):
     assert data['message']['type'] == 'group'
 
     verification_code = args['primary']
-    key = current_config.VERIFICATION_FORMAT.format(verification_code)
+    key = current_config.GROUP_BIND_VERI_FORMAT.format(verification_code)
     payload = redis.connection.get(key)  # 从 redis 中 get 信息
     if not payload:
         return {'text': "请先通过 Web 端获取验证码"}
@@ -286,6 +286,19 @@ def typing_score_handler(data, session, message):
     """跟打成绩记录
 
     ------
+    :param data:
+    :param session:
+    :param message:
+    :return:
+    """
+    # TODO 待完成
+    pass
+
+
+def reset_passwd_handler(data, session, message):
+    """修改账号密码
+    需要先在网页上
+    ---
     :param data:
     :param session:
     :param message:

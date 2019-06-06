@@ -35,7 +35,8 @@ class BaseConfig(object):
 
     # 各种 redis key 的格式串
     CAPTCHA_FORMAT = "captcha:{}"  # 登录验证码对应的 key
-    VERIFICATION_FORMAT = "group_user_relation:{}"  # 群组绑定验证码对应的 key
+    GROUP_BIND_VERI_FORMAT = "group_user_relation:{}"  # 群组绑定验证码对应的 key
+    RESET_PASSWORD_VERI_FORMAT = "reset_password:{}"  # 重设密码对应的验证码
 
     # 3. 权限与日志配置
     # 是否开启权限鉴定

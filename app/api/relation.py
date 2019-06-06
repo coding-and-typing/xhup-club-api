@@ -64,9 +64,10 @@ class RelationView(MethodView):
             "user_db_id": current_user.id,
             "verification_code": verification_code,
             "timestamp": timestamp(),
+            "expires": current_config.VERIFICATION_CODE_EXPIRES
         }
 
-        key = current_config.VERIFICATION_FORMAT.format(verification_code)
+        key = current_config.GROUP_BIND_VERI_FORMAT.format(verification_code)
         redis.connection.set(key,
                              json.dumps(payload),
                              ex=current_config.VERIFICATION_CODE_EXPIRES)

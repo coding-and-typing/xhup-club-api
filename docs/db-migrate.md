@@ -10,7 +10,7 @@ flask db init
 # 2. 初始化生成的 migrations/env.py 不能直接使用，需要更改
 # 这一步详见 config.md
 
-# 3. 每次 model 更改后，运行此命令
+# 3. 每次 model 更改后，运行此命令(如果提示数据库不是最新，就先 upgrade)
 flask db migrate  # 这会自动检测 model 的更改
 
 # 4. 将 migrate 检测到的更新应用到数据库
