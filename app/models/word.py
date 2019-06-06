@@ -9,7 +9,7 @@ from app import db
 """
 
 
-class WordsTable(db.Model):
+class WordTable(db.Model):
     """码表"""
     id = db.Column(db.Integer, primary_key=True)
 
