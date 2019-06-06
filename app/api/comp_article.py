@@ -126,7 +126,7 @@ class GroupSchema(ma.Schema):
         ordered = True
 
     id = ma.fields.Integer()
-    platform = db.Columnma.fields.String()  # qq、wechat 或 telegram
+    platform = ma.fields.String()  # qq、wechat 或 telegram
     group_id = ma.fields.String()  # 群的唯一 id
     group_name = ma.fields.String()  # 群名称
 
@@ -155,6 +155,19 @@ class CompArticleSchema(ma.Schema):
     level = ma.fields.Integer()  # 赛文难度评级
 
     group = ma.fields.Nested(GroupSchema)  # 赛文所属群组
+
+
+class SQLAlchemyPage(Page):
+    """分页时，使用 SQLAlchemy 的 Query 类进行分页，
+    提升性能。"""
+    @property
+    def items(self):
+        return list(self.collection[
+            self.page_params.first_item: self.page_params.last_item + 1])
+
+    @property
+    def item_count(self):
+        return self.collection.count()  # query 有 count 方法
 
 
 @comp_article_bp.route("/box")

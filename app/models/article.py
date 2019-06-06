@@ -13,7 +13,7 @@ from app.utils import text
 
 
 class CompArticle(db.Model):
-    """赛文库（包括历史赛文，和未来的赛文）"""
+    """赛文库（包括历史赛文，当前赛文和未来的赛文）"""
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128), index=True, nullable=False)  # 赛文标题
     producer = db.Column(db.String(128), index=True, nullable=True)  # 赛文制作人
