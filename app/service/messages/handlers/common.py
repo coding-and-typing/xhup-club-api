@@ -297,7 +297,6 @@ def typing_score_handler(data, session, message):
 
 def reset_passwd_handler(data, session, message):
     """修改账号密码
-    需要先在网页上
     ---
     :param data:
     :param session:
@@ -306,6 +305,9 @@ def reset_passwd_handler(data, session, message):
     """
     # TODO 待完成
     pass
+
+    # 创建新 session 并回复：“如果你确定你需要修改新密码，请在三分钟内回复 [新密码 xxx]”
+    # 注意新密码中不能包含空格或换行
 
 
 # 添加默认 handlers
