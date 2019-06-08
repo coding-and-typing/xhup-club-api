@@ -17,6 +17,8 @@ class CharTable(db.Model):
     # 所属的拆字表版本号，应使用 pkg_resources.parse_version 做比较
     version = db.Column(db.String(20), index=True, nullable=False)
 
+    description = db.Column(db.String(2048))  # 描述，比如新版本更新了啥。
+
     # 拆字表所属群组，群管理员可编辑该表。（其他群只能选用该表，不能修改）
     # 通过 backref 添加了 group 引用
     group_db_id = db.Column(db.Integer,

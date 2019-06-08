@@ -54,6 +54,7 @@ def save_char_table(table: str,
                     version: str,
                     table_type: str,
                     table_name: str,
+                    description: str,
                     group_id: str,
                     platform: str):
     """
@@ -62,6 +63,7 @@ def save_char_table(table: str,
     :param version: 拆字表版本号
     :param table_type: 编码表类型，用于确定应该调用的解析器
     :param table_name: 编码表名称（如小鹤音形拆字表）
+    :param description: 说明，比如新版本更新了啥。
     :param group_id: 群组 id（非数据库 id）
     :param platform: 该群所属平台
     :return:
@@ -84,6 +86,7 @@ def save_char_table(table: str,
 
     chars_table = CharTable(name=table_name,
                             version=version,
+                            description=description,
                             group_db_id=group_db_id)
     db.session.add(chars_table)  # 将 chars_table 插入表中
     table_db_id = db.session.query(CharTable) \

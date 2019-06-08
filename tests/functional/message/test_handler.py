@@ -86,6 +86,7 @@ def test_char_query_handler(group_admin):
         "version": "0.0.1",
         "table_name": "小鹤音形拆字表",
         "table_type": "xhup",
+        "description": "最初的版本，小鹤音形是双拼+形的四键编码方案。",
         "table": """比：　bi bibb*=拆分：　比左 匕=首末：　比左 匕=编码：　b  b
     顷：　qkb qkbr=拆分：　比左 一 ノ 冂 人=首末：　比左 人=编码：　b  r
     皆：　jpb jpbb=拆分：　比左 匕 白=首末：　比左 白=编码：　b  b""",

@@ -150,27 +150,32 @@ class UserView(MethodView):
         db.session.commit()
         return current_user
 
+#
+# @user_bp.route('/password')
+# class UserPasswordView(MethodView):
+#     """修改用户密码
+#     有两种方法：
+#         1. 直接通过拆小鹤进行账户密码修改，发送「修改密码」给拆小鹤就行
+#         2. 通过邮箱验证，将验证消息通过 jwt 编码进链接中，通过该链接修改密码。
+#     """
+#     def get(self):
+#         """使用 jwt 生成密码重置用的编码串，拼成链接发送给用户绑定的邮箱"""
+#         verification_code = generate_captcha_code()
+#         payload = {
+#             "user_db_id": current_user.id,
+#             "verification_code": verification_code,
+#             "timestamp": timestamp(),
+#             "expires": current_config.VERIFICATION_CODE_EXPIRES
+#         }
+#
+#         key = current_config.RESET_PASSWORD_VERI_FORMAT.format(verification_code)
+#         redis.connection.set(key,
+#                              json.dumps(payload),
+#                              ex=current_config.VERIFICATION_CODE_EXPIRES)
+#         return payload  # 返回的是临时验证信息
+#
+#     def patch(self):
+#         """通过邮箱跳转进密码修改页面。
+#         """
 
-@user_bp.route('/password')
-class UserPasswordView(MethodView):
-    """修改用户密码"""
-    def patch(self):
-        """修改用户密码
-        将返回验证码，用户需要通过已绑定的群组，将验证码发送给拆小鹤。
-        才能才能进入密码修改的下一个流程。
-        """
-        # 生成验证码
-        verification_code = generate_captcha_code()
-        payload = {
-            "user_db_id": current_user.id,
-            "verification_code": verification_code,
-            "timestamp": timestamp(),
-            "expires": current_config.VERIFICATION_CODE_EXPIRES
-        }
-
-        key = current_config.RESET_PASSWORD_VERI_FORMAT.format(verification_code)
-        redis.connection.set(key,
-                             json.dumps(payload),
-                             ex=current_config.VERIFICATION_CODE_EXPIRES)
-        return payload  # 返回的是临时验证信息
 

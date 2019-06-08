@@ -44,6 +44,8 @@ class TableSchema(ma.Schema):
 
     table_name = ma.fields.String(required=True)  # 编码表名称（如小鹤音形拆字表）
 
+    description = ma.fields.String(default="")
+
     group_id = ma.fields.String(required=True)  # 一个编码表，需要绑定一个群号。
     platform = ma.fields.String(required=True)  # 该群所属平台
 
