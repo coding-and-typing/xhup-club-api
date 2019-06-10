@@ -91,6 +91,16 @@ travis encrypt-file secrets.tar
 
 对 `DB_PASSWORD` 这种使用了 `urllib.parse.quote_plus` 的字符串，quote 后的字符串也应该加进去。
 
+### 开发机安装  travis
+
+```bash
+sudo apt-get install ruby ruby-dev gcc make
+gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
+sudo gem install travis
+travis login --com  # 然后输入账号密码
+# 现在才能用 `travis encrypt-file` 命令
+```
+
 ### DB 密码
 
 带特殊字符的 DB_PASSWORD 在 SQLAlchemy 中必须用 `urllib.parse.quote_plus` 编码，

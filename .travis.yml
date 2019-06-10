@@ -11,7 +11,7 @@ services:
   - redis  # 对应 redis-server 启动命令 `sudo systemctl start redis-server`
 
 before_install:
-- openssl aes-256-cbc -K $encrypted_7ca182d1b659_key -iv $encrypted_7ca182d1b659_iv
+- openssl aes-256-cbc -K $encrypted_e4e604bd9825_key -iv $encrypted_e4e604bd9825_iv
   -in secrets.tar.enc -out secrets.tar -d
 - tar -xv -f secrets.tar -C ~ # 解打包
 
