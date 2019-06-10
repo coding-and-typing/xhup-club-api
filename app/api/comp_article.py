@@ -11,7 +11,6 @@ from flask_rest_api.pagination import PaginationParameters
 from flask_sqlalchemy import BaseQuery
 from marshmallow import validates, ValidationError
 from sqlalchemy import desc, asc
-from sqlalchemy.orm import Query
 
 from app import api_rest, db
 from app.api import api_prefix

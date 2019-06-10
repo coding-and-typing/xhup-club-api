@@ -80,7 +80,7 @@ sudo journalctl -u xhup-club-api.service  # 查看该服务的日志
 
 ### 自动部署
 
-如果修改了 `.env`，记得运行如下命令更新加密文件：
+如果修改了 `prod.env`，记得运行如下命令更新加密文件：
 ```bash
 tar -cv -f secrets.tar prod.env id_rsa_for_ssh.key
 travis encrypt-file secrets.tar

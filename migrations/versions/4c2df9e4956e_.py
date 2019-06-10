@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: be9e8ae40412
+Revision ID: 4c2df9e4956e
 Revises: 
-Create Date: 2019-05-22 23:07:15.908255
+Create Date: 2019-06-10 16:45:42.837825
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'be9e8ae40412'
+revision = '4c2df9e4956e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -47,7 +47,7 @@ def upgrade():
     sa.Column('length', sa.Integer(), nullable=False),
     sa.Column('special_chars', sa.String(length=2040), nullable=False),
     sa.Column('main_user_id', sa.Integer(), nullable=True),
-    sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('title', 'hash', 'length', name='c_article')
     )
@@ -56,18 +56,31 @@ def upgrade():
     op.create_index(op.f('ix_article_length'), 'article', ['length'], unique=False)
     op.create_index(op.f('ix_article_main_user_id'), 'article', ['main_user_id'], unique=False)
     op.create_index(op.f('ix_article_title'), 'article', ['title'], unique=False)
-    op.create_table('chars_table',
+    op.create_table('chai_wu_bi_user',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('username', sa.String(length=64), nullable=False),
+    sa.Column('password', sa.String(length=128), nullable=False),
+    sa.Column('main_user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_chai_wu_bi_user_main_user_id'), 'chai_wu_bi_user', ['main_user_id'], unique=False)
+    op.create_table('char_table',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('version', sa.String(length=20), nullable=False),
-    sa.Column('group_db_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['group_db_id'], ['group.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.Column('description', sa.String(length=2048), nullable=True),
+    sa.Column('group_db_id', sa.Integer(), nullable=True),
+    sa.Column('main_user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['group_db_id'], ['group.id'], ),
+    sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name'),
-    sa.UniqueConstraint('name', 'version', name='c_chars_table')
+    sa.UniqueConstraint('name', 'version', name='c_char_table')
     )
-    op.create_index(op.f('ix_chars_table_group_db_id'), 'chars_table', ['group_db_id'], unique=False)
-    op.create_index(op.f('ix_chars_table_version'), 'chars_table', ['version'], unique=False)
+    op.create_index(op.f('ix_char_table_group_db_id'), 'char_table', ['group_db_id'], unique=False)
+    op.create_index(op.f('ix_char_table_main_user_id'), 'char_table', ['main_user_id'], unique=False)
+    op.create_index(op.f('ix_char_table_version'), 'char_table', ['version'], unique=False)
     op.create_table('comp_article',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=128), nullable=False),
@@ -77,10 +90,13 @@ def upgrade():
     sa.Column('length', sa.Integer(), nullable=False),
     sa.Column('hash', sa.String(length=128), nullable=False),
     sa.Column('date', sa.Date(), nullable=False),
+    sa.Column('start_time', sa.Time(), nullable=False),
+    sa.Column('end_time', sa.Time(), nullable=False),
     sa.Column('number', sa.Integer(), nullable=False),
     sa.Column('comp_type', sa.String(length=128), nullable=False),
     sa.Column('level', sa.Integer(), nullable=True),
-    sa.Column('group_db_id', sa.Integer(), nullable=True),
+    sa.Column('sync', sa.Integer(), nullable=False),
+    sa.Column('group_db_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['group_db_id'], ['group.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('date', 'group_db_id', name='c_comp_article_3'),
@@ -97,18 +113,17 @@ def upgrade():
     op.create_table('comp_article_box',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(length=128), nullable=False),
-    sa.Column('author', sa.String(length=128), nullable=True),
     sa.Column('content_type', sa.String(length=64), nullable=True),
     sa.Column('content', sa.Text(), nullable=False),
     sa.Column('hash', sa.String(length=128), nullable=False),
     sa.Column('length', sa.Integer(), nullable=False),
-    sa.Column('main_user_id', sa.Integer(), nullable=True),
+    sa.Column('level', sa.Integer(), nullable=True),
+    sa.Column('main_user_id', sa.Integer(), nullable=False),
     sa.Column('box_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('hash', 'length', 'main_user_id', name='c_article')
     )
-    op.create_index(op.f('ix_comp_article_box_author'), 'comp_article_box', ['author'], unique=False)
     op.create_index(op.f('ix_comp_article_box_box_id'), 'comp_article_box', ['box_id'], unique=False)
     op.create_index(op.f('ix_comp_article_box_content_type'), 'comp_article_box', ['content_type'], unique=False)
     op.create_index(op.f('ix_comp_article_box_length'), 'comp_article_box', ['length'], unique=False)
@@ -120,25 +135,28 @@ def upgrade():
     sa.Column('user_id', sa.String(length=20), nullable=False),
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('main_user_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], ),
+    sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('platform', 'user_id', name='c_group_user')
     )
     op.create_index(op.f('ix_group_user_main_user_id'), 'group_user', ['main_user_id'], unique=False)
     op.create_index(op.f('ix_group_user_platform'), 'group_user', ['platform'], unique=False)
     op.create_index(op.f('ix_group_user_user_id'), 'group_user', ['user_id'], unique=False)
-    op.create_table('words_table',
+    op.create_table('word_table',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('version', sa.String(length=20), nullable=False),
-    sa.Column('group_db_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['group_db_id'], ['group.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.Column('group_db_id', sa.Integer(), nullable=True),
+    sa.Column('main_user_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['group_db_id'], ['group.id'], ),
+    sa.ForeignKeyConstraint(['main_user_id'], ['main_user.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name', 'version', name='c_words_table')
+    sa.UniqueConstraint('name', 'version', name='c_word_table')
     )
-    op.create_index(op.f('ix_words_table_group_db_id'), 'words_table', ['group_db_id'], unique=False)
-    op.create_index(op.f('ix_words_table_name'), 'words_table', ['name'], unique=True)
-    op.create_index(op.f('ix_words_table_version'), 'words_table', ['version'], unique=False)
+    op.create_index(op.f('ix_word_table_group_db_id'), 'word_table', ['group_db_id'], unique=False)
+    op.create_index(op.f('ix_word_table_main_user_id'), 'word_table', ['main_user_id'], unique=False)
+    op.create_index(op.f('ix_word_table_name'), 'word_table', ['name'], unique=True)
+    op.create_index(op.f('ix_word_table_version'), 'word_table', ['version'], unique=False)
     op.create_table('character',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('char', sa.String(length=6), nullable=False),
@@ -146,7 +164,7 @@ def upgrade():
     sa.Column('split', sa.String(length=200), nullable=True),
     sa.Column('other_info', sa.String(length=200), nullable=True),
     sa.Column('table_db_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['table_db_id'], ['chars_table.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['table_db_id'], ['char_table.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('table_db_id', 'char', name='c_char')
     )
@@ -173,7 +191,7 @@ def upgrade():
     sa.Column('position', sa.Integer(), nullable=False),
     sa.Column('code', sa.String(length=12), nullable=False),
     sa.Column('table_db_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['table_db_id'], ['words_table.id'], onupdate='CASCADE', ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['table_db_id'], ['word_table.id'], onupdate='CASCADE', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('table_db_id', 'code', 'position', name='c_word')
     )
@@ -194,10 +212,11 @@ def downgrade():
     op.drop_index(op.f('ix_character_table_db_id'), table_name='character')
     op.drop_index(op.f('ix_character_char'), table_name='character')
     op.drop_table('character')
-    op.drop_index(op.f('ix_words_table_version'), table_name='words_table')
-    op.drop_index(op.f('ix_words_table_name'), table_name='words_table')
-    op.drop_index(op.f('ix_words_table_group_db_id'), table_name='words_table')
-    op.drop_table('words_table')
+    op.drop_index(op.f('ix_word_table_version'), table_name='word_table')
+    op.drop_index(op.f('ix_word_table_name'), table_name='word_table')
+    op.drop_index(op.f('ix_word_table_main_user_id'), table_name='word_table')
+    op.drop_index(op.f('ix_word_table_group_db_id'), table_name='word_table')
+    op.drop_table('word_table')
     op.drop_index(op.f('ix_group_user_user_id'), table_name='group_user')
     op.drop_index(op.f('ix_group_user_platform'), table_name='group_user')
     op.drop_index(op.f('ix_group_user_main_user_id'), table_name='group_user')
@@ -207,7 +226,6 @@ def downgrade():
     op.drop_index(op.f('ix_comp_article_box_length'), table_name='comp_article_box')
     op.drop_index(op.f('ix_comp_article_box_content_type'), table_name='comp_article_box')
     op.drop_index(op.f('ix_comp_article_box_box_id'), table_name='comp_article_box')
-    op.drop_index(op.f('ix_comp_article_box_author'), table_name='comp_article_box')
     op.drop_table('comp_article_box')
     op.drop_index(op.f('ix_comp_article_title'), table_name='comp_article')
     op.drop_index(op.f('ix_comp_article_producer'), table_name='comp_article')
@@ -217,9 +235,12 @@ def downgrade():
     op.drop_index(op.f('ix_comp_article_content_type'), table_name='comp_article')
     op.drop_index(op.f('ix_comp_article_comp_type'), table_name='comp_article')
     op.drop_table('comp_article')
-    op.drop_index(op.f('ix_chars_table_version'), table_name='chars_table')
-    op.drop_index(op.f('ix_chars_table_group_db_id'), table_name='chars_table')
-    op.drop_table('chars_table')
+    op.drop_index(op.f('ix_char_table_version'), table_name='char_table')
+    op.drop_index(op.f('ix_char_table_main_user_id'), table_name='char_table')
+    op.drop_index(op.f('ix_char_table_group_db_id'), table_name='char_table')
+    op.drop_table('char_table')
+    op.drop_index(op.f('ix_chai_wu_bi_user_main_user_id'), table_name='chai_wu_bi_user')
+    op.drop_table('chai_wu_bi_user')
     op.drop_index(op.f('ix_article_title'), table_name='article')
     op.drop_index(op.f('ix_article_main_user_id'), table_name='article')
     op.drop_index(op.f('ix_article_length'), table_name='article')
