@@ -31,6 +31,8 @@ class CompArticle(db.Model):
     comp_type = db.Column(db.String(128), index=True, nullable=False)  # 比赛类型（日赛、周赛等）
     level = db.Column(db.Integer, nullable=True)  # 赛文难度评级
 
+    sync = db.Column(db.Integer, nullable=False, default=0)  # 0 未同步，1 同步成功，2 同步失败
+
     # 赛文所属群组（级联）
     # 通过 backref 添加了 group 引用
     group_db_id = db.Column(db.Integer,

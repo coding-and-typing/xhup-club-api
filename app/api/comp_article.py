@@ -15,8 +15,9 @@ from sqlalchemy.orm import Query
 
 from app import api_rest, db
 from app.api import api_prefix
-from app.models import CompArticleBox, CompArticle, MainUser
+from app.models import CompArticleBox, CompArticle, MainUser, ChaiWuBiUser, get_group
 from app.service.articles.article_ import add_comp_article_box, delete_comp_article_box, add_comp_articles_from_box
+from app.service.articles.chaiwubi import ArticleAdder
 from app.utils.common import login_required
 
 logger = logging.getLogger(__name__)
@@ -127,8 +128,8 @@ class GroupSchema(ma.Schema):
         ordered = True
 
     id = ma.fields.Integer()
-    platform = ma.fields.String()  # qq、wechat 或 telegram
-    group_id = ma.fields.String()  # 群的唯一 id
+    platform = ma.fields.String(required=True)  # qq、wechat 或 telegram
+    group_id = ma.fields.String(required=True)  # 群的唯一 id
     group_name = ma.fields.String()  # 群名称
 
 
@@ -300,6 +301,56 @@ class CompArticleView(MethodView):
             article.__setattr__(key, value)  # 修改赛文
 
         db.session.commit()  # 最后提交
+
+
+@comp_article_bp.route("/chaiwubi")
+class ChaiWuBiView(MethodView):
+    """将指定群组的赛文同步到拆五笔赛文系统（会先清空拆五笔赛文库）
+    """
+
+    decorators = [login_required]
+
+    @comp_article_bp.arguments(GroupSchema)
+    @comp_article_bp.response(code=201, description="同步成功")
+    def post(self, data: Dict):
+        c_user: ChaiWuBiUser = current_user.chaiwubi_user
+        c_adder = ArticleAdder(c_user.username, c_user.password)
+
+        c_adder.login()  # 登录
+        c_adder.delete_all_articles()  # 清空
+
+        # 将所有赛文添加至拆五笔赛文系统
+        group = get_group(data['group_id'], data['platform'])
+        if group not in current_user.auth_groups:
+            abort(401, message="you don't have the authority of this group!")
+
+        failure_count = 0
+        for article in group.comp_articles:
+            success = c_adder.add_article(
+                content=article.content,
+                content_type=article.content_type,
+                date_=article.date,
+                start_time=article.start_time,
+                end_time=article.end_time,
+                group_id=article.group.id,
+                number=article.number,
+                title=article.title,
+                comp_type=article.comp_type,
+                producer=article.producer,
+                level=article.level,
+            )
+
+            if success:
+                article.sync = 1 # 1 表示同步成功
+            else:
+                article.sync = 2 # 2 表示同步失败
+                failure_count += 1
+        db.session.commit()  # 提交对 sync 字段的修改
+        return {
+            "group_id": group.id,
+            "total": group.comp_articles.count(),
+            "failure_count": failure_count,
+        }
 
 
 

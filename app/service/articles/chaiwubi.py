@@ -120,10 +120,17 @@ class ArticleAdder(object):
             "entries": entries
         }
 
-    def add_article(self, content: str,
-                    start_datetime: datetime,
-                    end_datetime: datetime,
-                    group_id, number, title, subtitle, producer, content_type,
+    def add_article(self,
+                    content: str,
+                    content_type,
+                    date_: date,
+                    start_time: time,
+                    end_time: time,
+                    group_id,
+                    number,
+                    title,
+                    comp_type,
+                    producer,
                     swid: int = 0,
                     level: int = 3):
         """
@@ -134,12 +141,14 @@ class ArticleAdder(object):
         """
         logger.info(f"开始添加赛文：《{title}》{content_type} - 第 {number} 期")
 
+        start_datetime = datetime.combine(date_, start_time)
+        end_datetime = datetime.combine(date_, end_time)
         article_dict = {
             "swid": swid,  # 赛文 id，为 0 时表示新增赛文。为已存在的赛文 id 时表示修改赛文
             "m_gid": group_id,  # 群号
             "m_qishu": number,  # 赛文期数
             "m_title": f"《{title}》",  # 赛文标题
-            "m_subtitle": subtitle,  # 子标题：日赛、周赛等
+            "m_subtitle": comp_type,  # 子标题：日赛、周赛等
             "m_chutiren": producer,  # 赛文制作人
             "m_zucheng": content_type,  # 赛文内容：单字、散文等
             "m_clock": 1200,  # 赛文跟打时间，好像没啥用
@@ -176,18 +185,15 @@ class ArticleAdder(object):
         :param kwargs: 其他参数
         :return:
         """
-        start_datetime = datetime.combine(start_date, start_time)
-        end_datetime = datetime.combine(start_date, end_time)
-
         # 上传文章
         for i, article in enumerate(articles):
             number = start_number + i
-            start = start_datetime + date_step * i
-            end = end_datetime + date_step * i
+            date_ = start_date + date_step * i
             self.add_article(**article,
                              number=number,
-                             start_datetime=start,
-                             end_datetime=end,
+                             date_=date_,
+                             start_time=start_time,
+                             end_time=end_time,
                              **kwargs)
 
     def get_article_raw(self, swid):
