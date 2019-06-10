@@ -37,10 +37,10 @@ class CharTable(db.Model):
                                  passive_deletes="cascade")
 
     # 同一张拆字表的同一个版本号只能使用一次
-    __table_args__ = (UniqueConstraint('name', 'version', name="c_chars_table"),)
+    __table_args__ = (UniqueConstraint('name', 'version', name="c_char_table"),)
 
     def __repr__(self):
-        return "<Chars Table '{}'>".format(self.name)
+        return "<Char Table '{}'>".format(self.name)
 
 
 class Character(db.Model):

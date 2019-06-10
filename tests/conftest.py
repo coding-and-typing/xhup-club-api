@@ -11,8 +11,6 @@ os.environ['XHUP_ENV'] = 'test'
 from app import create_app
 from app import db as _db
 from app.models import Group, GroupUser, GroupUserRelation, MainUser
-from app.models.character import CharsTable
-from app.service.words.character import get_info
 
 
 @pytest.fixture

@@ -6,7 +6,7 @@ from operator import itemgetter
 from pkg_resources import parse_version
 
 from app import db
-from app.models import Group
+from app.models import Group, MainUser
 from app.models.character import Character, CharTable
 
 """
@@ -54,18 +54,20 @@ def save_char_table(table: str,
                     version: str,
                     table_type: str,
                     table_name: str,
-                    description: str,
                     group_id: str,
-                    platform: str):
+                    platform: str,
+                    main_user: MainUser,
+                    description: str=None):
     """
 
     :param table: 待解析的拆字表字符串
     :param version: 拆字表版本号
     :param table_type: 编码表类型，用于确定应该调用的解析器
     :param table_name: 编码表名称（如小鹤音形拆字表）
-    :param description: 说明，比如新版本更新了啥。
     :param group_id: 群组 id（非数据库 id）
+    :param main_user: 拆字表创建者
     :param platform: 该群所属平台
+    :param description: 说明，比如新版本更新了啥。
     :return:
     """
     version_ = parse_version(version)
@@ -87,7 +89,8 @@ def save_char_table(table: str,
     chars_table = CharTable(name=table_name,
                             version=version,
                             description=description,
-                            group_db_id=group_db_id)
+                            group_db_id=group_db_id,
+                            main_user_id=main_user.id)
     db.session.add(chars_table)  # 将 chars_table 插入表中
     table_db_id = db.session.query(CharTable) \
         .filter_by(name=table_name, version=version) \

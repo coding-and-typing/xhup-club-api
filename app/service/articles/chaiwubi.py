@@ -158,6 +158,38 @@ class ArticleAdder(object):
             logger.warning(f"赛文添加出现问题，信息：{resp_json['msg']}")
             return False
 
+    def add_articles(self, articles: list,
+                     start_number: int,
+                     start_date: date,
+                     start_time: time,
+                     end_time: time,
+                     date_step: timedelta = timedelta(days=1),
+                     **kwargs):
+        """批量添加赛文
+
+        :param articles: 赛文 list，内部是 dict
+        :param start_number: 赛文的起始期数
+        :param start_date: 赛文开始的日期
+        :param start_time: 赛文开始的时间
+        :param end_time: 赛文结束时间
+        :param date_step: 赛事间隔（每这么多天一篇赛文）
+        :param kwargs: 其他参数
+        :return:
+        """
+        start_datetime = datetime.combine(start_date, start_time)
+        end_datetime = datetime.combine(start_date, end_time)
+
+        # 上传文章
+        for i, article in enumerate(articles):
+            number = start_number + i
+            start = start_datetime + date_step * i
+            end = end_datetime + date_step * i
+            self.add_article(**article,
+                             number=number,
+                             start_datetime=start,
+                             end_datetime=end,
+                             **kwargs)
+
     def get_article_raw(self, swid):
         """
         获取已添加赛文的信息
@@ -194,7 +226,7 @@ class ArticleAdder(object):
                                       data=article_raw).json()
 
         if int(resp_json['code']) == 200:
-            logger.info(f"赛文修改成功，信息：{resp_json['msg']}")
+            logger.debug(f"赛文修改成功，信息：{resp_json['msg']}")
             return True
         else:
             logger.warning(f"赛文修改出现问题，信息：{resp_json['msg']}")
@@ -270,34 +302,12 @@ class ArticleAdder(object):
                 self.delete_article(entry['id'])
                 logger.info(f"已删除 {entry['title']} - 第{entry['number']}期，赛文日期 {entry['date']}")
 
-    def add_articles(self, articles: list,
-                     start_number: int,
-                     start_date: date,
-                     start_time: time,
-                     end_time: time,
-                     date_step: timedelta = timedelta(days=1),
-                     **kwargs):
-        """批量添加赛文
+    def delete_all_articles(self, info=None):
+        """清空赛文库"""
+        if not info:
+            info = self.get_info(entries_index="list")  # 自动获取最新 info，使用日期索引entries
 
-        :param articles: 赛文 list，内部是 dict
-        :param start_number: 赛文的起始期数
-        :param start_date: 赛文开始的日期
-        :param start_time: 赛文开始的时间
-        :param end_time: 赛文结束时间
-        :param date_step: 赛事间隔（每这么多天一篇赛文）
-        :param kwargs: 其他参数
-        :return:
-        """
-        start_datetime = datetime.combine(start_date, start_time)
-        end_datetime = datetime.combine(start_date, end_time)
+        for entry in info["entries"]:
+            self.delete_article(entry['id'])
+            logger.debug(f"已删除 {entry['title']} - 第{entry['number']}期，赛文日期 {entry['date']}")
 
-        # 上传文章
-        for i, article in enumerate(articles):
-            number = start_number + i
-            start = start_datetime + date_step * i
-            end = end_datetime + date_step * i
-            self.add_article(**article,
-                             number=number,
-                             start_datetime=start,
-                             end_datetime=end,
-                             **kwargs)

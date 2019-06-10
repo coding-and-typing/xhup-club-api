@@ -197,6 +197,3 @@ def add_comp_articles_from_box(data: dict, main_user):
     }
 
 
-def sync_to_chaiwubi(data, main_user):
-    """TODO 赛文同步到拆五笔赛文系统上"""
-    pass

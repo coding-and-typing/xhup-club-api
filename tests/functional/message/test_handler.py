@@ -79,7 +79,7 @@ def test_usage_handler(app):
 #     assert reply['message']['text'] not in ["暂不提供该功能", "异常状况，即将崩坏。9 8 7..."]
 
 
-def test_char_query_handler(group_admin):
+def test_char_query_handler(user, client: FlaskClient, group_admin):
     """3. 测试小鹤拆字命令"""
     # 1. 首先上传拆字表
     payload = {
@@ -93,7 +93,8 @@ def test_char_query_handler(group_admin):
         "group_id": group_id,
         "platform": platform,
     }
-    character.save_char_table(**payload)
+    login(client)
+    character.save_char_table(**payload, main_user=user)
 
     # 2. 测试查字
     data = {
@@ -120,7 +121,7 @@ def test_char_query_handler(group_admin):
                                        "拆分：　比左 匕 白\n" \
                                        "首末：　比左 白\n" \
                                        "编码：　b b\n" \
-                                       "汉典：http://xhup.club/?G3"
+                                       "汉典：http://xhup.club/?UQ"
 
 
 def test_group_binding(group_admin, client: FlaskClient):

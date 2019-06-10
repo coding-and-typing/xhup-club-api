@@ -11,9 +11,9 @@ from pkg_resources import parse_version
 
 from app import api_rest
 from app.api import api_prefix
-from app.service.auth.group_user import is_
 from app.service.words import character
 from app.utils.common import login_required
+from app.utils.db import get_group
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class TableSchema(ma.Schema):
 
     table_name = ma.fields.String(required=True)  # 编码表名称（如小鹤音形拆字表）
 
-    description = ma.fields.String(default="")
+    description = ma.fields.String()
 
     group_id = ma.fields.String(required=True)  # 一个编码表，需要绑定一个群号。
     platform = ma.fields.String(required=True)  # 该群所属平台
@@ -81,11 +81,11 @@ class TableView(MethodView):
         :return None
         """
         # 验证当前用户是指定群的管理员
-        if not is_(["owner", "admin"], current_user,
-                   group_id=data['group_id'], platform=data['platform']):
+        if get_group(group_id=data['group_id'], platform=data['platform']) \
+                not in current_user.auth_groups:
             abort(401, message="you are not the admin of this group")
 
-        success, res = character.save_char_table(**data)
+        success, res = character.save_char_table(**data, main_user=current_user)
         if not success:  # 拆字表已经存在
             abort(400, message=res['message'])  # bad request, 无法处理该请求
 
