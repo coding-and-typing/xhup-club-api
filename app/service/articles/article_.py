@@ -27,28 +27,38 @@ def add_comp_article_box(data: dict, main_user):
     """添加候选赛文 box"""
     content_type = data['content_type']
     length = data['length']
-    delta = data['delta']
+    delta = data.get('delta', 30)  # 默认值 30
     count = data['count']
 
     # 1. 生成赛文
     if content_type == "random_article":
-        articles = [daily_article.get_article(
-            length=length,
-            delta=delta,
-            cut_content=True)
-            for _ in range(count)]
-    elif content_type == "shuffle_chars":
-        content_type = data.get('content_type_2', '')
+        content_type = "散文"
+        articles = []
+
+        for article in daily_article.get_random_articles(  # 1. 批量获取互不重复的随机散文
+                count=count,
+                length=length,
+                delta=delta,
+                cut_content=True):
+            articles.append({
+                "content": article.content,
+                "title": article.title,
+                "content_type": content_type,
+            })
+    elif content_type == "shuffle_chars":  # 2. 乱序单字
+        content_type = data.get('content_subtype', '')
         if content_type not in Chars.top_chars:
             return 400, f"invalid choice! required in {Chars.top_chars}"
 
+        chars_dict = Chars.top_chars[content_type]
         articles = generate_articles_from_chars(content_type, length, count, shuffle=True)
-    elif content_type == "given_text":
+        content_type = chars_dict['name']  # 内容名称（例：单字前五百）
+    elif content_type == "given_text":  # 3. 使用给定的文档生成赛文
+        content_type = data['content_subtype']
         title = data['title']
         text = data['text']
-        content_type = data['content_type_2']
 
-        # 1. 对文本做处理
+        # a. 对文本做处理
         # （中文：去空格去换行，英文：去换行，合并连续的空格。全半角转换，去除特殊字符）
         if data.get('en') is True:  # 内容为英文
             text = process_text_en(text)
@@ -57,23 +67,28 @@ def add_comp_article_box(data: dict, main_user):
             text = process_text_cn(text)
             text = del_special_char(text)  # 去除特殊字符
 
-        # 2. 文本切分（按长度还是按给定的分割符）
+        # b. 文本切分（按长度还是按给定的分割符）
         separator = data.get("separator")
         if not separator:
-            text_list = split_text_by_length(text, length, delta, ignore_=True)
+            text_generator = split_text_by_length(text, length, delta, ignore_=True)
         else:
-            text_list = split_text_by_sep(text, separator)  # 使用预先插入的切分符号进行切分。
-        articles = [{
-            "content": str_,
+            text_generator = iter(split_text_by_sep(text, separator))  # 使用预先插入的切分符号进行切分。
+
+        if isinstance(count, int) and count > 0:
+            text_generator_all = text_generator  # 重命名，以防止无限递归
+            text_generator = (next(text_generator_all) for _ in range(count))
+
+        articles = ({
+            "content": content,
             "title": title,
             "content_type": content_type,  # 散文、政论、小说、混合赛文等
-        } for str_ in text_list]
+        } for content in text_generator)
     else:
         return 400, "invalid content_type!"
 
     # 2. 插入数据库
-    next_box_id = 1 + db.session.query(func.count(CompArticleBox.box_id)) \
-        .filter_by(main_user_id=main_user.id).scalar()  # 获取标量
+    next_box_id = 1 + db.session.query(CompArticleBox.box_id) \
+        .filter_by(main_user_id=main_user.id).distinct().count()  # id 从 1 开始（1 + 0）
     items = [CompArticleBox(**article,
                             main_user_id=main_user.id,
                             box_id=next_box_id)
@@ -82,7 +97,7 @@ def add_comp_article_box(data: dict, main_user):
     db.session.add_all(items)
     db.session.commit()
 
-    return 200, {
+    return 201, {
         "box_id": next_box_id,
         'content_type': content_type,
         "count": len(items)
@@ -188,6 +203,7 @@ def add_comp_articles_from_box(data: dict, main_user):
                                    comp_type=data['comp_type'],
                                    group_db_id=group.id)
 
+    # TODO 添加之前，确认每篇文章都没有和已有的赛文重复！！
     db.session.add_all(items)
     db.session.commit()
     return 200, {
@@ -195,5 +211,3 @@ def add_comp_articles_from_box(data: dict, main_user):
         "start_date": data['start_date'],
         "end_date": data['start_date'] + timedelta(days=count)
     }
-
-

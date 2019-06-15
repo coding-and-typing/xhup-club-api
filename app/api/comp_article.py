@@ -43,12 +43,12 @@ class CompArticleBoxCreateArgsSchema(ma.Schema):
 
     content_type = ma.fields.String(required=True)  # 随机散文、乱序单字、从文档添加
     length = ma.fields.Integer(required=True)  # 赛文长度，建议 300-800 之间，乱序单字 30 - 70 之间
-    delta = ma.fields.Integer(default=30)  # 赛文长度的允许误差，默认 30
+    delta = ma.fields.Integer()  # 赛文长度的允许误差，默认 30(default 只被用于 dump，没有被用于 load)
     count = ma.fields.Integer(required=True)  # 添加的赛文篇数，不得超过这个数额。最多 999 篇
 
     # 从文档添加赛文时，此参数为赛文文本的类型：散文、政论、小说等
     # 添加乱序单字时，此参数为前五百“top_500”、中五百“middle_500”、后五百“last_500”或者前一千五“top_1500”
-    content_type_2 = ma.fields.String()
+    content_subtype = ma.fields.String()
 
     # 如果是从文档添加，下列参数可用
     title = ma.fields.String()  # 赛文标题
@@ -198,7 +198,7 @@ class CompArticleBoxView(MethodView):
         """添加一个赛文 box
         """
         code, res = add_comp_article_box(data, current_user)
-        if code == 200:
+        if code == 201:
             return res
         else:
             abort(code, description=res)

@@ -9,7 +9,7 @@ from app import limiter
 
 api_prefix = "/api/v1"
 
-from app.api.articles import articles_bp
+from app.api.article import article_bp
 from app.api.comp_article import comp_article_bp
 from app.api.character import table_bp
 from app.api.relation import relation_bp
@@ -26,7 +26,7 @@ def init_api(api_: Api):
     limiter.limit("666/hour;20/minute;3/second")(table_bp)  # 更严格的限制
 
     # 要将 flask-rest-api 定义的 blueprint 注册到 api_rest
-    api_.register_blueprint(articles_bp)
+    api_.register_blueprint(article_bp)
     api_.register_blueprint(comp_article_bp)
     api_.register_blueprint(table_bp)
     api_.register_blueprint(relation_bp)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import collections
 import logging
 from typing import Optional
 
@@ -7,7 +8,8 @@ from bs4 import BeautifulSoup
 from urllib import parse
 from urllib.parse import SplitResult
 
-from app import current_config, utils
+from app import current_config, utils, db
+from app.models import Article
 from app.utils.text import split_text_by_length
 
 """
@@ -87,6 +89,17 @@ def talk(message: str, user_id, group_id=None, username=None):
 class DailyArticle(object):
     """每日一文的 API"""
 
+    frozen_article = collections.namedtuple(
+        'frozen_article',
+        [
+            "content",
+            "title",
+            "subtitle",
+            "content_type",
+            "author",
+            "special_chars",
+        ])
+
     def __init__(self):
         self.session = requests.session()
         url: SplitResult = parse.urlsplit(current_config.RANDOM_ARTICLE_API)
@@ -96,6 +109,7 @@ class DailyArticle(object):
         }
 
     def get_article(self,
+                    *,  # 剔除所有非关键字参数
                     length: Optional[int] = None,  # 方案一：length + delta
                     delta: Optional[int] = 30,
                     max_length: Optional[int] = None,  # 方案二：直接确定长度上下限
@@ -104,8 +118,8 @@ class DailyArticle(object):
                     random=True,
                     del_special_char=True):
         """随机一篇散文
-        :param delta:
         :param length:
+        :param delta:
         :param max_length: 文章允许的最长长度。
         :param min_length: 文章允许的最短长度。比这还短就丢弃。
         :param cut_content: 如果文章过长，是否使用 split_text 做 cut 操作？
@@ -130,14 +144,24 @@ class DailyArticle(object):
             min_length = length - delta
 
         if min_length and len(content) < min_length:  # 如果给了最小长度，并且赛文短于这个长度
-            return self.get_article(min_length, random, del_special_char)  # 重新获取文章
+            return self.get_article(delta=delta,  # 重新获取文章
+                                    max_length=min_length,
+                                    min_length=max_length,
+                                    cut_content=cut_content,
+                                    random=random,
+                                    del_special_char=del_special_char)
 
         if max_length and len(content) > max_length:
             if cut_content:  # 对文章内容做剪切
                 content = next(split_text_by_length(
                     content, max_length=max_length, min_length=min_length))
             else:  # 不允许剪切文章，只好获取新文章了
-                return self.get_article(min_length, random, del_special_char)  # 重新获取文章
+                return self.get_article(delta=delta,  # 重新获取文章
+                                        max_length=min_length,
+                                        min_length=max_length,
+                                        cut_content=cut_content,
+                                        random=random,
+                                        del_special_char=del_special_char)
 
         # 去除特殊字符
         special_chars = None
@@ -146,14 +170,42 @@ class DailyArticle(object):
         else:
             special_chars = utils.text.special_chars(content)
 
-        return {
+        article = self.frozen_article(**{
             "content": content,
             "title": bsObj.h1.getText(),
-            "sub_title": "随机一文" if random else "每日一文",
+            "subtitle": "随机一文" if random else "每日一文",
             "content_type": "散文",
             "author": bsObj.find(attrs={"class": "article_author"}).getText(),
             "special_chars": special_chars,
-        }
+        })
+        # 将文章保存到 article 文章库
+        try:
+            db.session.add(Article(
+                title=article.title,
+                author=article.author,
+                content_type=article.content_type,
+                content=article.content,
+                special_chars=article.special_chars
+            ))
+        except Exception:
+            logger.debug(f"重复的随机散文：{article.title} - 作者：{article.author}")
+            db.session.rollback()
+        return article
+
+    def get_random_articles(self,
+                            count: int,  # 篇数
+                            **kwargs):
+        """批量获取互不重复的随机赛文"""
+        article_set = set()  # 用于去重的集合
+        i = 0
+        while i < count:
+            article = self.get_article(**kwargs)
+            if article in article_set:  # 文章重复
+                continue
+
+            article_set.add(article)
+            i += 1
+            yield article
 
 
 daily_article = DailyArticle()

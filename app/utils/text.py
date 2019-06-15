@@ -89,19 +89,19 @@ class Chars:
     top_chars = {
         'top_1500': {
             "chars": current_config.CHARS_TOP_1500,
-            "title": "单字前一千五",
+            "name": "单字前一千五",
         },
         'top_500': {
             "chars": current_config.CHARS_TOP_500,
-            "title": "单字前五百",
+            "name": "单字前五百",
         },
         'middle_500': {
             "chars": current_config.CHARS_MIDDLE_500,
-            "title": "单字中五百",
+            "name": "单字中五百",
         },
         'last_500': {
             "chars": current_config.CHARS_LAST_500,
-            "title": "单字后五百",
+            "name": "单字后五百",
         },
     }
 
@@ -277,19 +277,19 @@ def split_text_by_sep(text: str,
     return re.split(rf"(?:{sep}){{3,}}", text)  # sep 重复三次以上
 
 
-def generate_comp_content(content, title, sub_title, content_type, author, segment_num: int):
+def generate_comp_content(content, title, subtitle, content_type, author, segment_num: int):
     """将 article 组装成跟打器可以识别的赛文格式
 
     :param content: 内容
     :param title: 文章标题
-    :param sub_title: 子标题，日赛、周赛、每日赛文等
+    :param subtitle: 子标题，日赛、周赛、每日赛文等
     :param content_type: 文章类型
     :param author: 作者
     :param segment_num: 文章段号
     :return:
     """
     date = datetime.now().date()
-    return f"《{title}》{sub_title}第{date}期-作者：{author}\n" \
+    return f"《{title}》{subtitle}第{date}期-作者：{author}\n" \
         f"{content}\n" \
         f"-----第{segment_num}段--xxx--c.sw.1.1\n" \
         f"本文由 {content_type} 组成"
@@ -310,11 +310,18 @@ def generate_articles_from_chars(content_type, length, count, shuffle=True):
     chars = chars_dict['chars']  # 单字
 
     cycle_chars = cycle_str(chars, shuffle=shuffle)  # 无限迭代
-    for _ in range(count):
+
+    content_set = set()  # 用于去重的集合
+    i = 0
+    while i < count:
         content = "".join((next(cycle_chars) for _ in range(length)))
+        if content in content_set:  # 去重
+            continue
+
+        i += 1
         yield {
             "content": content,
-            "title": chars_dict['title'] + ("-乱序" if shuffle else ""),
+            "title": chars_dict['name'] + ("-乱序" if shuffle else ""),
             "content_type": "单字",
         }
 

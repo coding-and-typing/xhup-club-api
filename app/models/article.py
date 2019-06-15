@@ -84,7 +84,7 @@ class CompArticle(db.Model):
         if hash_ and isinstance(hash_, str):
             self.hash = hash_
         else:
-            self.hash = hashlib.sha1(content.encode("utf-8"))
+            self.hash = hashlib.sha1(content.encode("utf-8")).hexdigest()
 
     @validates("content")
     def validate_content(self):
@@ -124,7 +124,8 @@ class Article(db.Model):
                  author,
                  content_type,
                  content: str,
-                 main_user_id,
+                 main_user_id=None,
+                 special_chars=None,
                  hash_=None):
         self.title = title
         self.author = author
@@ -137,14 +138,15 @@ class Article(db.Model):
 
         self.main_user_id = main_user_id
 
-        special_chars = text.special_chars(content)
+        if special_chars is None:
+            special_chars = text.special_chars(content)
         self.special_chars = json.dumps(list(special_chars))  # set 不能序列化，得转成 list
 
         # 自动生成 hash，使用 sha1 算法（只是用于防碰撞，不需要 sha256）
         if hash_ and isinstance(hash_, str):
             self.hash = hash_
         else:
-            self.hash = hashlib.sha1(content.encode("utf-8"))
+            self.hash = hashlib.sha1(content.encode("utf-8")).hexdigest()
 
     def __repr__(self):
         return "<Stored Article '{}' - by {}>".format(self.title, self.author)
@@ -193,6 +195,6 @@ class CompArticleBox(db.Model):
         if hash_ and isinstance(hash_, str):
             self.hash = hash_
         else:
-            self.hash = hashlib.sha1(content.encode("utf-8"))
+            self.hash = hashlib.sha1(content.encode("utf-8")).hexdigest()
 
 

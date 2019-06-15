@@ -46,3 +46,8 @@ def iter_one_by_one(items, allow_none=False):
 
 def filter_truth(items):
     return filter(truth, items)  # 过滤掉判断为 False 的 items
+
+
+def equal(a, b):
+    """判断两个 object 的内容是否一致（只判断浅层数据）"""
+    return a.__dict__ == b.__dict__

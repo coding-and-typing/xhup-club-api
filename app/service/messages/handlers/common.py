@@ -116,11 +116,11 @@ def _daily_article_handler_maker(random=False):
 
         ------
         """
-        article = daily_article.get_article(random=random)
-        article['content'] = list(split_text_by_length(article['content'],
-                                                       length=args['primary']))
+        article = daily_article.get_article(random=random, with_subtitle=True)
+        article.content = list(split_text_by_length(article.content,
+                                                    length=args['primary']))
         segment_num = 1
-        article['segment_len'] = args['primary']
+        article.segment_len = args['primary']
         session.set("article", article)
         session.set("segment_num", segment_num)
 
@@ -128,11 +128,11 @@ def _daily_article_handler_maker(random=False):
         session.set("username", message['user']['nickname'])
 
         return {"text": generate_comp_content(
-            content=article['content'][segment_num - 1],
-            title=article['title'],
-            sub_title=article['sub_title'],
-            author=article['author'],
-            content_type=article['content_type'],
+            content=article.content[segment_num - 1],
+            title=article.title,
+            subtitle=article.subtitle,
+            author=article.author,
+            content_type=article.content_type,
             segment_num=segment_num,
         )}
 
@@ -191,7 +191,7 @@ def next_segment_handler(data, session, args, message):
     return {"text": generate_comp_content(
         content=article['content'][segment_num - 1],
         title=article['title'],
-        sub_title=article['sub_title'],
+        subtitle=article['subtitle'],
         author=article['author'],
         content_type=article['content_type'],
         segment_num=segment_num,
@@ -347,5 +347,3 @@ dispatcher.add_handler(destroy_session_handler, platform="default", group_id="pr
 
 # 7. 群组绑定
 dispatcher.add_handler(group_bind_handler, platform="default", group_id="group")
-
-

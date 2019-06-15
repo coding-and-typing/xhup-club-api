@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Defines fixtures available to all tests."""
 import os
+from pathlib import Path
 
 import pytest
 from flask import Response, url_for
@@ -63,6 +64,9 @@ def user(db):
 platform = 'qq'
 group_id = '12354321'
 user_id = "1233231"
+
+test_text = open(Path(__file__).parent / "resources/青铜葵花.txt",
+                 mode='r', encoding="utf-8").read()
 
 
 @pytest.fixture

@@ -7,6 +7,7 @@ from flask.testing import FlaskClient
 
 from app.service.messages import dispatcher
 from app.service.words import character
+from app.utils.db import get_group
 from tests.api.test_character import test_post_table_query
 from tests.conftest import group_id, platform, login
 
@@ -124,7 +125,7 @@ def test_char_query_handler(user, client: FlaskClient, group_admin):
                                        "汉典：http://xhup.club/?UQ"
 
 
-def test_group_binding(group_admin, client: FlaskClient):
+def test_group_binding(user, group_admin, client: FlaskClient):
     login(client)
 
     resp = client.post(url_for("relation.RelationView"))  # 获取验证码
@@ -136,7 +137,7 @@ def test_group_binding(group_admin, client: FlaskClient):
                 "user": {
                     "id": "123456",  # 用户 id，QQ 号等
                     "nickname": "riki",
-                    "role": "member",  # 群组 owner/admin/other
+                    "role": "owner",  # 群组 owner/admin/other
                 },
                 "group": {
                     "id": "234567",  # 群 id
@@ -149,3 +150,7 @@ def test_group_binding(group_admin, client: FlaskClient):
         }
     reply = dispatcher.handle_update(data)
     assert reply['message']['text'] == "绑定完成！"
+    group = get_group(platform="qq", group_id="234567")
+    assert group is not None
+    assert group in user.auth_groups
+

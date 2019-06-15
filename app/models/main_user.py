@@ -81,6 +81,15 @@ class MainUser(UserMixin, db.Model):
 
         return groups
 
+    def all_groups(self):
+        """当前用户所绑定的所有群组"""
+        groups = set()
+        for user in self.group_users:
+            for relation in user.relations:
+                groups.add(relation.group)
+
+        return groups
+
     def __repr__(self):
         return '<Main User {}>'.format(self.username)
 

@@ -11,22 +11,22 @@ from app.api import api_prefix
 
 logger = logging.getLogger(__name__)
 
-articles_bp = Blueprint(
-    'articles', __name__, url_prefix=f'{api_prefix}/articles',
+article_bp = Blueprint(
+    'article', __name__, url_prefix=f'{api_prefix}/article',
     description="文章库的增删查改（待实现）"
 )
 
 
 """
 这里的文章，可能包括散文、中短篇小说、政论甚至长篇小说（目前没有考虑保存这么长的小说），
-用于在 comp_articles 中生成群组赛文。
+用于在 comp_article 中生成群组赛文。
 
 操作对象可以为复数个。
 """
 
 
-@articles_bp.route("/")
-class ArticlesView(MethodView):
+@article_bp.route("/")
+class ArticleView(MethodView):
     """文章的增删查改"""
 
     decorators = [login_required]
