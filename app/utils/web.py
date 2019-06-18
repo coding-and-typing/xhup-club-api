@@ -187,8 +187,8 @@ class DailyArticle(object):
                 content=article.content,
                 special_chars=article.special_chars
             ))
-        except Exception:
-            logger.debug(f"重复的随机散文：{article.title} - 作者：{article.author}")
+        except Exception as e:  # 重复插入的异常是啥来着。。
+            logger.debug(f"重复的随机散文：{article.title} - 作者：{article.author}, {e}")
             db.session.rollback()
         return article
 

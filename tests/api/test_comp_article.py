@@ -60,7 +60,7 @@ def test_comp_article_box(user, client: FlaskClient):
     assert resp.status_code == 201
     assert resp.json == {
         "box_id": 3,
-        'content_type': "单字",
+        'content_type': "单字前五百",
         "count": 10
     }
 
