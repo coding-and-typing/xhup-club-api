@@ -94,6 +94,7 @@ def add_comp_article_box(data: dict, main_user):
                             box_id=next_box_id)
              for article in articles]
 
+    # TODO 去重！
     db.session.add_all(items)
     db.session.commit()
 

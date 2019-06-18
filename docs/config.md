@@ -83,7 +83,8 @@ sudo journalctl -u xhup-club-api.service  # 查看该服务的日志
 如果修改了 `prod.env`，记得运行如下命令更新加密文件：
 ```bash
 tar -cv -f secrets.tar prod.env id_rsa_for_ssh.key
-travis encrypt-file secrets.tar
+travis encrypt-file secrets.tar --com  # # 加 --com，否则默认加到 org 版本
+# 将返回信息中的 build script 命令加到 .travis.yaml 中
 ```
 
 **NOTE：所有密码一定要同时设为 travis-ci 的环境变量！(变量中的特殊字符 x 要用 \x 转义，否则也会发生不好的事。。)**
@@ -97,7 +98,7 @@ travis encrypt-file secrets.tar
 sudo apt-get install ruby ruby-dev gcc make
 gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
 sudo gem install travis
-travis login --com  # 然后输入账号密码
+travis login --com  # 登录到 com 版的 travis
 # 现在才能用 `travis encrypt-file` 命令
 ```
 
