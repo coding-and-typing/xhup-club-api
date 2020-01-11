@@ -10,9 +10,11 @@ from flask_limiter.util import get_remote_address
 from flask_smorest import Api
 from flask_redis import Redis
 from flask_rq2 import RQ
+from flask_login import LoginManager
+
+from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from flask_login import LoginManager
 
 from flask_mail import Mail
 from flask_sockets import Sockets
@@ -26,8 +28,17 @@ current_config: BaseConfig = config_by_name[env]
 logging.basicConfig(level=current_config.LOG_LEVEL)  # 日志
 
 # 初始化 flask 的各个插件
-db = SQLAlchemy()
+convention = {  # 数据库迁移需要约束拥有独特的别名
+    "ix": 'ix_%(column_0_label)s',
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
+metadata = MetaData(naming_convention=convention)
+db = SQLAlchemy(metadata=metadata)
 migrate = Migrate()
+
 redis = Redis()  # 用于短信验证码等信息的存储
 rq = RQ()  # 用于任务队列
 
