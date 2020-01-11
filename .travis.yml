@@ -1,29 +1,38 @@
 language: python
-
-# requires for python 3.7 currently
-sudo: required
-dist: xenial
-
 python:
 - '3.7'
 
+dist: bionic
+
 services:
-  - redis  # 对应 redis-server 启动命令 `sudo systemctl start redis-server`
+  # - mysql
+  # - elasticsearch
+  - docker
+  - redis-server  # 对应 redis-server 启动命令 `sudo systemctl start redis-server`
+
+addons:
+  ssh_known_hosts: 
+  - xhup.club
+
 
 before_install:
 - openssl aes-256-cbc -K $encrypted_6182cc8b533c_key -iv $encrypted_6182cc8b533c_iv
   -in secrets.tar.enc -out secrets.tar -d
 
-- tar -xv -f secrets.tar -C ~ # 解打包
+- tar -xv -f secrets.tar -C . # 解打包
 
 install:
-- pip install --upgrade pip
-- pip install pipenv
-- pipenv sync --dev
+- pip install poetry
+- poetry install
 
 script:
 - pytest --cov=./
 - codecov --token=$CODECOV_TOKEN
+
+after_success:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t ryan4yin/xhup-club-api .
+  - docker push ryan4yin/xhup-club-api
 
 deploy:
   provider: script
@@ -31,4 +40,3 @@ deploy:
   script: bash scripts/deploy.sh
   on:
     tags: true
-#    branch: master  # tags 为 true 的情况下，这个条件会被忽略掉

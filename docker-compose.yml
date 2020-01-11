@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+  xhup-club-api:
+    image: ryan4yin/xhup-club-api:latest
+    env_file: prod.env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "2M"
+        max-file: "10"
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 20000
+        hard: 40000
+    ports:
+      - "8080:8080"
+    volumes: []  # 数据都在数据库里边
+    restart: always

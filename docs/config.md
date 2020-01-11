@@ -15,70 +15,25 @@ Lincence 那里可以直接按 q 退出，然后 yes 就好。
 in your /home/ryan/.bashrc ? [yes|no]`，选择 yes. 或者安装后你自己手动配置 miniconda 的 PATH 变量。
 
 ### 二. clone 仓库，配置环境：
+
 ```bash
-git clone git@github.com:coding-and-typing/xhup-club-api.git 
+git https://github.com/coding-and-typing/xhup-club-api.git
 cd xhup-club-api
-pip install -r requirements.txt
+pip install poetry
+poetry install
 ```
 
-不知为何，CentOS 上用了 `miniconda` 后，pipenv 生成的虚拟环境，pip 就一直报错 `the ssl module in Python is not available`.
-暂时就先用 `requirements.txt` 吧。
+### Travis-CI 持续集成/持续部署
 
-### 三、 将 xhup-club-api 设为 systemd 服务：
-
-此处参考了 gunicorn 的官方文档（不支持行内注释！！！注释必须单独一行）
-`/etc/systemd/system/xhup-club-api.service`:
-```
-[Unit]
-Description=xhup-club-api 的 gunicorn 后台
-After=network.target
-
-[Service]
-PermissionsStartOnly=True
-
-# 临时文件夹
-RuntimeDirectory=gunicorn
-RuntimeDirectoryMode=0775
-PIDFile=/run/gunicorn/xhup-club-api.pid
-
-User=ryan
-Group=ryan
-
-# 环境变量
-EnvironmentFile=/home/ryan/xhup-club-api/prod.env
-
-# web app 目录
-WorkingDirectory=/home/ryan/xhup-club-api
-
-# unix socket 配置有点麻烦。。先直接用 tcp 吧，nginx 也稍后再配，先跑起来再说
-ExecStart=/home/ryan/miniconda3/bin/gunicorn --pid /run/gunicorn/xhup-club-api.pid   \
-          --worker-class flask_sockets.worker -w 1 \
-           --bind 0.0.0.0:8000 run:app
-
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
-PrivateTmp=true
-
-[Install]
-WantedBy=multi-user.target
-```
-
-然后启动服务：
-```bash
-sudo systemctl enable xhup-club-api.service
-sudo systemctl start xhup-club-api.service
-```
-
-要查看服务状态，可以用如下命令：
+首先安装 travis 客户端：
 
 ```bash
-sudo systemctl status xhup-club-api.service  # 状态
-sudo journalctl -u xhup-club-api.service  # 查看该服务的日志
+sudo apt-get install ruby ruby-dev gcc make
+gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
+sudo gem install travis
+travis login --com  # 登录到 com 版的 travis
+# 现在才能用 `travis encrypt-file` 命令
 ```
-
-如果修改了 service 文件，需要用 `sudo systemctl daemon-reload` 重载该配置文件。
-
-### 自动部署
 
 如果修改了 `prod.env`，记得运行如下命令更新加密文件：
 ```bash
@@ -88,19 +43,11 @@ travis encrypt-file secrets.tar --com  # # 加 --com，否则默认加到 org �
 ```
 
 **NOTE：所有密码一定要同时设为 travis-ci 的环境变量！(变量中的特殊字符 x 要用 \x 转义，否则也会发生不好的事。。)**
+
 这样如果 log 信息中出现了这些变量（比如报错），travis-ci 就会用 [secure] 替换它们！
 
 对 `DB_PASSWORD` 这种使用了 `urllib.parse.quote_plus` 的字符串，quote 后的字符串也应该加进去。
 
-### 开发机安装  travis
-
-```bash
-sudo apt-get install ruby ruby-dev gcc make
-gem sources --add https://gems.ruby-china.com/ --remove https://rubygems.org/
-sudo gem install travis
-travis login --com  # 登录到 com 版的 travis
-# 现在才能用 `travis encrypt-file` 命令
-```
 
 ### DB 密码
 
