@@ -5,7 +5,7 @@ import logging
 from flask.views import MethodView
 import marshmallow as ma
 from flask_login import current_user
-from flask_rest_api import abort, Blueprint
+from flask_smorest import abort, Blueprint
 from marshmallow import validates, ValidationError
 from pkg_resources import parse_version
 
@@ -99,7 +99,6 @@ class CharInfoSchema(ma.Schema):
     other_info = ma.fields.Dict()
 
 
-@api_rest.schema('Char')
 class CharSchema(ma.Schema):
     class Meta:
         strict = True

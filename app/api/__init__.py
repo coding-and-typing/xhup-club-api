@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from flask_rest_api import Api
+from flask_smorest import Api
 
 
 # 这里的问题是，blueprint 被 flask-rest-api 用来区分资源了

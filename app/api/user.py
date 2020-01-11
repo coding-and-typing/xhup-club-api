@@ -6,7 +6,7 @@ import typing
 from flask.views import MethodView
 from flask_login import current_user
 import marshmallow as ma
-from flask_rest_api import abort, Blueprint
+from flask_smorest import abort, Blueprint
 from sqlalchemy.exc import IntegrityError
 
 from app import api_rest, db, current_config, redis
@@ -27,7 +27,6 @@ user_bp = Blueprint(
 """
 
 
-@api_rest.schema('User')
 class UserSchema(ma.Schema):
     """应该暴露给 API 的 User 属性
     """

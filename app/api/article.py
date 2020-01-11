@@ -4,7 +4,7 @@ import logging
 from flask.views import MethodView
 import marshmallow as ma
 from app.utils.common import login_required
-from flask_rest_api import abort, Blueprint
+from flask_smorest import abort, Blueprint
 
 from app import api_rest
 from app.api import api_prefix

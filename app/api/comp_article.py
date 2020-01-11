@@ -6,8 +6,8 @@ from typing import Dict
 from flask.views import MethodView
 import marshmallow as ma
 from flask_login import current_user
-from flask_rest_api import abort, Blueprint, Page
-from flask_rest_api.pagination import PaginationParameters
+from flask_smorest import abort, Blueprint, Page
+from flask_smorest.pagination import PaginationParameters
 from flask_sqlalchemy import BaseQuery
 from marshmallow import validates, ValidationError
 from sqlalchemy import desc, asc
@@ -132,7 +132,6 @@ class GroupSchema(ma.Schema):
     group_name = ma.fields.String()  # 群名称
 
 
-@api_rest.definition("CompArticle")
 class CompArticleSchema(ma.Schema):
     class Meta:
         strict = True

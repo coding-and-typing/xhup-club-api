@@ -7,7 +7,7 @@ import time
 from itertools import chain, zip_longest
 
 from flask_login import login_required as login_required_
-from flask_rest_api.utils import deepupdate
+from flask_smorest.utils import deepupdate
 from operator import truth
 
 

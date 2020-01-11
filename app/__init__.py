@@ -7,7 +7,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
-from flask_rest_api import Api
+from flask_smorest import Api
 from flask_redis import Redis
 from flask_rq2 import RQ
 from flask_sqlalchemy import SQLAlchemy

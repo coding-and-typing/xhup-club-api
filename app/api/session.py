@@ -6,7 +6,7 @@ from flask import Response
 from flask.views import MethodView
 from flask_login import current_user, login_user, logout_user
 import marshmallow as ma
-from flask_rest_api import abort, Blueprint
+from flask_smorest import abort, Blueprint
 from marshmallow import validates_schema
 
 from app import api_rest, redis, current_config
@@ -26,7 +26,6 @@ session_bp = Blueprint(
 """
 
 
-@api_rest.schema('Session')
 class SessionSchema(ma.Schema):
     """应该暴露给 API 的 Session 属性
     """

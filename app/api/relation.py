@@ -9,7 +9,7 @@ from flask_login import current_user
 from app.models import GroupUserRelation
 from app.utils.captcha import generate_captcha_code
 from app.utils.common import login_required, timestamp
-from flask_rest_api import abort, Blueprint, Page
+from flask_smorest import abort, Blueprint, Page
 
 from app import api_rest, redis, current_config, db
 from app.api import api_prefix
@@ -22,7 +22,6 @@ relation_bp = Blueprint(
 )
 
 
-@api_rest.schema('RelationCreateArgs')
 class RelationCreateArgsSchema(ma.Schema):
     class Meta:
         strict = True
