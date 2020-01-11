@@ -35,7 +35,7 @@ class WordTable(db.Model):
                             passive_deletes="cascade")
 
     # 同一张码表的同一个版本号只能使用一次
-    __table_args__ = (UniqueConstraint('name', 'version', name='c_word_table'),)
+    __table_args__ = (UniqueConstraint('name', 'version'),)
 
     def __repr__(self):
         return "<Word Table '{}'>".format(self.name)
@@ -54,7 +54,7 @@ class Word(db.Model):
                             index=True, nullable=False)
 
     # 同一张码表中，一个编码的同一个位置，只能有一个词。
-    __table_args__ = (UniqueConstraint('table_db_id', 'code', 'position', name="c_word"),)
+    __table_args__ = (UniqueConstraint('table_db_id', 'code', 'position'),)
 
     def __repr__(self):
         return "<Word '{}'>".format(self.char)

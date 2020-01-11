@@ -25,6 +25,7 @@ flask db upgrade
     - 同上，你需要手动修改生成的 migrations/versions/xxxx.py
 1. 不能检测到匿名约束（Anonymously named constraints）
     - 因此你一定要为每个 constraints 命名，例如：`UniqueConstraint('col1', 'col2', name="my_name")`
+    - sqlalchemy 已經設置了自動為約束命名，不需要手動設置了
 1. 不能检测到后端数据库不支持的特殊数据类型，比如枚举 `ENUM`
 
 

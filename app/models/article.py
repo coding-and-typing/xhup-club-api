@@ -41,11 +41,11 @@ class CompArticle(db.Model):
 
     __table_args__ = (
         # 群内的赛文内容不要重复。
-        UniqueConstraint('title', 'hash', 'length', 'group_db_id', name='c_comp_article_1'),
+        UniqueConstraint('title', 'hash', 'length', 'group_db_id'),
         # 群内某一种类型的赛事，期数不能出现重复
-        UniqueConstraint('number', 'group_db_id', 'comp_type', name='c_comp_article_2'),
+        UniqueConstraint('number', 'group_db_id', 'comp_type'),
         # 一个群一天只有一篇赛文
-        UniqueConstraint('date', 'group_db_id', name='c_comp_article_3')
+        UniqueConstraint('date', 'group_db_id')
     )
 
     def __init__(self,
@@ -117,7 +117,7 @@ class Article(db.Model):
                              db.ForeignKey('main_user.id'),
                              index=True, nullable=True)
 
-    __table_args__ = (UniqueConstraint('title', 'hash', "length", name='c_article'),)
+    __table_args__ = (UniqueConstraint('title', 'hash', "length"),)
 
     def __init__(self,
                  title,
@@ -170,7 +170,7 @@ class CompArticleBox(db.Model):
                              index=True, nullable=False)
     box_id = db.Column(db.Integer, index=True, nullable=False)  # 条目所属的 box 的 id
 
-    __table_args__ = (UniqueConstraint('hash', "length", "main_user_id", name='c_article'),)
+    __table_args__ = (UniqueConstraint('hash', "length", "main_user_id"),)
 
     def __init__(self,
                  title,

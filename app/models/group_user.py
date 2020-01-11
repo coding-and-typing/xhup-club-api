@@ -29,7 +29,7 @@ class GroupUserRelation(db.Model):
     is_owner = db.Column(db.Boolean, nullable=False)
 
     # 特定平台下，用户 - 群组的映射不应该重复！
-    __table_args__ = (UniqueConstraint('platform', 'user_db_id', 'group_db_id', name='c_relation'),)
+    __table_args__ = (UniqueConstraint('platform', 'user_db_id', 'group_db_id'),)
 
 
 class Group(db.Model):
@@ -52,7 +52,7 @@ class Group(db.Model):
                                 passive_deletes="cascade")
 
     # 特定平台下，群的 id 应该是唯一的
-    __table_args__ = (UniqueConstraint('platform', 'group_id', name="c_group"),)
+    __table_args__ = (UniqueConstraint('platform', 'group_id'),)
 
     def __repr__(self):
         return "<{} Group '{}', Id '{}'>".format(self.platform, self.group_name, self.group_id)
@@ -76,7 +76,7 @@ class GroupUser(db.Model):
                                 passive_deletes="cascade")
 
     # 特定平台下，用户的 id 应该是唯一的
-    __table_args__ = (UniqueConstraint('platform', 'user_id', name='c_group_user'),)
+    __table_args__ = (UniqueConstraint('platform', 'user_id'),)
 
     def __repr__(self):
         return "<{} Group '{}', Id '{}'>".format(self.platform, self.username, self.user_id)
