@@ -15,7 +15,7 @@ RUN apk --no-cache add \
         jpeg-dev \
         libxslt-dev
 
-# RUN pip config global.index-url https://mirrors.aliyun.com/pypi/simple/
+# pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
 RUN pip install poetry gunicorn \
     && poetry config virtualenvs.create false \
     && poetry install --no-dev \
