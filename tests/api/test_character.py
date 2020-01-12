@@ -30,7 +30,7 @@ def test_post_table_query(client: FlaskClient):
     assert resp.status_code == 201
     assert resp.json['version'] == payload['version']
 
-    resp_2: Response = client.get(url_for("characters.CharView"), json={
+    resp_2: Response = client.get(url_for("characters.CharView"), data={
         "char": "比",
         "version": "0.0.1",
         "table_name": "小鹤音形拆字表"
