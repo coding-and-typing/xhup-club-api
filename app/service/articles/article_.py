@@ -207,7 +207,7 @@ def add_comp_articles_from_box(data: dict, main_user):
     # TODO 添加之前，确认每篇文章都没有和已有的赛文重复！！
     db.session.add_all(items)
     db.session.commit()
-    return 200, {
+    return 201, {
         "count": count,
         "start_date": data['start_date'],
         "end_date": data['start_date'] + timedelta(days=count)

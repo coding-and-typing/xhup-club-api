@@ -16,7 +16,7 @@ def login_required(func):
     给该函数的 401 响应添加 api doc
     """
 
-    doc = {'responses': {"401": {'description': "需要先登录，才能调用此 api"}}}
+    doc = {'responses': {"401": {'description': "未登录，或者 token 已过期"}}}
     func._api_manual_doc = deepupdate(getattr(func, '_api_manual_doc', {}), doc)
 
     return login_required_(func)

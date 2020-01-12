@@ -49,11 +49,10 @@ class RelationSchema(ma.Schema):
 class RelationView(MethodView):
     """用户与群组关系的增删查改"""
 
-    decorators = [login_required]
-
     @relation_bp.response(schema=RelationCreateArgsSchema, code=201,
                           description="成功生成验证码，三分钟内有效。\n"
                                       "请将收到的验证码发送到需要绑定的群组中，以完成绑定。（验证消息格式：`拆小鹤验证：xxxxxx`）")
+    @login_required
     def post(self):
         """新建用户与群组的绑定
         """
@@ -74,6 +73,7 @@ class RelationView(MethodView):
 
     @relation_bp.response(RelationSchema(many=True), code=200, description="成功获取到数据")
     @relation_bp.paginate(Page)
+    @login_required
     def get(self):
         """获取已有的关系表"""
         res = []
@@ -94,6 +94,7 @@ class RelationView(MethodView):
 
     @relation_bp.arguments(RelationSchema)
     @relation_bp.response(code=201, description="删除成功")
+    @login_required
     def delete(self, data: dict):
         """删除与某群组的绑定"""
         relations = current_user.group_users \

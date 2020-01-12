@@ -5,7 +5,7 @@ import logging
 from flask.views import MethodView
 import marshmallow as ma
 from flask_login import current_user
-from flask_smorest import abort, Blueprint
+from flask_smorest import abort,  Blueprint
 from marshmallow import validates, ValidationError
 from pkg_resources import parse_version
 
@@ -64,13 +64,13 @@ class TableSchema(ma.Schema):
 
 @table_bp.route("/table/")
 class TableView(MethodView):
-    """拆字表查询 api"""
-
-    decorators = [login_required]
+    """拆字表增添刪查改 api"""
 
     @table_bp.arguments(TableSchema)
     @table_bp.response(TableSchema, code=201, description="拆字表创建成功")
-    @table_bp.doc(responses={"401": {'description': "仅与该拆字表绑定的群的管理员可更新此表"}})
+    @table_bp.doc(responses={"403": {'description': "仅与该拆字表绑定的群的管理员可更新此表"}})
+    @table_bp.doc(responses={"409": {'description': "提交的拆字表已经存在"}})
+    @login_required
     def post(self, data: dict):
         """提交新的拆字表
 
@@ -83,11 +83,12 @@ class TableView(MethodView):
         # 验证当前用户是指定群的管理员
         if get_group(group_id=data['group_id'], platform=data['platform']) \
                 not in current_user.auth_groups:
-            abort(401, message="you are not the admin of this group")
+            abort(403, message="you are not the admin of this group")
 
         success, res = character.save_char_table(**data, main_user=current_user)
         if not success:  # 拆字表已经存在
-            abort(400, message=res['message'])  # bad request, 无法处理该请求
+            # 详见 https://www.stackoverflow.com/questions/3825990
+            abort(409, message=res['message'])
 
         return res
 
@@ -119,7 +120,7 @@ class CharSchema(ma.Schema):
 class CharView(MethodView):
     """拆字表查询 api"""
 
-    @table_bp.arguments(CharSchema)
+    @table_bp.arguments(CharSchema, location='query')
     @table_bp.response(CharSchema, code=200, description="成功获取到 char 的 info")
     @table_bp.doc(responses={"404": {'description': "拆字表中不包含该单字的信息"}})
     def get(self, data: dict):

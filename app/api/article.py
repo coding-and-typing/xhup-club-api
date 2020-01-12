@@ -29,8 +29,10 @@ article_bp = Blueprint(
 class ArticleView(MethodView):
     """文章的增删查改"""
 
-    decorators = [login_required]
+    # flask_smorest 不能通過這個參數生成對應的 openapi 文檔。
+    # decorators = [login_required]
 
+    @login_required
     def post(self):
         """增加文章
 
@@ -38,14 +40,17 @@ class ArticleView(MethodView):
         """
         pass
 
+    @login_required
     def delete(self):
         """删除文章"""
         pass
 
+    @login_required
     def get(self):
         """获取文章列表"""
         pass
 
+    @login_required
     def patch(self):
         """修改文章
 

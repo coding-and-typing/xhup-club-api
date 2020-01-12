@@ -78,10 +78,14 @@ class BaseConfig(object):
         "components": {
             "securitySchemes": {
                 "api_key": {
-                    "description": "更好的方案是再添加一个 secret-key，用于对数据做签名校验",
-                    "content_type": "apiKey",
-                    "name": "api_key",
+                    "type": "apiKey",
+                    "name": "X-API-Key",
                     "in": "header"
+                },
+                'jwt': {
+                    'bearerFormat': 'JWT',
+                    'scheme': 'bearer', 
+                    'type': 'http'
                 }
             },
         }
@@ -92,7 +96,8 @@ class BaseConfig(object):
 
     # swagger-ui api doc
     OPENAPI_SWAGGER_UI_PATH = '/swagger-ui'
-    OPENAPI_SWAGGER_UI_VERSION = '3.20.8'  # 用于生成静态文件的 cdn 链接
+    OPENAPI_SWAGGER_UI_URL = "https://cdn.bootcss.com/swagger-ui/3.23.11/"
+    
     OPENAPI_SWAGGER_UI_SUPPORTED_SUBMIT_METHODS = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch']
 
     # 5. 赛文系统相关配置

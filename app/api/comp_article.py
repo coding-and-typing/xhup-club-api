@@ -189,10 +189,10 @@ class CompArticleBoxView(MethodView):
         将赛文分成不同的 box，这样在提交赛文时，就可以指定赛文的混合方式。（通过 post comp_articles/）
     """
 
-    decorators = [login_required]
-
     @comp_article_bp.arguments(CompArticleBoxCreateArgsSchema)
     @comp_article_bp.response(code=201, description="赛文盒添加成功")
+    @comp_article_bp.doc(responses={"400": {'description': "无效参数"}})
+    @login_required
     def post(self, data: Dict):
         """添加一个赛文 box
         """
@@ -204,13 +204,15 @@ class CompArticleBoxView(MethodView):
 
     @comp_article_bp.arguments(CompArticleBoxArgsSchema)
     @comp_article_bp.response(code=204, description="赛文盒删除成功")
+    @login_required
     def delete(self, data: dict):
         """删除赛文 box"""
         delete_comp_article_box(data, current_user)
 
-    @comp_article_bp.arguments(CompArticleBoxArgsSchema)
+    @comp_article_bp.arguments(CompArticleBoxArgsSchema, location='query')
     @comp_article_bp.response(CompArticleBoxArgsSchema(many=True), code=200, description="成功获取到数据")
     @comp_article_bp.paginate(Page)  # 分页
+    @login_required
     def get(self, data: dict):
         """获取赛文 box，分页"""
         return db.session.query(CompArticleBox) \
@@ -222,22 +224,24 @@ class CompArticleBoxView(MethodView):
 class CompArticleView(MethodView):
     """赛文的增删查改，要求用户有群管理权限"""
 
-    decorators = [login_required]
-
     @comp_article_bp.arguments(CompArticleCreateArgsSchema)
     @comp_article_bp.response(code=201, description="赛文添加成功")
+    @comp_article_bp.doc(responses={"400": {'description': "无效的参数"}})
+    @login_required
     def post(self, data: dict):
         """将所有候选赛文盒的内容添加为赛文
         """
         code, res = add_comp_articles_from_box(data, current_user)
-        if code == 200:
+        if code == 201:
             return res
         else:
             abort(code, description=res)
 
-    @comp_article_bp.arguments(CompArticleQueryArgsSchema)
+    @comp_article_bp.arguments(CompArticleQueryArgsSchema, location='query')
     @comp_article_bp.response(CompArticleSchema(many=True), code=200, description="成功获取到数据")
     @comp_article_bp.paginate(SQLAlchemyPage)
+    @comp_article_bp.doc(responses={"400": {'description': "无效的参数"}})
+    @login_required
     def get(self, data):
         """获取赛文"""
         articles_query: BaseQuery = db.session.qeury(CompArticle) \
@@ -264,22 +268,28 @@ class CompArticleView(MethodView):
 
     @comp_article_bp.arguments(CompArticleSchema)
     @comp_article_bp.response(code=201, description="删除成功")
+    @comp_article_bp.doc(responses={"403": {'description': "权限不足"}})
+    @comp_article_bp.doc(responses={"404": {'description': "文章不存在"}})
+    @login_required
     def delete(self, data):
         """删除赛文"""
         article: CompArticle = db.session.qeury(CompArticle) \
             .filter_by(id=data.pop('id')).first()
 
         if not article:
-            abort(400, message="the id you specified not exist!")
+            abort(404, message="the id you specified not exist!")
 
         if article.group not in current_user.auth_groups:
-            abort(401, message="you don't have the authority to modify this article!")
+            abort(403, message="you don't have the authority to modify this article!")
 
         db.session.delete(article)
         db.session.commit()
 
     @comp_article_bp.arguments(CompArticleSchema)
     @comp_article_bp.response(CompArticleSchema, code=200, description="修改成功，返回最新内容")
+    @comp_article_bp.doc(responses={"403": {'description': "权限不足"}})
+    @comp_article_bp.doc(responses={"404": {'description': "文章不存在"}})
+    @login_required
     def patch(self, data: dict):
         """修改赛文
 
@@ -290,10 +300,10 @@ class CompArticleView(MethodView):
             .filter_by(id=data.pop('id')).first()
 
         if not article:
-            abort(400, message="the id you specified not exist!")
+            abort(404, message="the id you specified not exist!")
 
         if article.group not in current_user.auth_groups:
-            abort(401, message="you don't have the authority to modify this article!")
+            abort(403, message="you don't have the authority to modify this article!")
 
         for key, value in data.items():
             article.__setattr__(key, value)  # 修改赛文
@@ -306,10 +316,10 @@ class ChaiWuBiView(MethodView):
     """将指定群组的赛文同步到拆五笔赛文系统（会先清空拆五笔赛文库）
     """
 
-    decorators = [login_required]
-
     @comp_article_bp.arguments(GroupSchema)
     @comp_article_bp.response(code=201, description="同步成功")
+    @comp_article_bp.doc(responses={"403": {'description': "权限不足"}})
+    @login_required
     def post(self, data: Dict):
         c_user: ChaiWuBiUser = current_user.chaiwubi_user
         c_adder = ArticleAdder(c_user.username, c_user.password)
@@ -320,7 +330,7 @@ class ChaiWuBiView(MethodView):
         # 将所有赛文添加至拆五笔赛文系统
         group = get_group(data['group_id'], data['platform'])
         if group not in current_user.auth_groups:
-            abort(401, message="you don't have the authority of this group!")
+            abort(403, message="you don't have the authority of this group!")
 
         failure_count = 0
         for article in group.comp_articles:
