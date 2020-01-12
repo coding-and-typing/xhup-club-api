@@ -22,7 +22,7 @@ before_install:
 - tar -xv -f secrets.tar -C scripts # 解打包
 
 install:
-- pip install poetry
+- pip --quiet install poetry
 - poetry install
 
 script:
@@ -32,7 +32,7 @@ script:
 after_success:
   - mv scripts $HOME/deploy-scripts  # 包含敏感信息，不要放在 docker context 中！
   # 填充鏡像 tag
-  - sed -i s/${IMAGE_TAG}/${TRAVIS_BRANCH}/g $HOME/deploy-scripts/docker-compose.yml
+  - sed -i "s@\${IMAGE_TAG}@${TRAVIS_BRANCH}@g" $HOME/deploy-scripts/docker-compose.yml
   # 構建並推送 docker 鏡像
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t ryan4yin/xhup-club-api .
