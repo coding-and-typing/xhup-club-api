@@ -703,7 +703,7 @@ description = "More routines for operating on iterables, beyond itertools"
 name = "more-itertools"
 optional = false
 python-versions = ">=3.5"
-version = "8.0.2"
+version = "8.1.0"
 
 [package.source]
 reference = "aliyun-pypi"
@@ -908,7 +908,7 @@ reference = "aliyun-pypi"
 url = "https://mirrors.aliyun.com/pypi/simple"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Add .env support to your django/flask apps in development and deployments"
 name = "python-dotenv"
 optional = false
@@ -1165,7 +1165,7 @@ reference = "aliyun-pypi"
 url = "https://mirrors.aliyun.com/pypi/simple"
 
 [metadata]
-content-hash = "332ed303b90ad14f63c5b85168e497a6be8c18267ffd8e54a3e3fdccaa7182b0"
+content-hash = "f3c02f62109f0c942849f623da29ea761db2ae472363349de6394b15c44f8cd7"
 python-versions = "^3.7"
 
 [metadata.files]
@@ -1506,8 +1506,8 @@ mccabe = [
     {file = "mccabe-0.6.1.tar.gz", hash = "md5:723df2f7b1737b8887475bac4c763e1e"},
 ]
 more-itertools = [
-    {file = "more-itertools-8.0.2.tar.gz", hash = "sha256:b84b238cce0d9adad5ed87e745778d20a3f8487d0f0cb8b8a586816c7496458d"},
-    {file = "more_itertools-8.0.2-py3-none-any.whl", hash = "sha256:c833ef592a0324bcc6a60e48440da07645063c453880c9477ceb22490aec1564"},
+    {file = "more-itertools-8.1.0.tar.gz", hash = "sha256:c468adec578380b6281a114cb8a5db34eb1116277da92d7c46f904f0b52d3288"},
+    {file = "more_itertools-8.1.0-py3-none-any.whl", hash = "sha256:1a2a32c72400d365000412fe08eb4a24ebee89997c18d3d147544f70f5403b39"},
 ]
 packaging = [
     {file = "packaging-20.0-py2.py3-none-any.whl", hash = "sha256:aec3fdbb8bc9e4bb65f0634b9f551ced63983a529d6a8931817d52fdd0816ddb"},
