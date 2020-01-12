@@ -19,6 +19,7 @@ RUN apk --no-cache add \
 RUN pip install poetry gunicorn \
     && poetry config virtualenvs.create false \
     && poetry install --no-dev \
+    && pip uninstall poetry --yes \
     && rm -rf ~/.cache
 
 ENTRYPOINT ["python", "docker-entrypoint.py"]
