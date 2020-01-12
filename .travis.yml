@@ -16,10 +16,13 @@ addons:
 
 
 before_install:
+- mv scripts $HOME/deploy-scripts
+- sed -i "s@\${IMAGE_TAG}@${TRAVIS_BRANCH}@g" $HOME/deploy-scripts/docker-compose.yml
+# 解密數據（注意主要放到 docker context 中）
 - openssl aes-256-cbc -K $encrypted_6182cc8b533c_key -iv $encrypted_6182cc8b533c_iv
-  -in secrets.tar.enc -out secrets.tar -d
+  -in secrets.tar.enc -out $HOME/secrets.tar -d
 
-- tar -xv -f secrets.tar -C scripts # 解打包
+- tar -x -f $HOME/secrets.tar -C $HOME/deploy-scripts # 解打包
 
 install:
 - pip --quiet install poetry
@@ -30,9 +33,6 @@ script:
 - codecov --token=$CODECOV_TOKEN
 
 after_success:
-  - mv scripts $HOME/deploy-scripts  # 包含敏感信息，不要放在 docker context 中！
-  # 填充鏡像 tag
-  - sed -i "s@\${IMAGE_TAG}@${TRAVIS_BRANCH}@g" $HOME/deploy-scripts/docker-compose.yml
   # 構建並推送 docker 鏡像
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t ryan4yin/xhup-club-api .

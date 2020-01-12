@@ -4,6 +4,7 @@
 *.key
 *.tar
 *.env
+id_rsa*
 
 # redis 快照（用于宕机恢复的缓存）
 dump.rdb
