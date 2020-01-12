@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   xhup-club-api:
-    image: ryan4yin/xhup-club-api:latest
+    image: ryan4yin/xhup-club-api:${IMAGE_TAG}
     env_file: prod.env
     logging:
       driver: "json-file"

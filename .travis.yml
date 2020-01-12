@@ -19,7 +19,7 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_6182cc8b533c_key -iv $encrypted_6182cc8b533c_iv
   -in secrets.tar.enc -out secrets.tar -d
 
-- tar -xv -f secrets.tar -C . # 解打包
+- tar -xv -f secrets.tar -C scripts # 解打包
 
 install:
 - pip install poetry
@@ -30,13 +30,19 @@ script:
 - codecov --token=$CODECOV_TOKEN
 
 after_success:
+  - mv scripts $HOME/deploy-scripts  # 包含敏感信息，不要放在 docker context 中！
+  # 填充鏡像 tag
+  - sed -i s/${IMAGE_TAG}/${TRAVIS_BRANCH}/g $HOME/deploy-scripts/docker-compose.yml
+  # 構建並推送 docker 鏡像
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t ryan4yin/xhup-club-api .
+  - docker tag ryan4yin/xhup-club-api ryan4yin/xhup-club-api:$TRAVIS_BRANCH
   - docker push ryan4yin/xhup-club-api
+  - docker push ryan4yin/xhup-club-api:$TRAVIS_BRANCH
 
 deploy:
   provider: script
   skip_cleanup: true
-  script: bash scripts/deploy.sh
+  script: bash $HOME/deploy-scripts/deploy.sh
   on:
     tags: true
