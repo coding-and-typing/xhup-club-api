@@ -32,6 +32,7 @@ def make_shell_context():
 
 if __name__ == '__main__':
     # 需要使用 geventwebsocket 提供 websocket 服务，因此不能用常规方式（app.run）启动服务器
+    # 使用 pycharm 调试时，需要在 setting - debugger 中勾选 [gevent compatiable]
     from gevent import pywsgi
     from geventwebsocket.handler import WebSocketHandler
 
