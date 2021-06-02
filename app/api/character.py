@@ -5,23 +5,17 @@ import logging
 from flask.views import MethodView
 import marshmallow as ma
 from flask_login import current_user
-from flask_smorest import abort,  Blueprint
+from flask_smorest import abort
 from marshmallow import validates, ValidationError
 from pkg_resources import parse_version
 
-from app import api_rest
-from app.api import api_prefix
+from app.api import table_bp
 from app.service.words import character
 from app.utils.common import login_required
 from app.utils.db import get_group
 
 logger = logging.getLogger(__name__)
 
-
-table_bp = Blueprint(
-    'characters', __name__, url_prefix=f'{api_prefix}/characters',
-    description="拆字表相关"
-)
 
 """
 拆字表（小鹤音形等，即文字编码的详细）

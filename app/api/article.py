@@ -4,17 +4,10 @@ import logging
 from flask.views import MethodView
 import marshmallow as ma
 from app.utils.common import login_required
-from flask_smorest import abort, Blueprint
 
-from app import api_rest
-from app.api import api_prefix
+from app.api import article_bp
 
 logger = logging.getLogger(__name__)
-
-article_bp = Blueprint(
-    'article', __name__, url_prefix=f'{api_prefix}/article',
-    description="文章库的增删查改（待实现）"
-)
 
 
 """

@@ -10,7 +10,7 @@ from requests.cookies import cookiejar_from_dict
 from urllib import parse
 from urllib.parse import SplitResult
 
-from app import current_config
+from config import current_config
 
 logger = logging.getLogger(__name__)
 

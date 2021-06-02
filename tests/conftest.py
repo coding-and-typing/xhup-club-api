@@ -6,18 +6,16 @@ from pathlib import Path
 import pytest
 from flask import Response, url_for
 
-# 测试环境
-os.environ['XHUP_ENV'] = 'test'
-
 from app import create_app
 from app import db as _db
 from app.models import Group, GroupUser, GroupUserRelation, MainUser
+from config import current_config
 
 
 @pytest.fixture
 def app():
     """An application for the tests."""
-    _app = create_app()
+    _app = create_app(current_config)
     ctx = _app.test_request_context()
     ctx.push()
 

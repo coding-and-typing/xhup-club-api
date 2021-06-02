@@ -6,7 +6,7 @@ import string
 from captcha.image import ImageCaptcha
 from typing import Optional
 
-from app import current_config, redis
+from config import current_config, redis
 
 chars = string.digits + string.ascii_letters
 

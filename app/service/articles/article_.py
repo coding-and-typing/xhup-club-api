@@ -13,7 +13,7 @@ import random
 from operator import add
 from sqlalchemy import func
 
-from app import current_config, db
+from app import db
 from app.models import CompArticleBox, CompArticle, Group
 from app.utils.common import group_each, iter_one_by_one, filter_truth
 from app.utils.text import Chars, generate_articles_from_chars, split_text_by_length, split_text_by_sep, \

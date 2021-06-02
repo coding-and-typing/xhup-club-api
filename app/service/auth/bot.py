@@ -3,7 +3,7 @@
 """
 bot 的 ws api 验证相关
 """
-from app import current_config
+from config import current_config
 
 
 def validate_bot_token(token: str):

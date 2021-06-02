@@ -6,7 +6,7 @@ from typing import List
 
 import re
 
-from app import utils, redis, db, current_config
+from app import utils, redis, db
 from app.models import MainUser
 from app.service.messages import dispatcher, as_command_handler, as_regex_handler, as_at_me_handler
 from app.service.messages.handler import Handler
@@ -14,6 +14,8 @@ from app.service.words.character import get_info
 from app.utils.db import get_or_insert_group, insert_group_user_relation, get_or_insert_group_user
 from app.utils.text import split_text_by_length, generate_comp_content
 from app.utils.web import daily_article, char_zdict_url
+
+from config import current_config
 
 logger = logging.getLogger(__name__)
 

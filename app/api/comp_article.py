@@ -6,14 +6,14 @@ from typing import Dict
 from flask.views import MethodView
 import marshmallow as ma
 from flask_login import current_user
-from flask_smorest import abort, Blueprint, Page
+from flask_smorest import abort, Page
 from flask_smorest.pagination import PaginationParameters
 from flask_sqlalchemy import BaseQuery
 from marshmallow import validates, ValidationError
 from sqlalchemy import desc, asc
 
-from app import api_rest, db
-from app.api import api_prefix
+from app import db
+from app.api import comp_article_bp
 from app.models import CompArticleBox, CompArticle, MainUser, ChaiWuBiUser, get_group
 from app.service.articles.article_ import add_comp_article_box, delete_comp_article_box, add_comp_articles_from_box
 from app.service.articles.chaiwubi import ArticleAdder
@@ -21,10 +21,6 @@ from app.utils.common import login_required
 
 logger = logging.getLogger(__name__)
 
-comp_article_bp = Blueprint(
-    'comp_article', __name__, url_prefix=f'{api_prefix}/comp_article',
-    description="（各群组）赛文的增删查改"
-)
 
 
 """

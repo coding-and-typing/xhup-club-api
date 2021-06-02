@@ -1,8 +1,6 @@
 import logging
 from datetime import timedelta
 
-import os
-
 from flask import Flask
 from flask_cors import CORS
 from flask_limiter import Limiter
@@ -18,14 +16,7 @@ from flask_migrate import Migrate
 
 from flask_mail import Mail
 from flask_sockets import Sockets
-from werkzeug.contrib.fixers import ProxyFix
 
-from config import config_by_name, BaseConfig
-
-# 获取环境
-env = os.getenv("XHUP_ENV")
-current_config: BaseConfig = config_by_name[env]
-logging.basicConfig(level=current_config.LOG_LEVEL)  # 日志
 
 # 初始化 flask 的各个插件
 convention = {  # 数据库迁移需要约束拥有独特的别名
@@ -53,8 +44,11 @@ api_rest = Api()
 limiter = Limiter(key_func=get_remote_address)
 
 
-def create_app():
+def create_app(current_config):
     app = Flask(__name__)
+    logging.basicConfig(level=current_config.LOG_LEVEL)  # 日志
+    app.logger.info(f"current_config: {current_config.__name__}")
+
     app.config.from_object(current_config)
 
     # 允许 /api/ 下的 api 跨域访问

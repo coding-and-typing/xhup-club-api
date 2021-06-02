@@ -6,20 +6,16 @@ from flask.views import MethodView
 import marshmallow as ma
 from flask_login import current_user
 
+from app.api import relation_bp
 from app.models import GroupUserRelation
 from app.utils.captcha import generate_captcha_code
 from app.utils.common import login_required, timestamp
-from flask_smorest import abort, Blueprint, Page
+from flask_smorest import abort, Page
 
-from app import api_rest, redis, current_config, db
-from app.api import api_prefix
+from app import redis, db
+from config import current_config
 
 logger = logging.getLogger(__name__)
-
-relation_bp = Blueprint(
-    'relation', __name__, url_prefix=f'{api_prefix}/relation',
-    description="用户与群组的绑定（建立 relation）"
-)
 
 
 class RelationCreateArgsSchema(ma.Schema):

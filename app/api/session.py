@@ -6,20 +6,17 @@ from flask import Response
 from flask.views import MethodView
 from flask_login import current_user, login_user, logout_user
 import marshmallow as ma
-from flask_smorest import abort, Blueprint
+from flask_smorest import abort
 from marshmallow import validates_schema
 
-from app import api_rest, redis, current_config
+from app.api import session_bp
 from app.models import MainUser
 from app.utils.common import login_required
-from app.api import api_prefix
+
 
 logger = logging.getLogger(__name__)
 
-session_bp = Blueprint(
-    'session', __name__, url_prefix=f'{api_prefix}/session',
-    description="用户的登入登出，看作 session 的创建与删除"
-)
+
 
 """
 不存在对多个 session 的操作，因此用单数

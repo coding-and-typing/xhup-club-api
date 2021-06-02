@@ -10,7 +10,7 @@ from datetime import datetime
 import chardet
 from typing import Iterable, Optional
 
-from app import current_config
+from config import current_config
 
 """
 文字处理相关的工具函数

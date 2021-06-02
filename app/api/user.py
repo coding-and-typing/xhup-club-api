@@ -6,21 +6,18 @@ import typing
 from flask.views import MethodView
 from flask_login import current_user
 import marshmallow as ma
-from flask_smorest import abort, Blueprint
+from flask_smorest import abort
 from sqlalchemy.exc import IntegrityError
 
-from app import api_rest, db, current_config, redis
+from app import api_rest, db, redis
 from app.models import MainUser
 from app.utils.captcha import generate_captcha_code
 from app.utils.common import login_required, timestamp
-from app.api import api_prefix
+from app.api import user_bp
 
 logger = logging.getLogger(__name__)
 
-user_bp = Blueprint(
-    'user', __name__, url_prefix=f'{api_prefix}/user',
-    description="用户的注册、用户信息的获取与修改"
-)
+
 
 """
 用户只能对自己的信息做 CURD，因此用单数。
@@ -61,6 +58,7 @@ class UserDeleteArgsSchema(ma.Schema):
         ordered = True
 
     password = ma.fields.String(required=True, load_only=True)
+
 
 class UserPatchArgsSchema(ma.Schema):
     """修改用户信息需要的参数

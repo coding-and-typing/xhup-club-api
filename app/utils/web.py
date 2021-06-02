@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from urllib import parse
 from urllib.parse import SplitResult
 
-from app import current_config, utils, db
+from config import current_config, utils, db
 from app.models import Article
 from app.utils.text import split_text_by_length
 
